@@ -1,13 +1,14 @@
-function [res,gt,gtBrick] = createData(parts,appParam,imSize,locs)
+function [res,gt,gtBrick] = createData(params,appParam,imSize,locs)
     %appParam(end) must be background appearance param
-    % gtBrick{nn,n,i}: record centre of brick of image nn, part type n, and
-    %                  ith instance of it
+    % gtBrick = -1 is flag to mean invalid
 
-    nIm = 100;
-    maxPartsPer = 5;
+    nIm = 1000;
+    maxPartsPer = 3;
+    parts = params.partSizes;
    
     res = zeros([imSize,nIm]);
     gt = zeros([imSize,nIm]);
+    gtBrick = -1*ones(nIm,params.nParts,maxPartsPer,2);
     
     for (nn=1:nIm)
         nParts = randi(maxPartsPer,[size(parts,1),1]);
@@ -15,7 +16,7 @@ function [res,gt,gtBrick] = createData(parts,appParam,imSize,locs)
         
         fg = zeros(imSize);
         
-        for (n=1:size(nParts,1))
+        for (n=1:params.nParts)
             clear temp;
             for (i=1:nParts(n))
                 
@@ -36,10 +37,10 @@ function [res,gt,gtBrick] = createData(parts,appParam,imSize,locs)
                 
                 im(pts) = im(pts) | ptsOn;
                 fg(pts) = 1;
-                temp{i} = [y,x];
+                gtBrick(nn,n,i,:) = [y,x];
 
             end
-            gtBrick{nn,n} = temp;
+            
         end
         bg = find(fg == 0);
         bgOn = rand(size(bg,1),1) < appParam(end);

@@ -4,9 +4,9 @@ imSize = [100,100];
 
 params = initParams;
 
-appParam = [0.9,0.9,0.01]';
+appParam = [0.5,0.95,0.01]';
 
-locs = getBrickLoc(imSize);
-[data,gt,gtBrick] = createData(params.partSizes,appParam,imSize,locs);
+locs = getBrickLoc(imSize,params);
+[data,gt,gtBrick] = createData(params,appParam,imSize,locs);
 
-learnParams(params,data,gtBrick);
+qParts = learnParams(params,data,gtBrick);

@@ -33,7 +33,7 @@ function [res,gt,gtBrick] = createData(params,appParam,imSize,locs)
                 pts= [tempY(:),tempX(:)];
                 
                 pts = sub2ind(imSize,pts(:,1),pts(:,2));                
-                ptsOn = rand(size(pts,1),1) < appParam(n);
+                ptsOn = rand(size(pts,1),1) < appParam{n}(:);
                 
                 im(pts) = im(pts) | ptsOn;
                 fg(pts) = 1;
@@ -43,7 +43,7 @@ function [res,gt,gtBrick] = createData(params,appParam,imSize,locs)
             
         end
         bg = find(fg == 0);
-        bgOn = rand(size(bg,1),1) < appParam(end);
+        bgOn = rand(size(bg,1),1) < appParam{end};
         
         im(bg) = bgOn;
         res(:,:,nn) = im;

@@ -12,7 +12,7 @@ function [likeSingle] = computeLike(params,data,qParts,gtBrick,nStart,nEnd)
     for (i=nStart:nEnd)
         for (p=1:params.nParts)
             
-            bricksUse = squeeze(gtBrick(i,p,:,:));
+            bricksUse = reshape(gtBrick(i,p,:,:),[size(gtBrick,3),size(gtBrick,4)]);
             pSizeUse = params.partSizes(p,:);
             qPartUse = qParts{p};
 
@@ -33,8 +33,7 @@ function [likeSingle] = computeLike(params,data,qParts,gtBrick,nStart,nEnd)
                 dataUse = data(yStart:yEnd, xStart:xEnd, i);
                 ent = (qUse.^dataUse).*((1-qUse).^(1-dataUse));
                 
-                temp = zeros(imSize); temp(yStart:yEnd, xStart:xEnd) = ent;
-                likeSingle(i,p,n,:,:) = temp;
+                likeSingle(i,p,n,yStart:yEnd, xStart:xEnd) = ent;
                 
             end
         end

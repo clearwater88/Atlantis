@@ -8,16 +8,17 @@ function qParts = learnParams(params,data,gtBrick)
         qParts{i} = 0.3+0.4*rand(2*params.partSizes(i,:)+1);
     end
         
-    tic
+
     nStart = 1;
-    nEnd =nImages;
     
-    likeSingle = computeLike(params,data,qParts,gtBrick,nStart,nEnd);
+    nEnd =nImages;
+    tic
     for (it=1:params.qIter)
+        likeSingle = computeLike(params,data,qParts,gtBrick,nStart,nEnd);
         qParts = updateQParts(params,data,likeSingle,gtBrick,qParts);
-%         figure(1); imshow(qParts{1});
-%         figure(2); imshow(qParts{2});
-%         pause
+        %figure(1); imshow(qParts{1});
+        %figure(2); imshow(qParts{2});
+        %pause
     end
     toc
     

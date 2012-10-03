@@ -1,6 +1,8 @@
-function qParts = updateQParts(params,stackedData,partInds,loc,likeSingle,data)
+function qParts = updateQParts(params,stackedData,partInds,loc,likeSingle)
     % likeSingle: [nImages,nParts,maxParts,imSize]
 
+    sz = size(likeSingle);
+    imSize = sz(4:5);
     
     %sumLikeAll = squeeze(sum(sum(likeSingle,2),3));
     
@@ -14,12 +16,9 @@ function qParts = updateQParts(params,stackedData,partInds,loc,likeSingle,data)
         locUse = loc{p};
         
         stackedParts = zeros(size(partIndUse));
-        likePartDiffUse = likePartDiff(:,p,:,:,:);
-        sh = size(likePartDiffUse); sh(2) = [];
-        likePartDiffUse = reshape(likePartDiffUse,sh);
         
         for (c=1:size(partIndUse,3))
-           temp = squeeze(likePartDiffUse(locUse(1,c),locUse(2,c),:,:));
+           temp = reshape(likePartDiff(locUse(1,c),p,locUse(2,c),:,:),imSize);
            stackedParts(:,:,c) = temp(partIndUse(:,:,c));
         end
         qParts{p} = solveQ(params,stackedParts,stackedData{p});

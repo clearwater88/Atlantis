@@ -19,10 +19,16 @@ function qParts = learnParams(params,data,gtBrick)
     tic
     [partInds,loc] = getLikePartInds(params,data,gtBrick);
     toc
+    
+    tic
+    likeInds = getLikeInds(params,data,gtBrick,nStart,nEnd);
+    toc
+    
     for (it=1:params.qIter)
+        
         tic
-        likeSingle = computeLike(params,data,qParts,gtBrick,nStart,nEnd);
-        qParts = updateQParts(params,stackedData,partInds,loc,likeSingle,data);
+        likeSingle = computeLike(params,data,qParts,likeInds);    
+        qParts = updateQParts(params,stackedData,partInds,loc,likeSingle);
         toc
         
         %figure(1); imshow(qParts{1});

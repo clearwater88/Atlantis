@@ -2,8 +2,8 @@ function [res,gtBrick] = createData(params,appParam,imSize,locs)
     %appParam(end) must be background appearance param
     % gtBrick = -1 is flag to mean invalid
 
-    nIm = 100;
-    maxPartsPer = 3;
+    nIm = 1000;
+    maxPartsPer = 2;
     parts = params.partSizes;
    
     res = zeros([imSize,nIm]);
@@ -30,8 +30,7 @@ function [res,gtBrick] = createData(params,appParam,imSize,locs)
                 yPts = max(1,y-partDim(1)):min(y+partDim(1),imSize(1));
                 xPts = max(1,x-partDim(2)):min(x+partDim(2),imSize(2));
                        
-                [tempY,tempX] = meshgrid(yPts,xPts);
-                pts= [tempY(:),tempX(:)];
+                [pts] = meshgridRaster(yPts,xPts);
                 
                 [ptsRot,corresPts] = rotatePts(pts,[y,x],rot,0);
                 ptsRotInd = sub2ind(imSize,ptsRot(:,1),ptsRot(:,2));  

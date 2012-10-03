@@ -13,36 +13,68 @@ function qParts = updateQParts(params,data,likeSingle,gtBrick,qParts)
     totalLike = sum(sum(likeSingle,2),3);
     % [nImage,nParts,maxPartPer,imSize]
     likePartDiff = bsxfun(@minus,totalLike,likeSingle);
-    
+
     tic
+
+    stackedDataAllP = cell(params.nParts,1);
     for (p=1:nParts)
-        
         counter = 1;
-        stackedParts = zeros([2*params.partSizes(p,:)+1,maxParts*nImages]);
+        pSizeUse = params.partSizes(p,:);
         stackedData = zeros([2*params.partSizes(p,:)+1,maxParts*nImages]);
         for (mp=1:maxParts)
-            temp = squeeze(likePartDiff(:,p,mp,:,:));
-            cornerUse = squeeze(corners(:,p,mp,:));
+            % [nImages,imSize]
+            
             for (n=1:nImages)
-                tempN = squeeze(temp(n,:,:));
-                cornerN = cornerUse(n,:);
+                %tempN = likePartDiff(n,p,mp,:,:);
+                %tempN = reshape(tempN,[size(tempN)]);
+                dataN = data(:,:,n);
                 
-                % sentinel condition
-                if(cornerN(1) > cornerN(2)) continue; end;
+                br = gtBrick(n,p,mp,:); br = reshape(br,[1,numel(br)]);
+                if(br(1) == -1) continue; end;
                 
-                stackedParts(:,:,counter) = tempN(cornerN(1):cornerN(2), ...
-                                                  cornerN(3):cornerN(4));
-                stackedData(:,:,counter) = data(cornerN(1):cornerN(2), ...
-                                                cornerN(3):cornerN(4),n);
-                counter = counter + 1;
+                yStart = br(1)-pSizeUse(1); yEnd = br(1)+pSizeUse(1);
+                xStart = br(2)-pSizeUse(2); xEnd = br(2)+pSizeUse(2);
+                pts = meshgridRaster(yStart:yEnd,xStart:xEnd);
+                
+                imPts = rotatePts(pts,br(1:2),br(3),1);
+                imPtsInd = imSize(1)*(imPts(:,2)-1)+imPts(:,1);
+                stackedData(:,:,counter) = reshape(dataN(imPtsInd),2*[pSizeUse(1),pSizeUse(2)]+1);
+                
+                counter = counter+1;
             end
         end
-        % delete unused stuff
-        stackedParts(:,:,counter:end) = [];
         stackedData(:,:,counter:end) = [];
-        qParts{p} = solveQ(params,stackedParts,stackedData);
+        stackedDataAllP{p} = stackedData;
     end
+    
     toc
+    
+    
+%         counter = 1;
+%         stackedParts = zeros([2*params.partSizes(p,:)+1,maxParts*nImages]);
+%         stackedData = zeros([2*params.partSizes(p,:)+1,maxParts*nImages]);
+%         for (mp=1:maxParts)
+%             temp = squeeze(likePartDiff(:,p,mp,:,:));
+%             cornerUse = squeeze(corners(:,p,mp,:));
+%             for (n=1:nImages)
+%                 tempN = squeeze(temp(n,:,:));
+%                 cornerN = cornerUse(n,:);
+%                 
+%                 % sentinel condition
+%                 if(cornerN(1) > cornerN(2)) continue; end;
+%                 
+%                 stackedParts(:,:,counter) = tempN(cornerN(1):cornerN(2), ...
+%                                                   cornerN(3):cornerN(4));
+%                 stackedData(:,:,counter) = data(cornerN(1):cornerN(2), ...
+%                                                 cornerN(3):cornerN(4),n);
+%                 counter = counter + 1;
+%             end
+%         end
+%         % delete unused stuff
+%         stackedParts(:,:,counter:end) = [];
+%         stackedData(:,:,counter:end) = [];
+%         qParts{p} = solveQ(params,stackedParts,stackedData);
+%     end
 end
 
 function res = solveQ(params,stackedParts,stackedData)

@@ -14,8 +14,6 @@ function [res] = getCorners(params,gtBrick)
         
         partSize = params.partSizes(p,:);
         
-        
-        
         res(:,p,:,1) = toUse(:,:,:,1) - partSize(1);
         res(:,p,:,2) = toUse(:,:,:,1) + partSize(1);
         res(:,p,:,3) = toUse(:,:,:,2) - partSize(2);

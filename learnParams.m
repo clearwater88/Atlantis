@@ -14,8 +14,11 @@ function qParts = learnParams(params,data,gtBrick)
     nEnd =nImages;
     tic
     for (it=1:params.qIter)
+        tic
         likeSingle = computeLike(params,data,qParts,gtBrick,nStart,nEnd);
         qParts = updateQParts(params,data,likeSingle,gtBrick,qParts);
+        toc
+        
         %figure(1); imshow(qParts{1});
         %figure(2); imshow(qParts{2});
         %pause

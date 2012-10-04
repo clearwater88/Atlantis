@@ -24,7 +24,7 @@ function [stackedAllPInds,locAll] = getLikePartInds(params,data,gtBrick)
                 xStart = br(2)-pSizeUse(2); xEnd = br(2)+pSizeUse(2);
                 pts = meshgridRaster(yStart:yEnd,xStart:xEnd);
 
-                imPts = rotatePts(pts,br(1:2),br(3),1);
+                imPts = rotatePts(pts,br(1:2),br(3),br(4),1);
                 imPtsInd = imSize(1)*(imPts(:,2)-1)+imPts(:,1);
                 stackedInds(:,:,counter) = reshape(imPtsInd,2*[pSizeUse(1),pSizeUse(2)]+1);
                 loc(:,counter) = [n,mp];

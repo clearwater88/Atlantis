@@ -2,13 +2,13 @@ function [res,gtBrick] = createData(params,appParam,imSize,locs)
     %appParam(end) must be background appearance param
     % gtBrick = -1 is flag to mean invalid
 
-    nIm = 100;
-    maxPartsPer = 3;
+    nIm = 1000;
+    maxPartsPer = 5;
     parts = params.partSizes;
    
     res = zeros([imSize,nIm]);
 
-    gtBrick = -1*ones(nIm,params.nParts,maxPartsPer,3);
+    gtBrick = -1*ones(nIm,params.nParts,maxPartsPer,4);
     
     for (nn=1:nIm)
         nParts = randi(maxPartsPer,[size(parts,1),1]);
@@ -26,18 +26,19 @@ function [res,gtBrick] = createData(params,appParam,imSize,locs)
                 y = locs(ind,1);
                 x = locs(ind,2);
                 rot = pi*rand(1,1);
-
-                yPts = max(1,y-partDim(1)):min(y+partDim(1),imSize(1));
-                xPts = max(1,x-partDim(2)):min(x+partDim(2),imSize(2));
+                fs = (0.0+0.6*rand(1,1));
+                
+                yPts = y-partDim(1):y+partDim(1);
+                xPts = x-partDim(2):x+partDim(2);
                        
                 [pts] = meshgridRaster(yPts,xPts);
                 
-                [ptsRot,corresPts] = rotatePts(pts,[y,x],rot,0);
+                [ptsRot,corresPts] = rotatePts(pts,[y,x],rot,fs,0);
                 
-                ptsRotInd = sub2ind(imSize,ptsRot(:,1),ptsRot(:,2));  
-                
-                corresPtsInd = sub2ind(imSize,corresPts(:,1),corresPts(:,2));
-                ptsInd = sub2ind(imSize,pts(:,1),pts(:,2));
+                ptsRotInd = imSize(1)*(ptsRot(:,2)-1)+ptsRot(:,1);
+                corresPtsInd = imSize(1)*(corresPts(:,2)-1)+corresPts(:,1);                
+                ptsInd = imSize(1)*(pts(:,2)-1)+pts(:,1);
+
                 [~,ind] = ismember(corresPtsInd,ptsInd);
                 
                 ptsOn = rand(size(ptsInd,1),1) < appParam{n}(:);
@@ -45,7 +46,7 @@ function [res,gtBrick] = createData(params,appParam,imSize,locs)
                 
                 im(ptsRotInd) = ptsOn;
                 fg(ptsRotInd) = 1;
-                gtBrick(nn,n,i,:) = [y,x,rot];
+                gtBrick(nn,n,i,:) = [y,x,rot,fs];
                 
             end
             

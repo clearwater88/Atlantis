@@ -1,4 +1,4 @@
-function [res,corresPts,corresPtsInd] = rotatePts(inPts,centre,rot,fillSource)
+function [res,corresPts,corresPtsInd] = rotatePts(inPts,centre,rot,fs,fillSource)
     % inPts: nPts x 2
     % centre: [1,2]
     % looks like counter clockwise rotation because y-axis points down
@@ -9,7 +9,9 @@ function [res,corresPts,corresPtsInd] = rotatePts(inPts,centre,rot,fillSource)
     rotBackMat = [cos(-rot), sin(-rot); -sin(-rot), cos(-rot)];
     rotForMat = [cos(rot),sin(rot); -sin(rot) cos(rot)];
     
-    rotInPts = round(bsxfun(@plus,(rotForMat*bsxfun(@minus,inPts,centre)')',centre));
+    temp=bsxfun(@minus,inPts,centre);
+    temp(:,1) = temp(:,1)*(1-fs);
+    rotInPts = round(bsxfun(@plus,(rotForMat*temp')',centre));
     if (fillSource == 1)        
         res = rotInPts;
         return;
@@ -21,7 +23,11 @@ function [res,corresPts,corresPtsInd] = rotatePts(inPts,centre,rot,fillSource)
     [newY,newX] = meshgrid(minYX(1):maxYX(1),minYX(2):maxYX(2));
     
     res = [newY(:),newX(:)];
-    corresPts = round(bsxfun(@plus,(rotBackMat*bsxfun(@minus,res,centre)')',centre));
+    
+    temp = (rotBackMat*bsxfun(@minus,res,centre)')';
+    temp(:,1) = temp(:,1)/(1-fs);
+    
+    corresPts = round(bsxfun(@plus,temp,centre));
 
     badPts = ~(ismember(corresPts(:,1),inPts(:,1)) & ...
                ismember(corresPts(:,2),inPts(:,2)));
@@ -31,11 +37,11 @@ function [res,corresPts,corresPtsInd] = rotatePts(inPts,centre,rot,fillSource)
     
     [~,corresPtsInd] = ismember(corresPts,inPts,'rows');
     
-%     im1 = zeros(15,15);
-%     im1(sub2ind([15,15],inPts(:,1),inPts(:,2))) = 1;
+%     im1 = zeros(100,100);
+%     im1(sub2ind([100,100],inPts(:,1),inPts(:,2))) = 1;
 %     
-%     im2 = zeros(15,15);
-%     im2(sub2ind([15,15],res(:,1),res(:,2))) = 1;
+%     im2 = zeros(100,100);
+%     im2(sub2ind([100,100],res(:,1),res(:,2))) = 1;
 %     
 %     figure(1); imshow(im1);
 %     figure(2); imshow(im2);

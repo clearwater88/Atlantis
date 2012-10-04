@@ -1,7 +1,7 @@
 function [params] = initParams()
 
     %actual sizes are 2* + 1
-    params.partSizes(1,:) = [3,1];
+    params.partSizes(1,:) = [7,1];    
     params.partSizes(2,:) = [2,2];
     params.partSizes(3,:) = [4,4];
     

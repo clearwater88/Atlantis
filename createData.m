@@ -26,7 +26,7 @@ function [res,gtBrick] = createData(params,appParam,imSize,locs)
                 y = locs(ind,1);
                 x = locs(ind,2);
                 rot = pi*rand(1,1);
-                fs = (0.0+0.6*rand(1,1));
+                fs = (0.0+0.3*rand(1,1));
                 
                 yPts = y-partDim(1):y+partDim(1);
                 xPts = x-partDim(2):x+partDim(2);

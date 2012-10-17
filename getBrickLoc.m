@@ -12,6 +12,5 @@ function [res] = getBrickLoc(imSize,params)
    
     res(res(:,2) < maxSpread+1,:) = [];
     res(res(:,2) > imSize(2) - maxSpread,:) = [];
-    
 end
 

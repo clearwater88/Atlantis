@@ -27,7 +27,7 @@ function qParts = learnParams(params,data,gtBrick)
     for (it=1:params.qIter)
         
         tic
-        likeSingle = computeLike(params,data,qParts,likeInds);    
+        likeSingle = computeLikeSingle(params,data,qParts,likeInds);    
         qParts = updateQParts(params,stackedData,partInds,loc,likeSingle);
         toc
         

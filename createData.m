@@ -2,7 +2,7 @@ function [res,gtBrick] = createData(params,appParam,imSize,locs)
     %appParam(end) must be background appearance param
     % gtBrick = -1 is flag to mean invalid
 
-    nIm = 1000;
+    nIm = 100;
     maxPartsPer = 5;
     parts = params.partSizes;
    
@@ -25,8 +25,10 @@ function [res,gtBrick] = createData(params,appParam,imSize,locs)
                 ind = randi(size(locs,1),1);
                 y = locs(ind,1);
                 x = locs(ind,2);
-                rot = pi*rand(1,1);
-                fs = (0.0+0.3*rand(1,1));
+                rot = 2*pi*rand(1,1);
+                %rot = 0;
+                %fs = (0.0+0.3*rand(1,1));
+                fs = 0;
                 
                 yPts = y-partDim(1):y+partDim(1);
                 xPts = x-partDim(2):x+partDim(2);

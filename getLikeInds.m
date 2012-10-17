@@ -16,19 +16,10 @@ function [likeInds] = getLikeInds(params,data,gtBrick,nStart,nEnd)
            for (mp=1:maxParts)
                br = bricksUse(mp,:);
                if(br(1) == -1) continue; end;
-               
-                yStart = br(1)-pSizeUse(1); yEnd = br(1)+pSizeUse(1);
-                xStart = br(2)-pSizeUse(2); xEnd = br(2)+pSizeUse(2);
-               
-                pts = meshgridRaster(yStart:yEnd,xStart:xEnd);
-                [rotPts,~,origPtsInd] = rotatePts(pts,br(1:2),br(3),br(4),0);
-                rotPtsInd = (rotPts(:,2)-1)*imSize(1)+rotPts(:,1);
-                
-                likeInds(n,p,mp,rotPtsInd) = origPtsInd;
-                
+                [rotPtsInd,~,origPtsInd] = doGetLikeInds(br(1),br(2),br(3),br(4),pSizeUse,imSize,0);
+                likeInds(n,p,mp,rotPtsInd) = origPtsInd; 
            end
        end
-        
     end
 
     likeInds = permute(likeInds,[4,5,2,3,1]);

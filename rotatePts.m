@@ -14,6 +14,8 @@ function [res,corresPts,corresPtsInd] = rotatePts(inPts,centre,rot,fs,fillSource
     rotInPts = round(bsxfun(@plus,(rotForMat*temp')',centre));
     if (fillSource == 1)        
         res = rotInPts;
+        corresPts = -1;
+        corresPtsInd = -1;
         return;
     end
     
@@ -29,6 +31,7 @@ function [res,corresPts,corresPtsInd] = rotatePts(inPts,centre,rot,fs,fillSource
     
     corresPts = round(bsxfun(@plus,temp,centre));
 
+    % assumes points are discrete, not continuous-valued
     badPts = ~(ismember(corresPts(:,1),inPts(:,1)) & ...
                ismember(corresPts(:,2),inPts(:,2)));
 
@@ -36,14 +39,6 @@ function [res,corresPts,corresPtsInd] = rotatePts(inPts,centre,rot,fs,fillSource
     corresPts(badPts,:) = [];
     
     [~,corresPtsInd] = ismember(corresPts,inPts,'rows');
-    
-%     im1 = zeros(100,100);
-%     im1(sub2ind([100,100],inPts(:,1),inPts(:,2))) = 1;
-%     
-%     im2 = zeros(100,100);
-%     im2(sub2ind([100,100],res(:,1),res(:,2))) = 1;
-%     
-%     figure(1); imshow(im1);
-%     figure(2); imshow(im2);
+
 end
 

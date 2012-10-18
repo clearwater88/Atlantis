@@ -1,4 +1,4 @@
-function [res,corresPts,corresPtsInd] = rotatePts(inPts,centre,rot,fs,fillSource)
+function [res,corresPts,corresPtsInd] = rotatePts(inPts,centre,rot,fs,fillSource,imSize)
     % inPts: nPts x 2
     % centre: [1,2]
     % looks like counter clockwise rotation because y-axis points down
@@ -6,6 +6,7 @@ function [res,corresPts,corresPtsInd] = rotatePts(inPts,centre,rot,fs,fillSource
 
     % For coordinates in y-x format
     % this is really a backwarp
+    
     rotBackMat = [cos(-rot), sin(-rot); -sin(-rot), cos(-rot)];
     rotForMat = [cos(rot),sin(rot); -sin(rot) cos(rot)];
     
@@ -31,14 +32,17 @@ function [res,corresPts,corresPtsInd] = rotatePts(inPts,centre,rot,fs,fillSource
     
     corresPts = round(bsxfun(@plus,temp,centre));
 
-    % assumes points are discrete, not continuous-valued
-    badPts = ~(ismember(corresPts(:,1),inPts(:,1)) & ...
-               ismember(corresPts(:,2),inPts(:,2)));
-
-    res(badPts,:) = [];
-    corresPts(badPts,:) = [];
+    % assume points stay in image
+    corresPtsInd = imSize(1)*(corresPts(:,2)-1) + corresPts(:,1);
+    inPtsInd = imSize(1)*(inPts(:,2)-1) + inPts(:,1);
     
-    [~,corresPtsInd] = ismember(corresPts,inPts,'rows');
+    % assumes points are discrete, not continuous-valued
+    [ptsValid,corresPtsInd] = ismember(corresPtsInd,inPtsInd);
+    
+    res(~ptsValid(:),:) = [];
+    corresPts(~ptsValid(:),:) = [];
+    corresPtsInd(~ptsValid(:)) = [];
+
 
 end
 

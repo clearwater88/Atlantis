@@ -19,17 +19,33 @@ function [totalLike,samp_x,counts,likeFg] = samplePosterior(params,data,qParts,p
     likeFg = zeros([size(data),params.postParticles]);
     totalLike = zeros(params.postParticles,1);
     % draw from p(x_new | x_old,I)
+    
+    nOldSamps = size(samp_xOld,1);
+    newSampCache = cell(nOldSamps,1);
+    
     for (i=1:params.postParticles)
         if(mod(i,100) == 0)
             display(sprintf('On %d / %d particles', i,params.postParticles));
         end
         
-       oldSamp = find(cumLikeOld >= samps(i),1);
-       
-       countsOldUse = countsOld(:,:,oldSamp);
-       likeFgOldUse = likeFgOld(:,:,oldSamp);
-       [totalLikePost,samp_xPost,countsPost,likeFgPost] = samplePosteriorX(params,data,qParts,partSize,loc,likeFgOldUse,likeBg,params.postXSamples,countsOldUse);
-       
+        oldSamp = find(cumLikeOld >= samps(i),1);
+        
+        % No posterior cache exists? Compute it, otherwise, load the
+        % samples
+        if(isempty(newSampCache{oldSamp}))
+            countsOldUse = countsOld(:,:,oldSamp);
+            likeFgOldUse = likeFgOld(:,:,oldSamp);
+            [totalLikePost,samp_xPost,countsPost,likeFgPost] = samplePosteriorX(params,data,qParts,partSize,loc,likeFgOldUse,likeBg,params.postXSamples,countsOldUse);
+            newSampCache{oldSamp}.totalLikePost = totalLikePost;
+            newSampCache{oldSamp}.samp_xPost = samp_xPost;
+            newSampCache{oldSamp}.countsPost = countsPost;
+            newSampCache{oldSamp}.likeFgPost = likeFgPost;
+        else
+            totalLikePost = newSampCache{oldSamp}.totalLikePost;
+            samp_xPost = newSampCache{oldSamp}.samp_xPost;
+            countsPost = newSampCache{oldSamp}.countsPost;
+            likeFgPost = newSampCache{oldSamp}.likeFgPost;  
+        end
        % NOW DRAW FROM POSTERIOR
        cumTotalLikePost = cumsum(totalLikePost);
        postSamp = find(cumTotalLikePost >= rand(1,1),1);

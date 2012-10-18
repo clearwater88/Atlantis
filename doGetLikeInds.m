@@ -4,7 +4,7 @@ function [rotPtsInd,corresPts,origPtsInd] = doGetLikeInds(y,x,rot,fs,partSize,im
     xStart = x-partSize(2); xEnd = x+partSize(2);
 
     pts = meshgridRaster(yStart:yEnd,xStart:xEnd);
-    [rotPts,corresPts,origPtsInd] = rotatePts(pts,[y,x],rot,fs,fillSource);
+    [rotPts,corresPts,origPtsInd] = rotatePts(pts,[y,x],rot,fs,fillSource,imSize);
     rotPtsInd = (rotPts(:,2)-1)*imSize(1)+rotPts(:,1);
 end
 

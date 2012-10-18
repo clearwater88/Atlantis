@@ -1,4 +1,4 @@
-function [particles] = infer(data,qParts,locs,params)
+function [totalLike,samp_x,counts,likeFg] = infer(data,qParts,locs,params)
 
     MAXP = size(locs,1);
     partSize =  params.partSizes(1,:);
@@ -16,9 +16,6 @@ function [particles] = infer(data,qParts,locs,params)
             samplePosterior(params, data,qParts,partSize,locs(i,:), ...
                             totalLike,likeFg,samp_x,counts);
     end
-
-
-particles = 0;
 
 end
 

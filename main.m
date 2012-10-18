@@ -66,4 +66,16 @@ load('temp');
 locs(mod(locs(:,1),3) ~= 0,:) = [];
 locs(mod(locs(:,2),3) ~= 0,:) = [];
 
-particles = infer(testData(:,:,1),qParts,locs,params);
+imSize = [size(data,1),size(data,2)];
+nTest = size(testData,3);
+
+totalLike = zeros([params.postParticles, nTest]);
+samp_x = zeros([params.postParticles,size(locs,1)*3,nTest]);
+counts = zeros([imSize,params.postParticles,nTest]);
+likeFg = zeros([imSize,params.postParticles,nTest]);
+
+for (i=1:nTest)
+    display(sprintf('On image %d of %d', i, nTest));
+    [totalLike(:,i),samp_x(:,:,i),counts(:,:,:,i),likeFg(:,:,:,i)] = infer(testData(:,:,i),qParts,locs,params);
+end
+save('res2');

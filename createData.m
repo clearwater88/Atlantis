@@ -35,7 +35,7 @@ function [res,gtBrick] = createData(params,appParam,imSize,locs)
                        
                 [pts] = meshgridRaster(yPts,xPts);
                 
-                [ptsRot,corresPts] = rotatePts(pts,[y,x],rot,fs,0);
+                [ptsRot,corresPts] = rotatePts(pts,[y,x],rot,fs,0,imSize);
                 
                 ptsRotInd = imSize(1)*(ptsRot(:,2)-1)+ptsRot(:,1);
                 corresPtsInd = imSize(1)*(corresPts(:,2)-1)+corresPts(:,1);                

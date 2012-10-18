@@ -5,15 +5,16 @@ function [particles] = infer(data,qParts,locs,params)
     
     % For now, iterate in order
     
-    totalLike = [];
     samp_x = [];
-    countMask = [];
-    likeIm = [];
+    counts = [];
+    likeFg = [];
+    totalLike = [];
+    
     for (i=1:MAXP)
-        
-        [totalLike,samp_x,countMask,likeIm] = ...
+        display(sprintf('%d / %d',i,MAXP));
+        [totalLike,samp_x,counts,likeFg] = ...
             samplePosterior(params, data,qParts,partSize,locs(i,:), ...
-                            totalLike,samp_x,countMask,likeIm);
+                            totalLike,likeFg,samp_x,counts);
     end
 
 

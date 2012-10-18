@@ -1,4 +1,4 @@
-function [totalLike,samp_x,countMask,likeIm] = samplePosteriorX(params,data,qParts,partSize,loc,likeBg,nParticles,countMaskOld)
+function [totalLike,samp_x,counts,likeFg] = samplePosteriorX(params,data,qParts,partSize,loc,likeFgOld,likeBg,nParticles,countsOld)
     % Last drawLike is always brick = off
     
     imSize = size(data);    
@@ -9,13 +9,12 @@ function [totalLike,samp_x,countMask,likeIm] = samplePosteriorX(params,data,qPar
     samp_x(:,1:2) = round(samp_x(:,1:2));
 
     totalLogLike = zeros(nParticleOn,1);
-    oldMask = countMaskOld>0;
     
     countValid = 1;
     
     
-    countMask = zeros([imSize,nParticleOn+1]);
-    likeIm = zeros([imSize,nParticleOn+1]);
+    counts = zeros([imSize,nParticleOn+1]);
+    likeFg = zeros([imSize,nParticleOn+1]);
     for (pp=1:nParticleOn)
         if(mod(pp,1000) == 0)
             display(sprintf('On %d / %d particles', pp,nParticleOn));
@@ -27,33 +26,29 @@ function [totalLike,samp_x,countMask,likeIm] = samplePosteriorX(params,data,qPar
             continue;
         end;
 
-        counts = countMaskOld;
-        counts(imPtsInd) = counts(imPtsInd) + 1;
-        countMask(:,:,pp) = counts;
         
-        % now compute imlike....
         % only 1 part, so qParts{1}
+        % Overlay new Fg + old Fg parts
+        likeFgTemp = computeLike(data,qParts{1},imPtsInd,qInd) + likeFgOld;
+        likeFg(:,:,pp) = likeFgTemp;
         
-        % NEED TO ADD IN BG FROM BEFORE
-        likeTemp = computeLike(data,qParts{1},imPtsInd,qInd);
-        likeTemp(oldMask) = likeTemp(oldMask) + likeBg(oldMask);
+        % Update mask of counts
+        countsTemp = countsOld;
+        countsTemp(imPtsInd) = countsTemp(imPtsInd) + 1;
+        counts(:,:,pp) = countsTemp;
         
-        mask = (counts > 0);
-        likeTemp(mask) = likeTemp(mask)./counts(mask);
-        likeIm(:,:,pp) = likeTemp.*mask + likeBg.*(1-mask);
-        
-        fgLogProb = log(likeTemp(mask));
-        bgLogProb = log(likeBg(~mask(:)));
-        
-        totalLogLike(countValid) = sum(fgLogProb(:))+sum(bgLogProb(:));
+        % Compute full image likelihood at each pixel
+        like = computeFullLike(likeFg(:,:,pp),likeBg,counts(:,:,pp));        
+        totalLogLike(countValid) = sum(log(like(:)));
         countValid = countValid+1;
 
     end
     
     % Append the brick = off element.
-    totalLogLike = cat(1,totalLogLike,log(nParticles-nParticleOn)+sum(log(likeBg(:))));
-    likeIm(:,:,end) = likeBg;
-    countMask(:,:,end) = countMaskOld;
+    oldLike = computeFullLike(likeFgOld,likeBg,countsOld);
+    totalLogLike = cat(1,totalLogLike,log(nParticles-nParticleOn)+sum(log(oldLike(:))));
+    likeFg(:,:,end) = likeFgOld;
+    counts(:,:,end) = countsOld;
     % add in special "off" flags
     samp_x = cat(1,samp_x,-1*ones(1,size(samp_x,2)));
     

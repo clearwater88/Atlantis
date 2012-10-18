@@ -63,7 +63,7 @@ save('temp','qParts','trainData','testData','gtBrickTrain','gtBrickTest');
 load('temp');
 
 % clear them out a bit
-locs(mod(locs(:,1),2) == 0,:) = [];
-locs(mod(locs(:,2),2) == 0,:) = [];
+locs(mod(locs(:,1),3) ~= 0,:) = [];
+locs(mod(locs(:,2),3) ~= 0,:) = [];
 
 particles = infer(testData(:,:,1),qParts,locs,params);

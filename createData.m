@@ -25,8 +25,8 @@ function [res,gtBrick] = createData(params,appParam,imSize,locs)
                 ind = randi(size(locs,1),1);
                 y = locs(ind,1);
                 x = locs(ind,2);
-                %rot = 2*pi*rand(1,1);
-                rot = 0;
+                rot = (pi/10)*randn(1,1);
+                %rot = 0;
                 %fs = (0.0+0.3*rand(1,1));
                 fs = 0;
                 

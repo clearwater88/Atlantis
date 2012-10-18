@@ -11,6 +11,9 @@ function [params] = initParams()
     params.qIter = 3;
     
     % std devs to use for sampling particle locations
-    params.brickStd=[1,1,pi/10];
+    params.brickStd=[0.5,0.5,0/10];
+    params.brickOn = 0.1;
+    params.postParticles = 1000;
+    params.postXSamples = 100;
 end
 

@@ -1,4 +1,4 @@
-function [likeSingle] = computeLike2(data,qParts,imPtsInd,qInd)
+function [likeSingle] = computeLike(data,qParts,imPtsInd,qInd)
     % likeSingle = 0 also used to mean undefined. Because we're just using these for
     % sums
 

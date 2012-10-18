@@ -1,6 +1,6 @@
 
 
-imSize = [100,100];
+imSize = [50,50];
 
 params = initParams;
 
@@ -43,7 +43,7 @@ appParam{1} = [1, 1, 1; ...
 % appParam{2} = 1;
 % appParam{3} = 1;
 
-appParam{end} = 0.1;
+appParam{end} = 0.01;
            
 locs = getBrickLoc(imSize,params);
 [data,gtBrick] = createData(params,appParam,imSize,locs);
@@ -56,6 +56,9 @@ gtBrickTest = gtBrick(floor(end/2)+1:end,:,:,:);
 
 qParts = learnParams(params,trainData,gtBrick);
 
+% HACK FOR BACKGROUND FOR NOW
+qParts{end+1} = appParam{end};
+
 save('temp','qParts','trainData','testData','gtBrickTrain','gtBrickTest');
 load('temp');
 
@@ -63,5 +66,4 @@ load('temp');
 locs(mod(locs(:,1),2) == 0,:) = [];
 locs(mod(locs(:,2),2) == 0,:) = [];
 
-
-particles = infer(testData(:,:,1),qParts,locs,params,appParam{end});
+particles = infer(testData(:,:,1),qParts,locs,params);

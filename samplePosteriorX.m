@@ -50,7 +50,7 @@ function [totalLike,samp_x,counts,likeFg] = samplePosteriorX(params,data,qParts,
     likeFg(:,:,end) = likeFgOld;
     counts(:,:,end) = countsOld;
     % add in special "off" flags
-    samp_x = cat(1,samp_x,-1000000*ones(1,size(samp_x,2)));
+    samp_x = cat(1,samp_x,-10*ones(1,size(samp_x,2)));
     
     totalLogLike = totalLogLike-logsum(totalLogLike);
     totalLike = exp(totalLogLike);

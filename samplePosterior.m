@@ -55,6 +55,15 @@ function [totalLike,samp_x,counts,likeFg] = samplePosterior(params,data,qParts,p
        counts(:,:,i) = countsPost(:,:,postSamp);
        likeFg(:,:,i) = likeFgPost(:,:,postSamp);
        totalLike(i) = totalLikePost(postSamp);
+
+%        totalLikePost
+%        samp_xPost(postSamp,:)
+%        if ( i > 5)
+%            if(postSamp == size(samp_xPost,1))
+%                'here'
+%            end
+%        end
+%        pause(0.1)
     end
     totalLike = totalLike/sum(totalLike);
 end

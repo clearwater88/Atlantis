@@ -1,6 +1,6 @@
 
 
-imSize = [50,50];
+imSize = [100,100];
 
 params = initParams;
 
@@ -76,8 +76,10 @@ samp_x = cell(nTest,1);
 counts = zeros([imSize,params.postParticles,nTest]);
 likeFg = zeros([imSize,params.postParticles,nTest]);
 
+tic
 for (i=1:nTest)
     display(sprintf('On image %d of %d', i, nTest));
     [totalLike(:,i),samp_x{i},counts(:,:,:,i),likeFg(:,:,:,i)] = infer(testData(:,:,i),qParts,locs,params);
 end
+toc
 save('res3');

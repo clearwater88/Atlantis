@@ -3,7 +3,7 @@ function [res,gtBrick] = createData(params,appParam,imSize,locs)
     % gtBrick = -1 is flag to mean invalid
 
     nIm = 50;
-    maxPartsPer = 10;
+    maxPartsPer = 5;
     parts = params.partSizes;
    
     res = zeros([imSize,nIm]);

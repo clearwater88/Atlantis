@@ -1,7 +1,7 @@
 function [params] = initParams()
 
     %actual sizes are 2* + 1
-    params.partSizes(1,:) = [7,1];    
+    params.partSizes(1,:) = [8,2];    
 %     params.partSizes(2,:) = [2,2];
 %     params.partSizes(3,:) = [4,4];
     
@@ -12,8 +12,10 @@ function [params] = initParams()
     
     % std devs to use for sampling particle locations
     params.brickStd=[0.5,0.5,pi/10];
-    params.brickOn = 0.1;
+    params.brickOn = 0.05;
     params.postParticles = 200;
     params.postXSamples = 100;
+    
+    params.salientLogThresh = log(1/10);
 end
 

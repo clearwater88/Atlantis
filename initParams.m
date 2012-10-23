@@ -17,5 +17,6 @@ function [params] = initParams()
     params.postXSamples = 5000;
     
     params.salientLogThresh = log(2);
+    params.bgMix = 0.01;
 end
 

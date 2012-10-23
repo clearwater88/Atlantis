@@ -1,4 +1,4 @@
-function [totalLike,samp_x,counts,likeFg] = samplePosteriorX(params,data,qParts,partSize,loc,likeFgOld,likeBg,nParticles,countsOld)
+function [totalLike,samp_x,counts,like] = samplePosteriorX(params,data,qParts,partSize,loc,likeOld,nParticles,countsOld)
     % Last drawLike is always brick = off
     
     imSize = size(data);    
@@ -13,7 +13,7 @@ function [totalLike,samp_x,counts,likeFg] = samplePosteriorX(params,data,qParts,
     countValid = 1;
     
     counts = zeros([imSize,nParticleOn+1]);
-    likeFg = zeros([imSize,nParticleOn+1]);
+    like = zeros([imSize,nParticleOn+1]);
     for (pp=1:nParticleOn)
         if(mod(pp,1000) == 0)
             display(sprintf('On %d / %d particles', pp,nParticleOn));
@@ -28,8 +28,8 @@ function [totalLike,samp_x,counts,likeFg] = samplePosteriorX(params,data,qParts,
         
         % only 1 part, so qParts{1}
         % Overlay new Fg + old Fg parts
-        likeFgTemp = computeLike(data,qParts{1},imPtsInd,qInd) + likeFgOld;
-        likeFg(:,:,pp) = likeFgTemp;
+        likeTemp = computeLike(data,qParts{1},imPtsInd,qInd) ;
+        like(:,:,pp) = likeTemp + likeOld;
         
         % Update mask of counts
         countsTemp = countsOld;
@@ -37,16 +37,16 @@ function [totalLike,samp_x,counts,likeFg] = samplePosteriorX(params,data,qParts,
         counts(:,:,pp) = countsTemp;
         
         % Compute full image likelihood at each pixel
-        like = computeFullLike(likeFg(:,:,pp),likeBg,counts(:,:,pp));        
-        totalLogLike(countValid) = sum(log(like(:)));
+        likeFull = like(:,:,pp)./counts(:,:,pp);        
+        totalLogLike(countValid) = sum(log(likeFull(:)));
         countValid = countValid+1;
 
     end
     
     % Append the brick = off element.
-    oldLike = computeFullLike(likeFgOld,likeBg,countsOld);
+    oldLike = likeOld./countsOld;
     totalLogLike = cat(1,totalLogLike,log(nParticles-nParticleOn)+sum(log(oldLike(:))));
-    likeFg(:,:,end) = likeFgOld;
+    like(:,:,end) = likeOld;
     counts(:,:,end) = countsOld;
     % add in special "off" flags
     samp_x = cat(1,samp_x,-10*ones(1,size(samp_x,2)));

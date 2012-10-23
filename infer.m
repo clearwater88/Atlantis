@@ -1,14 +1,16 @@
-function [totalLike,samp_x,counts,likeFg] = infer(data,qParts,locs,params)
+function [totalLike,samp_x,counts,like] = infer(data,qParts,locs,params)
 
 
     partSize =  params.partSizes(1,:);
     
     % For now, iterate in order
     
+    bg = qParts{end};
+    
+    like = params.bgMix*((bg.^data).*((1-bg).^(1-data)));
+    counts = params.bgMix*ones(size(data));
     samp_x = [];
-    counts = [];
-    likeFg = [];
-    totalLike = [];
+    totalLike = 1;
     
     salient = getSaliencyMap(data,qParts);
     [salientLocs,locsScore] = orderSalient(salient,locs);
@@ -22,9 +24,9 @@ function [totalLike,samp_x,counts,likeFg] = infer(data,qParts,locs,params)
   %  figure(1); imshow(data);
     for (i=1:MAXP)
         display(sprintf('%d / %d',i,MAXP));
-        [totalLike,samp_x,counts,likeFg] = ...
+        [totalLike,samp_x,counts,like] = ...
             samplePosterior(params, data,qParts,partSize,salientLocs(i,:), ...
-                            totalLike,likeFg,samp_x,counts);
+                            totalLike,like,samp_x,counts);
     end
 
 end

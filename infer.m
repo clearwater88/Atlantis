@@ -26,7 +26,17 @@ function [totalLike,samp_x,counts,like] = infer(data,qParts,locs,params)
         display(sprintf('%d / %d',i,MAXP));
         [totalLike,samp_x,counts,like] = ...
             samplePosterior(params, data,qParts,partSize,salientLocs(i,:), ...
+<<<<<<< HEAD
                             totalLike,like,samp_x,counts);
+=======
+                            totalLike,likeFg,samp_x,counts);
+%         figure(2);
+%         samp = samp_x(1,:);
+%         samp(samp<-3) = [];
+%         ot= doOutline(samp,params.partSizes,[size(data,1),size(data,2)]);
+%         figure(2); imshow(ot); title(int2str(i));
+%         pause;
+>>>>>>> parent of a22258e... preparing code for keeping up-to-date saliency maps
     end
 
 end

@@ -12,7 +12,6 @@ function [totalLike,samp_x,counts,likeFg] = samplePosteriorX(params,data,qParts,
     
     countValid = 1;
     
-    
     counts = zeros([imSize,nParticleOn+1]);
     likeFg = zeros([imSize,nParticleOn+1]);
     for (pp=1:nParticleOn)

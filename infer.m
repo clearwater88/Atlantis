@@ -1,11 +1,14 @@
 function [totalLike,samp_x,counts,like] = infer(data,qParts,locs,params)
-
-
-    partSize =  params.partSizes(1,:);
     
-    % For now, iterate in order
+    
+    patches = getAppPatches(qParts{1},params);
+    
+    
     
     bg = qParts{end};
+    
+    
+    
     
     like = params.bgMix*((bg.^data).*((1-bg).^(1-data)));
     counts = params.bgMix*ones(size(data));
@@ -25,18 +28,9 @@ function [totalLike,samp_x,counts,like] = infer(data,qParts,locs,params)
     for (i=1:MAXP)
         display(sprintf('%d / %d',i,MAXP));
         [totalLike,samp_x,counts,like] = ...
-            samplePosterior(params, data,qParts,partSize,salientLocs(i,:), ...
-<<<<<<< HEAD
+            samplePosterior(params, data,qParts,params.partSizes,salientLocs(i,:), ...
                             totalLike,like,samp_x,counts);
-=======
-                            totalLike,likeFg,samp_x,counts);
-%         figure(2);
-%         samp = samp_x(1,:);
-%         samp(samp<-3) = [];
-%         ot= doOutline(samp,params.partSizes,[size(data,1),size(data,2)]);
-%         figure(2); imshow(ot); title(int2str(i));
-%         pause;
->>>>>>> parent of a22258e... preparing code for keeping up-to-date saliency maps
+
     end
 
 end

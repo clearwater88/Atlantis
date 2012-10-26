@@ -18,5 +18,7 @@ function [params] = initParams()
     
     params.salientLogThresh = log(2);
     params.bgMix = 0.01;
+    
+    params.orientationsUse = [0:pi/10:2*pi]';
 end
 

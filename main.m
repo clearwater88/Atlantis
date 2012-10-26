@@ -1,6 +1,6 @@
 
 
-imSize = [100,100];
+imSize = [50,50];
 
 params = initParams;
 
@@ -45,7 +45,7 @@ appParam{1} = [1,   1,   1,   1,   1; ...
 % appParam{2} = 1;
 % appParam{3} = 1;
 
-appParam{end} = 0.01;
+appParam{end} = 0.1;
            
 locs = getBrickLoc(imSize,params);
 [data,gtBrick] = createData(params,appParam,imSize,locs);
@@ -64,9 +64,6 @@ qParts{end+1} = appParam{end};
 save('temp','qParts','trainData','testData','gtBrickTrain','gtBrickTest');
 load('temp');
 
-% clear them out a bit
-locs(mod(locs(:,1),3) ~= 0,:) = [];
-locs(mod(locs(:,2),3) ~= 0,:) = [];
 
 imSize = [size(data,1),size(data,2)];
 nTest = size(testData,3);
@@ -80,6 +77,9 @@ tic
 for (i=1:nTest)
     display(sprintf('On image %d of %d', i, nTest));
     [totalLike(:,i),samp_x{i},counts(:,:,:,i),like(:,:,:,i)] = infer(testData(:,:,i),qParts,locs,params);
+    
+    figure(1); imshow(testData(:,:,i));
+    figure(2); viewSamples(samp_x{i},params.partSizes,imSize);
 end
 toc
 save('res3');

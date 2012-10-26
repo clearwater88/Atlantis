@@ -1,36 +1,37 @@
 function [totalLike,samp_x,counts,like] = infer(data,qParts,locs,params)
-    
-    
-    patches = getAppPatches(qParts{1},params);
-    
-    
-    
+
     bg = qParts{end};
-    
-    
-    
-    
+
     like = params.bgMix*((bg.^data).*((1-bg).^(1-data)));
     counts = params.bgMix*ones(size(data));
     samp_x = [];
     totalLike = 1;
     
-    salient = getSaliencyMap(data,qParts);
-    [salientLocs,locsScore] = orderSalient(salient,locs);
+    [patches,patchCounts] = getAppPatches(qParts{1},params);
     
-    goodLocs = locsScore>params.salientLogThresh;
-    salientLocs = salientLocs(goodLocs,:);
+    tic
+    patchLikes = getPatchLikes(patches,data,locs,patchCounts);
+    toc
     
-    MAXP = size(salientLocs,1);
-    assert(MAXP > 1);
-    
-  %  figure(1); imshow(data);
-    for (i=1:MAXP)
-        display(sprintf('%d / %d',i,MAXP));
+    nSamps = 1;
+    while(1)
+        tic
+        likeRatio = getLikeRatio(patchLikes,patchCounts,counts(:,:,1),like(:,:,1),locs);
+        toc
+        saliencyScore = getSaliencyScore(likeRatio);
+        saliencyScore = sum(saliencyScore,1);
+        [sc,i] = max(saliencyScore);
+        
+        
+        sc
+        if((sc<params.salientLogThresh && nSamps > 5) || nSamps > 10)
+            break;
+        end
+        
         [totalLike,samp_x,counts,like] = ...
-            samplePosterior(params, data,qParts,params.partSizes,salientLocs(i,:), ...
+            samplePosterior(params, data,qParts,params.partSizes,locs(i,:), ...
                             totalLike,like,samp_x,counts);
-
+        nSamps = nSamps+1;
     end
 
 end

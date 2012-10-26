@@ -52,7 +52,7 @@ function [totalLike,samp_x,counts,like] = samplePosteriorX(params,data,qParts,pa
     % add in special "off" flags
     samp_x = cat(1,samp_x,-10*ones(1,size(samp_x,2)));
     
-    totalLogLike = totalLogLike-logsum(totalLogLike);
+    totalLogLike = totalLogLike-logsum(totalLogLike,1);
     totalLike = exp(totalLogLike);
     
 end

@@ -16,9 +16,9 @@ function [params] = initParams()
     params.postParticles = 100;
     params.postXSamples = 5000;
     
-    params.salientLogThresh = log(2);
+    params.salientLogThresh = log(5);
     params.bgMix = 0.01;
     
-    params.orientationsUse = [0:pi/10:2*pi]';
+    params.orientationsUse = [0:pi/20:2*pi]';
 end
 

@@ -2,7 +2,9 @@ function viewSamples(samps,partSize,imSize)
     for (i=1:size(samps,1))
        sampUse = samps(i,:);
        sampUse(sampUse<-5) = [];
-       imshow(doOutline(sampUse,partSize,imSize)); title(int2str(i));
+       nSampOn = numel(sampUse)/3;
+       imshow(doOutline(sampUse,partSize,imSize));
+       title(sprintf('%d: %d', i, nSampOn));
        pause;
     end
 

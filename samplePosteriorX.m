@@ -46,6 +46,9 @@ function [totalLike,samp_x,counts,like] = samplePosteriorX(params,data,qParts,pa
     
     % Append the brick = off element.
     oldLike = likeOld./countsOld;
+
+    %nParticleOn/nParticles
+    
     totalLogLike = cat(1,totalLogLike,log(nParticles-nParticleOn)+sum(log(oldLike(:))));
     like(:,:,end) = likeOld;
     counts(:,:,end) = countsOld;

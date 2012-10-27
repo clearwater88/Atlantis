@@ -78,8 +78,8 @@ for (i=1:nTest)
     display(sprintf('On image %d of %d', i, nTest));
     [totalLike(:,i),samp_x{i},counts(:,:,:,i),like(:,:,:,i)] = infer(testData(:,:,i),qParts,locs,params);
     
-    figure(1); imshow(testData(:,:,i));
-    figure(2); viewSamples(samp_x{i},params.partSizes,imSize);
+%     figure(1); imshow(testData(:,:,i));
+%     figure(2); viewSamples(samp_x{i},params.partSizes,imSize);
 end
 toc
 save('res3');

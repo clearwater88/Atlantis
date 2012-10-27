@@ -12,7 +12,8 @@ function [params] = initParams()
     
     % std devs to use for sampling particle locations
     params.brickStd=[0.5,0.5,pi/10];
-    params.brickOn = 0.01;
+    params.brickOn = 0.001;
+    params.salientSample = 50;
     params.postParticles = 100;
     params.postXSamples = 5000;
     

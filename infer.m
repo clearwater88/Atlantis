@@ -13,13 +13,17 @@ function [totalLike,samp_x,counts,like] = infer(data,qParts,locs,params)
     patchLikes = getPatchLikes(patches,data,locs,patchCounts);
     toc
     
+    figure(100);
+    imshow(data);
+    
     nSamps = 1;
     while(1)
+        nSalSample = min(params.salientSample,size(counts,3));
+        salSamp = discretesample(totalLike,nSalSample);
         tic
-        likeRatio = getLikeRatio(patchLikes,patchCounts,counts(:,:,1),like(:,:,1),locs);
+        likeRatio = getLikeRatio(patchLikes,patchCounts,counts(:,:,salSamp),like(:,:,salSamp),locs);
         toc
         saliencyScore = getSaliencyScore(likeRatio);
-        saliencyScore = sum(saliencyScore,1);
         [sc,i] = max(saliencyScore);
         
         

@@ -19,7 +19,7 @@ function [totalPost,samp_x,counts,like] = samplePosterior(params,patchLikes,patc
     newSampCache = cell(nOldSamps,1);
     
     % prior for location
-    prior = params.brickOn*mvnpdf(locs,brickCentre,params.brickStd)';
+    prior = params.brickOn*mvnpdf(locs,brickCentre,[params.brickStd,params.brickStd])';
     % special case for brick = off
     prior(end+1) = 1-params.brickOn;
     
@@ -73,6 +73,8 @@ function [totalPost,samp_x,counts,like] = samplePosterior(params,patchLikes,patc
             samp_xPost(1:2) = centre;
             samp_xPost(3) = params.orientationsUse(orientNum);
             
+            locNum
+            locs(locNum,:)
             likePatchUse = patchLikes(:,:,orientNum,locNum);
             countsPatchUse = patchCounts(:,:,orientNum);
             

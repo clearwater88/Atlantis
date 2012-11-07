@@ -24,15 +24,13 @@ appParam = cell(2,1);
 %                0.2, 0.2, 0.2, 0.2, 0.2; ...
 %                1,   1,   1,   1,   1];
 
-appParam{1} = [0,   1,   0; ...
-               0,   1,   0; ...
-               0,   1,   0; ...
-               0,   1,   0; ...
-               0,   1,   0; ...
-               0,   1,   0; ...
-               0,   1,   0;
-               0,   1,   0;
-               0,   1,   0;];
+appParam{1} = [0.1,   0.9,   0.1; ...
+               0.1,   0.9,   0.1; ...
+               0.1,   0.9,   0.1; ...
+               0.1,   0.9,   0.1; ...
+               0.1,   0.9,   0.1; ...
+               0.1,   0.9,   0.1; ...
+               0.1,   0.9,   0.1];
 
 % appParam{2} = [0.5, 0.5, 0.5, 0.5, 0.5; ...
 %                0.5, 0.5, 0.9, 0.5, 0.5; ...
@@ -62,33 +60,38 @@ locs = getBrickLoc(imSize,params);
 trainData = data(:,:,1:floor(end/2));
 gtBrickTrain = gtBrick(1:floor(end/2),:,:,:);
 
-testData = data(:,:,floor(end/2)+1:end);
-gtBrickTest = gtBrick(floor(end/2)+1:end,:,:,:);
+%testData = data(:,:,floor(end/2)+1:end);
+%gtBrickTest = gtBrick(floor(end/2)+1:end,:,:,:);
 
 qParts = learnParams(params,trainData,gtBrick);
 
 % HACK FOR BACKGROUND FOR NOW
 qParts{end+1} = appParam{end};
 
-save('temp','qParts','trainData','testData','gtBrickTrain','gtBrickTest');
-load('temp');
+for (ii=1:10)
 
-imSize = [size(data,1),size(data,2)];
-nTest = size(testData,3);
+    testData = im2double(imread(['test', int2str(ii), '.jpg']));
+    testData = imresize(testData,1/8);
+    testData = testData<0.99;
 
-totalPost = cell(nTest,1);
-samp_x = cell(nTest,1);
-counts = cell(nTest,1);
-like = cell(nTest,1);
+    imSize = [size(testData,1),size(testData,2)];
+    nTest = size(testData,3);
+    locs = getBrickLoc(imSize,params);
 
-tic
-for (i=1:nTest)
-    display(sprintf('On image %d of %d', i, nTest));
-    [totalPost{i},samp_x{i},counts{i},like{i}] = infer(testData(:,:,i),qParts,locs,params);
-    
-%     'showing'
-%     figure(1); imshow(testData(:,:,i));
-%     figure(2); viewSamples(samp_x{i},params.partSizes,imSize,totalPost{i});
+    totalPost = cell(nTest,1);
+    samp_x = cell(nTest,1);
+    counts = cell(nTest,1);
+    like = cell(nTest,1);
+
+    tic
+    for (i=1:nTest)
+        display(sprintf('On image %d of %d', i, nTest));
+        [totalPost{i},samp_x{i},counts{i},like{i}] = infer(testData(:,:,i),qParts,locs,params);
+
+%         'showing'
+%         figure(1); imshow(testData(:,:,i));
+%         figure(2); viewSamples(samp_x{i},params.partSizes,imSize,totalPost{i});
+    end
+    toc
+    save(['resBSDS', int2str(ii)]);
 end
-toc
-save('res4');

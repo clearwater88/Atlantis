@@ -14,27 +14,35 @@ function [totalPost,samp_x,counts,like] = infer(data,qParts,locs,params)
     tic
     patchLikes = getPatchLikes(patches,data,locs,patchCounts);
     toc
-    
+        
     nSamps = 1;
     while(1)
         
-        salSamp = discretesample(totalPost,params.salientSample);
-        uniqueSalSamp = unique(salSamp);
-        nSalSamp = zeros(numel(uniqueSalSamp),1);
-        for (j=1:numel(uniqueSalSamp))
-            nSalSamp(j) = sum(uniqueSalSamp(j) == salSamp);
+        oldSamps = discretesample(totalPost,params.postParticles);
+        uniqueOldSamp = unique(oldSamps);
+        nOldSamp = zeros(numel(uniqueOldSamp),1);
+        for (j=1:numel(uniqueOldSamp))
+            nOldSamp(j) = sum(uniqueOldSamp(j) == oldSamps);
         end
         
-        likeRatio = getLikeRatio(patchLikes,patchCounts,counts(:,:,uniqueSalSamp),like(:,:,uniqueSalSamp),locs);
-        saliencyScore = getSaliencyScore(likeRatio,nSalSamp,params);
-        [sc,i] = max(saliencyScore);
+        likeRatio = getLikeRatio(patchLikes,patchCounts,counts(:,:,uniqueOldSamp),like(:,:,uniqueOldSamp),locs);
+        logLikeRatioPatch = getLLRatioPatch(likeRatio,locs,imSize);
+        
+        saliencyScore = getSaliencyScore(logLikeRatioPatch,nOldSamp,locs,imSize,params);
+        [sc,i] = max(saliencyScore(:));
+        
+        [y,x] = ind2sub(size(saliencyScore),i);
         sc
         
-        [totalPost,samp_x,counts,like] = ...
-            samplePosterior(params,patchLikes,patchCounts,counts,like,totalPost,samp_x,locs(i,:),locs);
+         [totalPost,samp_x,counts,like] = ...
+             samplePosterior2(params,patchLikes,patchCounts,logLikeRatioPatch,samp_x,[y,x],uniqueOldSamp,nOldSamp,totalPost,counts,like,locs);
+                
+%         [totalPost,samp_x,counts,like] = ...
+%             samplePosterior(params,patchLikes,patchCounts,counts,like,totalPost,samp_x,[y,x],locs);
+         
         nSamps = nSamps+1;
         
-        sampOn = find(samp_x(:,end) ~= params.sampOffFlag);
+        sampOn = samp_x(:,end) ~= params.sampOffFlag;
         probOn = sum(totalPost(sampOn));
         probOn
         
@@ -45,7 +53,7 @@ function [totalPost,samp_x,counts,like] = infer(data,qParts,locs,params)
             display(sprintf('Particles made on: %d/%d', nOn,size(samp_x,1)));
         end
         
-%         
+        
 %         figure(100);
 %         imshow(data);
 %     

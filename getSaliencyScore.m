@@ -1,10 +1,16 @@
-function [res] = getSaliencyScore(likeRatio,nSalSamp,params)
-    % likeRatio: [patchSize, nOrientations, nLocs, nOldSamp]
-    nSalSamp = reshape(nSalSamp,[1,1,1,1,numel(nSalSamp)]);
+function [logPosteriorRatio] = getSaliencyScore(logLikeRatioPatch,nOldSamp,locs,imSize,params)
+    % logLikeRatioPatch: [imSize,nOrientations, nOldSamp]
+    nOldSamp = reshape(nOldSamp,[1,1,1,numel(nOldSamp)]);
+
+    % [nOrientations,locs,nOldSample]
+    logLikeRatioPatch = bsxfun(@plus,logLikeRatioPatch,log(nOldSamp));
+
+    priorLoc = fspecial('gaussian',[2*round(3*params.brickStd)+1,2*round(3*params.brickStd)+1],params.brickStd);
     
-    %jointRatio = likeRatio*params.brickOn;
-    res = sum(sum(log(likeRatio),1),2);
-    res = bsxfun(@plus,res,log(nSalSamp));
-    res = squeeze(logsum(logsum(res,3),5))-log(sum(nSalSamp));
+    factor = max(logLikeRatioPatch,[],3);
+    logLikeRatioPatch = bsxfun(@minus,logLikeRatioPatch,factor);
+    
+    logPosteriorRatio = bsxfun(@plus,log(convn(exp(logLikeRatioPatch),priorLoc,'same')),factor);
+    logPosteriorRatio = logsum(logsum(logPosteriorRatio,4),3)-log(sum(nOldSamp));
 end
 

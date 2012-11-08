@@ -90,7 +90,7 @@ for (ii=1:10)
 
 %         'showing'
 %         figure(1); imshow(testData(:,:,i));
-%         figure(2); viewSamples(samp_x{i},params.partSizes,imSize,totalPost{i});
+%         figure(2); viewSamples(samp_x{i},params.partSizes,imSize,totalPost{i},qParts);
     end
     toc
     save(['resBSDS', int2str(ii)]);

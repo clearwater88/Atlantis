@@ -6,27 +6,28 @@ function [totalPost,samp_x,counts,like] = samplePosterior2(params,patchLikes,pat
     like = zeros([size(likeOld,1),size(likeOld,2),params.postParticles]);
     totalPost = zeros(sum(nOldSamp),1);
     
-
     imSize = [size(llrPatch,1),size(llrPatch,2)];
     pSize = [size(patchCounts,1),size(patchCounts,2)];
     nOrient = numel(params.orientationsUse);
     
+    % llrPatch: [prod(imSize),#orient,#oldSamples]
     llrPatch = reshape(llrPatch,[prod(imSize),size(llrPatch,3),size(llrPatch,4)]);
     locs = imSize(1)*(locsOrig(:,2)-1)+locsOrig(:,1);
-    
-    pts = meshgridRaster(1:imSize(1),1:imSize(2));
+
     % uniform on orientation
+    pts = meshgridRaster(1:imSize(1),1:imSize(2));
     prior = params.brickOn*mvnpdf(pts,brickCentre,[params.brickStd,params.brickStd]);
     
-    ljointrPatch = bsxfun(@plus,llrPatch,log(prior));
-    %don't need likelihood ratio term, because it's 1: comparing to off
-    %brick is comparing to what's in the background already
     
+    ljointrPatch = bsxfun(@plus,llrPatch,log(prior));    
     ljointrPatch = reshape(ljointrPatch,[size(ljointrPatch,1)*size(ljointrPatch,2),size(ljointrPatch,3),size(ljointrPatch,4)]);
     
-    ljointrPatch(end+1,:,:) = log(1-params.brickOn);
+    %don't need likelihood ratio term, because it's 1: comparing to off
+    %brick is comparing to what's in the background already
+    ljointrPatch(end+1,:) = log(1-params.brickOn);
+     % ljointrPatch: [prod(imSize)*#orient+1,#oldSamples]
     
-    % nLocs*nOrient+1,nUniqueSamp
+    % lPosterior: [prod(imSize)*#orient+1,#oldSamples]
     lPosterior = exp(bsxfun(@minus,ljointrPatch, logsum(ljointrPatch,1)));
     
     sampCount = 1;
@@ -40,7 +41,7 @@ function [totalPost,samp_x,counts,like] = samplePosterior2(params,patchLikes,pat
         for (j=1:nOldSamp(i))
             postSamp = find(cumsum(lPosteriorUse) >= rand(1,1),1);
 
-            % off?
+            % off state?
             if(postSamp == size(lPosteriorUse,1))
                 samp_xPost = params.sampOffFlag*ones(3,1);
                 like(:,:,sampCount) = likeOldUse;
@@ -57,20 +58,18 @@ function [totalPost,samp_x,counts,like] = samplePosterior2(params,patchLikes,pat
 
                 likePatchUse = patchLikes(:,:,orientNum,locNum);
                 countsPatchUse = patchCounts(:,:,orientNum);
-                likePost = likeOldUse;
+                likePostSamp = likeOldUse;
                                 
                 yStart = y - (pSize(1)-1)/2;
                 xStart = x - (pSize(2)-1)/2;
-
+                likePostSamp(yStart:yStart+pSize(1)-1,xStart:xStart+pSize(1)-1) = ...
+                    likePostSamp(yStart:yStart+pSize(2)-1,xStart:xStart+pSize(2)-1) + likePatchUse;
+                like(:,:,sampCount) = likePostSamp;
                 
-                likePost(yStart:yStart+pSize(1)-1,xStart:xStart+pSize(1)-1) = ...
-                    likePost(yStart:yStart+pSize(2)-1,xStart:xStart+pSize(2)-1) + likePatchUse;
-                like(:,:,sampCount) = likePost;
-                
-                countsPost = countsOldUse;
-                countsPost(yStart:yStart+pSize(1)-1,xStart:xStart+pSize(1)-1) = ...
-                    countsPost(yStart:yStart+pSize(2)-1,xStart:xStart+pSize(2)-1)+countsPatchUse;
-                counts(:,:,sampCount) = countsPost;
+                countsPostSamp = countsOldUse;
+                countsPostSamp(yStart:yStart+pSize(1)-1,xStart:xStart+pSize(1)-1) = ...
+                    countsPostSamp(yStart:yStart+pSize(2)-1,xStart:xStart+pSize(2)-1)+countsPatchUse;
+                counts(:,:,sampCount) = countsPostSamp;
             
                 totalPost(sampCount) = lPosteriorUse(postSamp);
             end

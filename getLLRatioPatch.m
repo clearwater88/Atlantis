@@ -1,4 +1,9 @@
 function [llRMap] = getLLRatioPatch(likeRatio,locs,imSize)
+    % Compute patch-wise log-likelihood of patch, and arranges them
+    % according to their centre
+    % likeRatio: [patchSize,#orients,#locs,#oldSamples]
+    % llRMap: [imSize,#orient,#oldSamples]
+
     logLikeRatioPatch = squeeze(sum(sum(log(likeRatio),1),2));
     logLikeRatioPatch = permute(logLikeRatioPatch,[2,1,3]);
     

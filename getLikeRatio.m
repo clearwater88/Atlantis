@@ -1,5 +1,11 @@
 function likeRatio = getLikeRatio(patchLikes,patchCounts,counts,like,locs)
- 
+    % Get likelihood ratio between foreground-background at each patch
+    % likeRatio: [patchSize,#orients,#locs,#oldSamples]
+    % like: current image likelihoods [imSize,#oldSamples]
+    % patchLikes: likelihood of a single patch; combines with like to get
+    %             current estimate of likelihood for that patch.
+    %             [patchSize,#orientations,#locs]
+    
     pSize = ([size(patchLikes,1),size(patchLikes,2)]-1)/2;
     
     counts = reshape(counts,[size(counts,1),size(counts,2),1,1,size(counts,3)]);

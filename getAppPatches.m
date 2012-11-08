@@ -1,4 +1,7 @@
 function [res,counts] = getAppPatches(part,params)
+    % res: [partSize, #orientations], appearnace of the patch
+    % counts: [partSize, #orientations], associated count for each pixel (mixing weight)
+
 
     partSize = size(part);
     maxDim = max(partSize);

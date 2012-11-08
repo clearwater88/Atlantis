@@ -1,4 +1,7 @@
 function res = getPatchLikes(patches,data,locs,counts)
+    % res: [patchSize,#orientations,#locs] of patch likelihoods, for a
+    %      patch being at this location and orientation
+    
     %locs are possible brick centers
 
     pSize = ([size(patches,1),size(patches,2)]-1)/2;

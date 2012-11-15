@@ -2,7 +2,7 @@ params = initParams;
 
 %must be odd
 szs = [5,9,13];
-params.partMix = [5,9,13]/5;
+params.partMix = params.mixPropFact*(max(szs)./(szs) - 1) + 1;
 
 nParts = numel(szs);
 qParts = cell(nParts+1,1);
@@ -41,10 +41,9 @@ for (i=1:nTest)
     testData{i} = testDataTemp;
     
     imSize = [size(testData{i},1),size(testData{i},2)];
-    locs = getBrickLoc(imSize,params);
 
     display(sprintf('On image %d of %d', i, nTest));
-    [totalPost{i},samp_x{i},counts{i},like{i}] = infer(testData{i},qParts,locs,params);
+    [totalPost{i},samp_x{i},counts{i},like{i}] = infer(testData{i},qParts,params);
     
     'showing'
     figure(101); imshow(cleanTestData);

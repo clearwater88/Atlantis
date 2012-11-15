@@ -11,11 +11,13 @@ function [params] = initParams()
     params.qIter = 3;
     
     % std devs to use for sampling particle locations
-    params.brickStd=0.5;
+    params.mixPropFact = 2;
+    params.bgMix = 0.01;
+
+    params.brickStd=0.1;
     params.brickOn = 0.01;
     params.postParticles = 20;
     
-    params.bgMix = 0.01;
     
     params.orientationsUse = [0:pi/15:2*pi]';
     params.sampOffFlag = -10;

@@ -1,4 +1,4 @@
-function [totalPost,samp_x,counts,like] = infer(data,qParts,locs,params)
+function [totalPost,samp_x,counts,like] = infer(data,qParts,params)
 
     imSize = size(data);
 
@@ -12,9 +12,10 @@ function [totalPost,samp_x,counts,like] = infer(data,qParts,locs,params)
     totalPost = 1;
     
     % -1 for bg model
-    for (i=1:numel(qParts)-1)
-        [patches{i},patchCounts{i}] = getAppPatches(qParts{i},params);
-        patchLikes{i} = getPatchLikes(patches{i},data,locs,patchCounts{i});
+    for (p=1:numel(qParts)-1)
+        locs{p} = getBrickLoc(imSize,params.partSizes);
+        [patches,patchCounts{p}] = getAppPatches(qParts,params,p);
+        patchLikes{p} = getPatchLikes(params,patches,data,locs{p},patchCounts{p},params.partMix(p));
     end
     
     while(1)
@@ -30,9 +31,9 @@ function [totalPost,samp_x,counts,like] = infer(data,qParts,locs,params)
             nOldSamp(j) = sum(oldSamps==uniqueOldSamp(j) );
         end
         
-        for (i=1:numel(qParts)-1)
-            likeRatio = getLikeRatio(patchLikes{i},patchCounts{i},counts(:,:,uniqueOldSamp),like(:,:,uniqueOldSamp),locs);
-            logLikeRatioPatch{i} = getLLRatioPatch(likeRatio,locs,imSize);
+        for (p=1:numel(qParts)-1)
+            likeRatio = getLikeRatio(patchLikes{p},patchCounts{p},counts(:,:,uniqueOldSamp),like(:,:,uniqueOldSamp),locs{p});
+            logLikeRatioPatch{p} = getLLRatioPatch(likeRatio,locs{p},imSize);
         end
         
         for (i=1:numel(qParts)-1)

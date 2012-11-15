@@ -1,8 +1,8 @@
-function [res,counts] = getAppPatches(part,params)
+function [res,counts] = getAppPatches(part,params, partNum)
     % res: [partSize, #orientations], appearnace of the patch
     % counts: [partSize, #orientations], associated count for each pixel (mixing weight)
 
-
+    part = part{partNum};
     partSize = size(part);
     maxDim = max(partSize);
     
@@ -14,5 +14,5 @@ function [res,counts] = getAppPatches(part,params)
         % direction in rest of code
        res(:,:,i) = imrotate(res(:,:,i),-180*params.orientationsUse(i)/pi,'nearest','crop');
     end
-    counts = double(res>0);
+    counts = params.partMix(partNum)*double(res>0);
 end

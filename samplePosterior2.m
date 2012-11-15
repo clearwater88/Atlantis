@@ -6,6 +6,7 @@ function [totalPost,samp_x,counts,like] = samplePosterior2(params,partNum,patchL
     patchLikes = patchLikes{partNum};
     patchCounts = patchCounts{partNum};
     llrPatch = llrPatch{partNum};
+    locsOrig = locsOrig{partNum};
     
     samp_x = zeros(sum(nOldSamp),size(samp_xOld,2)+stateSize);
     counts = zeros([size(countsOld,1),size(countsOld,2),params.postParticles]);

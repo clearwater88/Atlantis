@@ -1,4 +1,4 @@
-function res = getPatchLikes(patches,data,locs,counts)
+function res = getPatchLikes(params,patches,data,locs,counts,mix)
     % res: [patchSize,#orientations,#locs] of patch likelihoods, for a
     %      patch being at this location and orientation
     
@@ -17,4 +17,5 @@ function res = getPatchLikes(patches,data,locs,counts)
         % set likelihood if undefined pixels to 0 (ok, since we're adding likelihoods)
         res(:,:,:,i) =  res(:,:,:,i).*mask;
     end
+    res = res * mix;
 end

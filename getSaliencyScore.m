@@ -2,7 +2,7 @@ function [logPosterior] = getSaliencyScore(likeOld,logLikeRatioPatch,nOldSamp,pa
     % logLikeRatioPatch: [imSize,nOrientations, nOldSamp]
     nOldSamp = reshape(nOldSamp,[1,1,1,numel(nOldSamp)]);
 
-    % if we want it proper
+    % if we want the proper posterior
     likeOld = squeeze(sum(sum(log(likeOld),1),2));
     likeOld = reshape(likeOld,[1,1,1,size(likeOld,1)]);
     logLikePatch = bsxfun(@plus,logLikeRatioPatch,likeOld);

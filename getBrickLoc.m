@@ -1,6 +1,6 @@
 function [res] = getBrickLoc(imSize,params)
 
-    maxSpread = max(params.partSizes(1));
+    maxSpread = max(params.partSizes(:));
 
     % Every brick can be at every pixel location, except at borders
     temp = [1:prod(imSize)]';

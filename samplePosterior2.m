@@ -1,7 +1,13 @@
-function [totalPost,samp_x,counts,like] = samplePosterior2(params,patchLikes,patchCounts,llrPatch,samp_xOld,brickCentre,uniqueOldSamp,nOldSamp,totalPostOld,countsOld,likeOld,locsOrig)
+function [totalPost,samp_x,counts,like] = samplePosterior2(params,partNum,patchLikes,patchCounts,llrPatch,samp_xOld,brickCentre,uniqueOldSamp,nOldSamp,totalPostOld,countsOld,likeOld,locsOrig)
     %logLikeRatioPatch: [imSize,nOrient,nSamp]
     
-    samp_x = zeros(sum(nOldSamp),size(samp_xOld,2)+3);
+    stateSize= 4;
+    
+    patchLikes = patchLikes{partNum};
+    patchCounts = patchCounts{partNum};
+    llrPatch = llrPatch{partNum};
+    
+    samp_x = zeros(sum(nOldSamp),size(samp_xOld,2)+stateSize);
     counts = zeros([size(countsOld,1),size(countsOld,2),params.postParticles]);
     like = zeros([size(likeOld,1),size(likeOld,2),params.postParticles]);
     totalPost = zeros(sum(nOldSamp),1);
@@ -43,7 +49,7 @@ function [totalPost,samp_x,counts,like] = samplePosterior2(params,patchLikes,pat
 
             % off state?
             if(postSamp == size(lPosteriorUse,1))
-                samp_xPost = params.sampOffFlag*ones(3,1);
+                samp_xPost = params.sampOffFlag*ones(stateSize,1);
                 like(:,:,sampCount) = likeOldUse;
                 counts(:,:,sampCount) = countsOldUse;
                 totalPost(sampCount) = totalPostOldUse;
@@ -53,6 +59,7 @@ function [totalPost,samp_x,counts,like] = samplePosterior2(params,patchLikes,pat
                 [y,x] = ind2sub(imSize,loc);
                 samp_xPost(1:2) = [y,x];
                 samp_xPost(3) = params.orientationsUse(orientNum);
+                samp_xPost(4) = partNum;
                 
                 locNum = find(locs==loc,1,'first');
 
@@ -77,8 +84,8 @@ function [totalPost,samp_x,counts,like] = samplePosterior2(params,patchLikes,pat
             if (isempty(samp_xOld))
                 samp_x(sampCount,:) = samp_xPost;
             else
-                samp_x(sampCount,1:end-3) = samp_xOld(oldSamp,:);
-                samp_x(sampCount,end-2:end) = samp_xPost;
+                samp_x(sampCount,1:end-stateSize) = samp_xOld(oldSamp,:);
+                samp_x(sampCount,end-stateSize+1:end) = samp_xPost;
             end
             
             sampCount = sampCount+1;

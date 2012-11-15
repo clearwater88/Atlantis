@@ -11,9 +11,12 @@ function [totalPost,samp_x,counts,like] = infer(data,qParts,locs,params)
     samp_x = [];
     totalPost = 1;
     
-    [patches,patchCounts] = getAppPatches(qParts{1},params);
-    patchLikes = getPatchLikes(patches,data,locs,patchCounts);
-
+    % -1 for bg model
+    for (i=1:numel(qParts)-1)
+        [patches{i},patchCounts{i}] = getAppPatches(qParts{i},params);
+        patchLikes{i} = getPatchLikes(patches{i},data,locs,patchCounts{i});
+    end
+    
     while(1)
         
         % Determine samples of previous state
@@ -27,22 +30,27 @@ function [totalPost,samp_x,counts,like] = infer(data,qParts,locs,params)
             nOldSamp(j) = sum(oldSamps==uniqueOldSamp(j) );
         end
         
-        likeRatio = getLikeRatio(patchLikes,patchCounts,counts(:,:,uniqueOldSamp),like(:,:,uniqueOldSamp),locs);
-        logLikeRatioPatch = getLLRatioPatch(likeRatio,locs,imSize);
+        for (i=1:numel(qParts)-1)
+            likeRatio = getLikeRatio(patchLikes{i},patchCounts{i},counts(:,:,uniqueOldSamp),like(:,:,uniqueOldSamp),locs);
+            logLikeRatioPatch{i} = getLLRatioPatch(likeRatio,locs,imSize);
+        end
         
-        % saliencyScore: [imSize]
-        saliencyScore = getSaliencyScore(like(:,:,uniqueOldSamp),logLikeRatioPatch,nOldSamp,params);
+        for (i=1:numel(qParts)-1)
+            % saliencyScore: [imSize]
+            saliencyScore(:,:,i) = getSaliencyScore(like(:,:,uniqueOldSamp),logLikeRatioPatch{i},nOldSamp,params);
+        end
         [sc,i] = max(saliencyScore(:));
-         
+
 %         figure(1); imagesc(data); colormap(gray);
 %         figure(2); imagesc(saliencyScore); colormap(gray);
 %         pause(0.5);
         
-        [y,x] = ind2sub(size(saliencyScore),i);
+        [y,x,partNum] = ind2sub(size(saliencyScore),i);
         sc
+        [y,x,partNum]
         
          [totalPost,samp_x,counts,like] = ...
-             samplePosterior2(params, ...
+             samplePosterior2(params, partNum, ...
                               patchLikes, ...
                               patchCounts, ...
                               logLikeRatioPatch, ...
@@ -67,8 +75,8 @@ function [totalPost,samp_x,counts,like] = infer(data,qParts,locs,params)
         
 %         figure(100);
 %         imshow(data);
-%     
-%         figure(2); viewSamples(samp_x,params.partSizes,imSize,totalPost);
+    
+        %figure(2); viewSamples(samp_x,params.partSizes,imSize,totalPost,qParts);
 
     end
 

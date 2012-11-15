@@ -14,5 +14,5 @@ function [res,counts] = getAppPatches(part,params)
         % direction in rest of code
        res(:,:,i) = imrotate(res(:,:,i),-180*params.orientationsUse(i)/pi,'nearest','crop');
     end
-    counts = res>0;
+    counts = double(res>0);
 end

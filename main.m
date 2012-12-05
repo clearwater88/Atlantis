@@ -51,7 +51,7 @@ appParam{1} = [0.1,   0.9,   0.1; ...
 % appParam{1} = 1;
 % appParam{2} = 1;
 % appParam{3} = 1;
-
+error('Unmaintained');
 appParam{end} = 0.1;
            
 locs = getBrickLoc(imSize,params);
@@ -88,9 +88,9 @@ for (ii=1:10)
         display(sprintf('On image %d of %d', i, nTest));
         [totalPost{i},samp_x{i},counts{i},like{i}] = infer(testData(:,:,i),qParts,locs,params);
 
-%         'showing'
-%         figure(1); imshow(testData(:,:,i));
-%         figure(2); viewSamples(samp_x{i},params.partSizes,imSize,totalPost{i},qParts);
+        'showing'
+        figure(1); imshow(testData(:,:,i));
+        figure(2); viewSamples(samp_x{i},params.partSizes,imSize,totalPost{i},qParts);
     end
     toc
     save(['resBSDS', int2str(ii)]);

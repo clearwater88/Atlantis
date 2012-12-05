@@ -1,4 +1,4 @@
-function res = getPatchLikes(params,patches,data,locs,counts,mix)
+function res = getPatchLikes(patches,data,locs,counts,mix)
     % res: [patchSize,#orientations,#locs] of patch likelihoods, for a
     %      patch being at this location and orientation
     

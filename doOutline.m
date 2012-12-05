@@ -1,23 +1,30 @@
-function res = doOutline(samp,partSize,imSize)
+function res = doOutline(samp,partSizes,imSize,qParts)
 
     res = zeros(imSize);
     
-    for (i=1:numel(samp)/3)
+    
+    for (i=1:numel(samp)/4)
         tempIm = zeros(imSize);
-        y = samp(3*(i-1)+1); x = samp(3*(i-1)+2); rot = samp(3*(i-1)+3); fs = 0;
+        y = samp(4*(i-1)+1);
+        x = samp(4*(i-1)+2);
+        rot = samp(4*(i-1)+3); 
+        partNum = samp(4*(i-1)+4);
+        
+        fs = 0;
         fillSource = 0;
 
-        yStart = y-partSize(1); yEnd = y+partSize(1);
-        xStart = x-partSize(2); xEnd = x+partSize(2);
+        yStart = y-partSizes(partNum,1); yEnd = y+partSizes(partNum,1);
+        xStart = x-partSizes(partNum,2); xEnd = x+partSizes(partNum,2);
 
         pts = meshgridRaster(yStart:yEnd,xStart:xEnd);
-        [rotPts,~,~] = rotatePts(pts,[y,x],rot,fs,fillSource,imSize);
+        [rotPts,~,corresPtsInd] = rotatePts(pts,[y,x],rot,fs,fillSource,imSize);
 
         rotPtsInd = (rotPts(:,2)-1)*imSize(1)+rotPts(:,1);
 
-
-        tempIm(rotPtsInd) = 1;
-        tempIm = bwmorph(tempIm,'remove');
+        % Just take most likely assignment
+        qPartUse = qParts{partNum}(:)  > 0.5; 
+        tempIm(rotPtsInd) = qPartUse(corresPtsInd);
+        %tempIm = bwmorph(tempIm,'remove');
 
         res = res+tempIm;
         

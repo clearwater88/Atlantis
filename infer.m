@@ -11,14 +11,15 @@ function [totalPost,samp_x,counts,like] = infer(data,qParts,params)
     samp_x = [];
     totalPost = 1;
     
-    % -1 for bg model
+    % -1 because last elem is bg model
     for (p=1:numel(qParts)-1)
-        locs{p} = getBrickLoc(imSize,params.partSizes);
+        locs{p} = getLocs(imSize,params,p);
         [patches,patchCounts{p}] = getAppPatches(qParts,params,p);
-        patchLikes{p} = getPatchLikes(params,patches,data,locs{p},patchCounts{p},params.partMix(p));
+        patchLikes{p} = getPatchLikes(patches,data,locs{p},patchCounts{p},params.partMix(p));
     end
     
     while(1)
+
         
         % Determine samples of previous state
         oldSamps = discretesample(totalPost,params.postParticles);
@@ -35,32 +36,28 @@ function [totalPost,samp_x,counts,like] = infer(data,qParts,params)
             likeRatio = getLikeRatio(patchLikes{p},patchCounts{p},counts(:,:,uniqueOldSamp),like(:,:,uniqueOldSamp),locs{p});
             logLikeRatioPatch{p} = getLLRatioPatch(likeRatio,locs{p},imSize);
         end
+        %logLikeRatioPatch: [imSize x nOrient]
         
-        for (i=1:numel(qParts)-1)
+        for (p=1:numel(qParts)-1)
             % saliencyScore: [imSize]
-            saliencyScore(:,:,i) = getSaliencyScore(like(:,:,uniqueOldSamp),logLikeRatioPatch{i},nOldSamp,params);
+            saliencyScore(:,:,:,p) = getSaliencyScore(like(:,:,uniqueOldSamp),logLikeRatioPatch{p},nOldSamp,params);
         end
-        [sc,i] = max(saliencyScore(:));
-
-%         figure(1); imagesc(data); colormap(gray);
-%         figure(2); imagesc(saliencyScore); colormap(gray);
-%         pause(0.5);
+        [sc,ind] = max(saliencyScore(:));
         
-        [y,x,partNum] = ind2sub(size(saliencyScore),i);
-        sc
-        [y,x,partNum]
+        [y,x,thetaInd,partNum] = ind2sub(size(saliencyScore),ind);
+        [y,x,thetaInd,partNum]
         
          [totalPost,samp_x,counts,like] = ...
-             samplePosterior2(params, partNum, ...
-                              patchLikes, ...
-                              patchCounts, ...
-                              logLikeRatioPatch, ...
-                              samp_x, ...
-                              [y,x], ...
-                              uniqueOldSamp, ...
-                              nOldSamp, ...
-                              totalPost, ...
-                              counts,like,locs);
+             samplePosterior(params, partNum, ...
+                             patchLikes, ...
+                             patchCounts, ...
+                             logLikeRatioPatch, ...
+                             samp_x, ...
+                             [y,x,thetaInd], ...
+                             uniqueOldSamp, ...
+                             nOldSamp, ...
+                             totalPost, ...
+                             counts,like,locs);
                 
         sampOn = samp_x(:,end) ~= params.sampOffFlag;
         probOn = sum(totalPost(sampOn));
@@ -76,8 +73,8 @@ function [totalPost,samp_x,counts,like] = infer(data,qParts,params)
         
 %         figure(100);
 %         imshow(data);
-    
-        %figure(2); viewSamples(samp_x,params.partSizes,imSize,totalPost,qParts);
+%     
+%         figure(2); viewSamples(samp_x,params.partSizes,imSize,totalPost,qParts);
 
     end
 

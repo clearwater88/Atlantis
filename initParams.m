@@ -9,10 +9,10 @@ function [params] = initParams()
 
     params.brickStd=0.1;
     params.brickOn = 0.01;
-    params.postParticles = 20;
+    params.postParticles = 50;
     params.orientPriorStep = pi/4;
     
-    params.orientUse = [0:pi/16:2*pi]';
+    params.orientUse = [0:pi/32:2*pi]';
     params.sampOffFlag = -10;
     params.probOnThresh = 0.3;
 end

@@ -1,4 +1,4 @@
-function [totalPost,samp_x,counts,like] = infer(data,qParts,params)
+function [totalPost,samp_x,counts,like] = infer(data,cleanData,qParts,params)
 
     imSize = size(data);
 
@@ -69,12 +69,8 @@ function [totalPost,samp_x,counts,like] = infer(data,qParts,params)
             nOn = sum(samp_x(:,end) ~= params.sampOffFlag);
             display(sprintf('Particles made on: %d/%d', nOn,size(samp_x,1)));
         end
-        
-        
-%         figure(100);
-%         imshow(data);
-%     
-%         figure(2); viewSamples(samp_x,params.partSizes,imSize,totalPost,qParts);
+%         figure(2);
+%         viewSamples(samp_x,data,cleanData,params,imSize,totalPost,qParts)
 
     end
 

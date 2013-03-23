@@ -1,5 +1,5 @@
 params = initParams;
-dataFolder = 'BSDSdata/';
+dataFolder = '../BSDSdata/';
 
 %must be odd
 szs = [5,9];

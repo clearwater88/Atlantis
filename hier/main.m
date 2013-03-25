@@ -7,8 +7,10 @@ ruleStruct = initRules;
 [poseCellLocs,cellDims,cellStrides] = initPoseCellLocs(params.imSize);
 templateStruct = initTemplates;
 
-% on/off, type, [cellCentreX,Y,Theta],[poseOffsetFromCentreX,Y,theta]
-[bricks,conn] = createBricks(poseCellLocs);
+% bricks: on/off, type, [cellCentreX,Y,Theta],[poseOffsetFromCentreX,Y,theta]
+% conn{i}: children of brick i, in indices of bricks
+% ruless: rule # of bricks, in reference to ruleStruct
+[bricks,conn,rules] = createBricks(poseCellLocs,ruleStruct);
 
 imBricks = viewBricks(bricks,templateStruct,params.imSize);
 imshow(imBricks);

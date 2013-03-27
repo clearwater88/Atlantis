@@ -2,7 +2,9 @@ function [params] = initParams()
     
     params.brickOn = 0.01;
     params.nParticles = 50;
-
+    
+    % start,increment,end
+    params.angleDisc = [0,pi/16,2*pi];
     % std devs to use for sampling particle locations
 %     params.mixPropFact = 2;
 %     params.bgMix = 0.01;

@@ -1,10 +1,10 @@
-function [like,counts] = evalLike(data,bricks,like,counts,templateStruct)
+function [like,counts] = evalLike(data,bricks,like,counts,poseCellLocs,templateStruct)
     
     bricksOn = bricks(:,bricks(1,:) == 1);
         
     for (i=1:size(bricksOn,2))
         type = bricksOn(2,i);
-        [patchRange,template] = getPatchTransformInds(bricksOn(:,i),templateStruct.app{type});
+        [patchRange,template] = getPatchTransformInds(bricksOn(:,i),poseCellLocs,templateStruct.app{type});
     
         dataUse = data(patchRange(1,1):patchRange(1,2), ...
                        patchRange(2,1):patchRange(2,2));

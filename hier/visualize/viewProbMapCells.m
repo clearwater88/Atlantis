@@ -1,5 +1,6 @@
 function viewProbMapCells(poseCellLocs,probMapCells)
-    
+    % poseCellLocs: must belong to type of probMapCells
+
     x = unique(poseCellLocs(:,1));
     y = unique(poseCellLocs(:,2));
     angles = unique(poseCellLocs(:,3));

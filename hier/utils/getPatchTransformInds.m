@@ -1,6 +1,8 @@
-function [patchRange,template] = getPatchTransformInds(brick, template)
-    poseCellCentre = brick(3:5);
-    offset = brick(6:8);
+function [patchRange,template] = getPatchTransformInds(brick, poseCellLocs, template)
+    type = brick(2);
+    brickInd = brick(3);
+    poseCellCentre = poseCellLocs{type}(brickInd,:)';
+    offset = brick(4:6);
 
     template = imrotate(template,-180*(poseCellCentre(3)+offset(3))/pi,'nearest','loose');
 

@@ -1,7 +1,5 @@
-function [ output_args ] = sampleChildren(type,)
-%SAMPLECHILDREN Summary of this function goes here
-%   Detailed explanation goes here
-
-
+function res = sampleChildren(type,probMap,nChildren,bricks)
+    childrenSamples = doSampleChildren(probMap,nChildren);
+    
 end
 

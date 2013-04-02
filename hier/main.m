@@ -14,6 +14,7 @@ probMapStruct = initProbMaps(ruleStruct,templateStruct.app);
 % %size of [ruleId,slot,loc] cell: each is an array
 % [allProbMaps] = getAllProbMapCells(poseCellLocs,cellDims,probMapStruct,ruleStruct,params);
 % toc;
+% save('allProbMaps','allProbMaps');
 load('allProbMaps');
 
 % bricks: on/off, type, [cellCentreIndex],[poseOffsetFromCentreX,Y,theta]
@@ -28,7 +29,7 @@ data = dataRand(params.imSize);
 [like,counts] = initLike(templateStruct,data);
 %[likeNew,countsNew] = evalLike(data,bricks,like,counts,poseCellLocs,templateStruct);
 
-probMap = allProbMaps{4,2,5};
-nChildren = 2;
-type = ruleStruct.children(4,2);
-sampleChildren(type,probMap,nChildren,bricks);
+ruleId = 4;
+parentLocInd = 5;
+slot=2;
+sampleChildren(parentLocInd,ruleId,slot,allProbMaps,bricks,ruleStruct);

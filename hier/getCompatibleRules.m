@@ -1,16 +1,16 @@
-function [mask] = getCompatibleRules(brickId,children,bricks,ruleStruct)
-    % returns mask that can be used on ruleStruct
+function [mask] = getCompatibleRules(brickId,slots,bricks,ruleStruct)
+    % mask for valid rules
 
     type = bricks(2,brickId);
     % child entry may be 0 to specify not selected yet
     % no ability to say "this slot is blank"
     
     % zeros are sentinel to indicate not used yet
-    childTypes = zeros(1,numel(children));
-    validChildren = children~=0;
-    childTypes(validChildren) = bricks(2,children(validChildren));
+    childTypes = zeros(1,numel(slots));
+    validChildren = slots~=0;
+    childTypes(validChildren) = bricks(2,slots(validChildren));
     
-    % no valid children? then only need to look at parent of rule
+    % no valid slots? then only need to look at parent of rule
     if (isempty(childTypes(validChildren)))
         mask = ones(size(ruleStruct.parents,1),1);
     else
@@ -20,5 +20,6 @@ function [mask] = getCompatibleRules(brickId,children,bricks,ruleStruct)
         mask = jIsMemberRows(ruleParts,childTypes(validChildren));        
     end
     mask = mask & (ruleStruct.parents==type);
+    res = find(mask==1);
 end
 

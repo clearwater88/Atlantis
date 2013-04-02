@@ -1,6 +1,8 @@
-function viewProbMapCells(poseCellLocs,probMapCells)
+function viewProbMapCells(poseCellLocs,probMapCells, figNum)
     % poseCellLocs: must belong to type of probMapCells
 
+    if (nargin < 3) figNum = 3; end
+    
     x = unique(poseCellLocs(:,1));
     y = unique(poseCellLocs(:,2));
     angles = unique(poseCellLocs(:,3));
@@ -14,6 +16,7 @@ function viewProbMapCells(poseCellLocs,probMapCells)
        res(xInd,yInd,angleInd) = probMapCells(i);       
     end
     
+    figure(figNum);
     for (i=1:size(res,3))
        imagesc(res(:,:,i));  colormap(gray);
        a=res(:,:,i);

@@ -1,22 +1,23 @@
-function conn = sampleParents(childId,bricks,conn,ruleStruct,allProbMaps)
-
+function [connChild,connPar,connOK] = sampleParents(childId,bricks,connChild,connPar,ruleStruct,allProbMaps)
+    %updates parent connections
+    connOK = 0;
+    
     for (parentId=1:size(bricks,2))
         if(parentId==childId) continue; end;
         if(bricks(1,parentId) == 0) continue; end; %brick off? then can't be parent
 
-        [probNo] = probBecomeParent(childId,parentId,bricks,conn,ruleStruct,allProbMaps);
+        [probNo] = probBecomeParent(childId,parentId,bricks,connChild,ruleStruct,allProbMaps);
 
         if (probNo > rand(1,1)) continue; end;
 
-        tic
         %Decided to make connection. Need to decide on probs and shit
-        parentId
-
+        display(['Connecting parent: ', int2str(parentId), ' to ', int2str(childId), '. Prob no: ', num2str(probNo)]);
+        
         chType = bricks(2,childId);
         chLoc = bricks(3,childId);
         parentLoc = bricks(3,parentId);
         
-        parentConn = conn{parentId};
+        parentConn = connChild{parentId};
         slotsAvailable = (parentConn == 0);
 
         ruleInds = find(getCompatibleRules(parentId,parentConn,bricks,ruleStruct)==1);
@@ -36,9 +37,10 @@ function conn = sampleParents(childId,bricks,conn,ruleStruct,allProbMaps)
         end
         slotProbs = slotProbs/sum(slotProbs(:));
         slotProbs = sum(slotProbs,1);
-        slotUse = find(mnrnd(1,slotProbs')==1);
-        conn{parentId}(slotUse) = childId;
-        toc
+        slotUse = mnrnd(1,slotProbs')==1;
+        connChild{parentId}(slotUse) = childId;
+        connPar{childId} = [connPar{childId},parentId];
+        connOK = 1;
     end
 end
 

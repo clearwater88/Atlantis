@@ -20,6 +20,5 @@ function [mask] = getCompatibleRules(brickId,slots,bricks,ruleStruct)
         mask = jIsMemberRows(ruleParts,childTypes(validChildren));        
     end
     mask = mask & (ruleStruct.parents==type);
-    res = find(mask==1);
 end
 

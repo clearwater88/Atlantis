@@ -26,5 +26,7 @@ function [probNo] = probBecomeParent(childId,parentId,bricks,conn,ruleStruct,all
         end
         probNo = probNo + ruleProb*probSlotsNo;
     end
+    % normalize to set of possible rules
+    probNo = probNo / sum(ruleStruct.probs(ruleInds));
 end
 

@@ -1,7 +1,7 @@
 startup;
 
 params = initParams;
-params.imSize = [100,50];
+params.imSize = [80,40];
 
 
 ruleStruct = initRules;
@@ -18,9 +18,10 @@ probMapStruct = initProbMaps(ruleStruct,templateStruct.app);
 load('allProbMaps');
 
 % bricks: on/off, type, [cellCentreIndex],[poseOffsetFromCentreX,Y,theta]
-% conn{i}: children of brick i, in indices of bricks
+% connChild{i}: children of brick i, in indices of all bricks in bricks
+% connParr{i}: parents of brick i, in indices of all bricks in bricks
 % ruless: rule # of bricks, in reference to ruleStruct
-[bricks,conn,rules] = createBricks(poseCellLocs,ruleStruct);
+[bricks,connChild,connParr,rules] = createBricks(allProbMaps,poseCellLocs,ruleStruct);
 
 imBricks = viewBricks(bricks,poseCellLocs,templateStruct,params.imSize);
 imshow(imBricks);
@@ -28,8 +29,8 @@ imshow(imBricks);
 data = dataRand(params.imSize);
 [like,counts] = initLike(templateStruct,data);
 %[likeNew,countsNew] = evalLike(data,bricks,like,counts,poseCellLocs,templateStruct);
-
-ruleId = 4;
-parentLocInd = 5;
-slot=2;
-sampleChildren(parentLocInd,ruleId,slot,allProbMaps,bricks,ruleStruct);
+% 
+% ruleId = 4;
+% parentLocInd = 5;
+% slot=2;
+% sampleChildren(parentLocInd,ruleId,slot,allProbMaps,bricks,ruleStruct);

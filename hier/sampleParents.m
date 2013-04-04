@@ -7,7 +7,6 @@ function [connChild,connPar,connOK] = sampleParents(childId,bricks,connChild,con
         if(bricks(1,parentId) == 0) continue; end; %brick off? then can't be parent
 
         [probNo] = probBecomeParent(childId,parentId,bricks,connChild,ruleStruct,allProbMaps);
-
         if (probNo > rand(1,1)) continue; end;
 
         %Decided to make connection. Need to decide on probs and shit

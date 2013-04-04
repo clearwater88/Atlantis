@@ -1,6 +1,7 @@
 function [res] = getAllProbMapCells(poseCellLocs,cellDims,probMapStruct,ruleStruct,params)
 
     for (ruleId=1:numel(ruleStruct.parents))
+        
         type = ruleStruct.parents(ruleId);
         ch = ruleStruct.children(ruleId,:);
         nSlots = sum(ch~=0);

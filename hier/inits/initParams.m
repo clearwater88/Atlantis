@@ -1,6 +1,6 @@
 function [params] = initParams()
     
-    params.brickOn = 0.01;
+    params.probRoot = [0.01,0.01];
     params.nParticles = 50;
     
     % start,increment,end

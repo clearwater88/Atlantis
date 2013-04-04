@@ -1,22 +1,35 @@
-function res = sampleChildren(parentLocInd,ruleId,slots,allProbMaps,bricks,ruleStruct)
+function [connChild,connPar,connOK] = sampleChildren(parentId,allProbMaps,bricks,ruleStruct,connChild,connPar,poseCellLocs,probRoot)
+% do at creation of brick
 
-    res = zeros(numel(slots),1);
-    for (i=1:numel(slots))
-        % access allProbMaps with probMap{ruleId,slot,loc index}
-        probMap = allProbMaps{ruleId,slots(i),parentLocInd};
-        res(i) = sampleChild(probMap);
-    end
+    connOK = 0;
+    ruleMask = getCompatibleRules(parentId,connPar{parentId},bricks,ruleStruct)==1;
+    ruleId = find(mnrnd(1,ruleStruct.probs.*ruleMask)==1);
     
-    for (i=1:numel(slots))
-        chType = ruleStruct.children(ruleId,slots(i));
+    nSlots = sum(ruleStruct.children(ruleId,:)~=0);
+    
+    for (i=1:nSlots)
+        chType = ruleStruct.children(ruleId,i);
+        % access allProbMaps with probMap{ruleId,slot,loc index}
         
-        childValid = any((bricks(1,:) == 1) & ... % brick on
-            (bricks(2,:) == chType) & ... % brick is right type
-            (bricks(3,:) == res(i))==1); % brick is in right location
-        if(~childValid)
-            res(i) = 0;
+        
+        probMapPrior = allProbMaps{ruleId,i,bricks(3,parentId)};
+        % modify with rooting probs
+        [selfRootMask] = isSelfRooted(bricks,chType,connPar,numel(probMapPrior));
+        probMap = probMapPrior.*((1/probRoot(chType)).^selfRootMask);
+        probMap = probMap/sum(probMap);
+        
+        childLoc = sampleChild(probMap);     
+        
+        childId = find((bricks(1,:) == 1) & ... % brick on
+                       (bricks(2,:) == chType) & ... % brick is right type
+                       (bricks(3,:) == childLoc) ==1); % brick is in right location
+                   
+        if(~isempty(childId))
+            display(['Connecting parent: ', int2str(parentId), ' to child: ',int2str(childId), ' in sampleChildren']);
+            connChild{parentId}(i) = childId;
+            connPar{childId} = [connPar{childId},parentId];
+            connOK = 1;
         end
     end
-
 end
 

@@ -21,6 +21,15 @@ function [probNo] = probBecomeParent(childId,parentId,bricks,conn,ruleStruct,all
         probSlotsNo = 1;
         for (s=1:numel(validSlots))
             probMap = allProbMaps{ruleInd,validSlots(s),parentLoc};
+            
+            % brick in active set? Then we say we can't be its
+            % parent, since we already decided on that. Except brick we're
+            % on.
+            active = isInActiveSet(bricks,chType,numel(probMap))==1;
+            active(chLoc) = 0;
+            probMap(active) = 0;
+            probMap = probMap/sum(probMap);
+            
             probSlotsNo = probSlotsNo*(1-probMap(chLoc));
             mm = max(probMap(chLoc),mm);
         end
@@ -28,5 +37,6 @@ function [probNo] = probBecomeParent(childId,parentId,bricks,conn,ruleStruct,all
     end
     % normalize to set of possible rules
     probNo = probNo / sum(ruleStruct.probs(ruleInds));
+
 end
 

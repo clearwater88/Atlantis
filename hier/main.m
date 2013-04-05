@@ -1,8 +1,11 @@
 startup;
 
+
+
 params = initParams;
 params.imSize = [80,40];
 
+data = dataRand(params.imSize);
 
 ruleStruct = initRules;
 templateStruct = initTemplates;
@@ -25,11 +28,6 @@ load('allProbMaps');
 %imBricks = viewBricks(bricks,poseCellLocs,templateStruct,params.imSize);
 %imshow(imBricks);
 % 
-% data = dataRand(params.imSize);
-% [like,counts] = initLike(templateStruct,data);
-%[likeNew,countsNew] = evalLike(data,bricks,like,counts,poseCellLocs,templateStruct);
-% 
-% ruleId = 4;
-% parentLocInd = 5;
-% slot=2;
-% sampleChildren(parentLocInd,ruleId,slot,allProbMaps,bricks,ruleStruct);
+
+[like,counts] = initLike(templateStruct,data);
+[likes,boundaries,counts] =evalLike(data,templateStruct,params);

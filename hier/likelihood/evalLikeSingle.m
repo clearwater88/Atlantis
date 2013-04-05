@@ -1,4 +1,4 @@
-function [like,counts] = evalLike(data,bricks,like,counts,poseCellLocs,templateStruct)
+function [like,counts] = evalLikeSingle(data,bricks,like,counts,poseCellLocs,templateStruct)
     
     bricksOn = bricks(:,bricks(1,:) == 1);
         

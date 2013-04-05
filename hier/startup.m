@@ -4,3 +4,4 @@ addpath(genpath('inits'));
 addpath(genpath('visualize'));
 addpath(genpath('utils'));
 addpath(genpath('localizer'));
+addpath(genpath('likelihood'));

@@ -19,6 +19,11 @@ function [templateStruct] = initTemplates()
                              0.9; ...
                              0.9];
     templateStruct.app{3} = 0.1; % background
+    
+    for (i=1:numel(templateStruct.app))
+       templateStruct.app{i}=single(templateStruct.app{i}); 
+    end
+    
     templateStruct.mix = [0.1,1,0.0001]';
 
 end

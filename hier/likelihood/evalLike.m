@@ -7,10 +7,8 @@ function [likes,boundaries,counts] = evalLike(data,templateStruct,params)
     boundaries = cell(nTemplates,1);
     counts = cell(nTemplates,1);
     
-    
     for (type=1:nTemplates)
-        tic
-        
+
         boundariesTemp = [];
         likesTemp = {};
         countsTemp = {};
@@ -25,7 +23,7 @@ function [likes,boundaries,counts] = evalLike(data,templateStruct,params)
                     poseCentre = [x,y,ag];
                     boundary(:,1) = (poseCentre(1:2)-(size(rotTemplate)-1)/2)';
                     boundary(:,2) = (poseCentre(1:2)+(size(rotTemplate)-1)/2)';
-                    
+                    boundary(:,3) = ag;
                     % rotated patch falls outside? Then forget it
                     if(any(boundary(:,1) < 1)) continue; end;
                     if(any(boundary(:,2) > size(data)')) continue; end;
@@ -42,12 +40,11 @@ function [likes,boundaries,counts] = evalLike(data,templateStruct,params)
                 end
             end
         end
-        toc
+
         boundaries{type} = boundariesTemp;
         likes{type} = likesTemp;
         counts{type} = countsTemp;
     end
-
 
 end
 

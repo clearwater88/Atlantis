@@ -1,4 +1,4 @@
-function [res] = getAllProbMapCells(poseCellLocs,cellDims,probMapStruct,ruleStruct,params)
+function [res] = getAllProbMapCells(cellCentres,cellDims,probMapStruct,ruleStruct,params)
 
     for (ruleId=1:numel(ruleStruct.parents))
         
@@ -6,7 +6,7 @@ function [res] = getAllProbMapCells(poseCellLocs,cellDims,probMapStruct,ruleStru
         ch = ruleStruct.children(ruleId,:);
         nSlots = sum(ch~=0);
         
-        locsUse = poseCellLocs{type};
+        locsUse = cellCentres{type};
         for (slot=1:nSlots)
             chType = ch(slot);            
             for (loc=1:size(locsUse,1))
@@ -14,7 +14,7 @@ function [res] = getAllProbMapCells(poseCellLocs,cellDims,probMapStruct,ruleStru
                     getProbMapCells(ruleId,slot,locsUse(loc,:), ...
                                     probMapStruct,ruleStruct, ...
                                     params.imSize,params.angleDisc, ...
-                                    poseCellLocs{chType}, cellDims(chType,:));
+                                    cellCentres{chType}, cellDims(chType,:));
             end
         end
         

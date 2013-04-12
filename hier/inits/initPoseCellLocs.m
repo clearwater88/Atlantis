@@ -1,5 +1,5 @@
 %centre of pose cells of each type
-function [cellLocs,cellDims,cellStrides] = initPoseCellLocs(imSize)
+function [cellCentres,cellDims,cellStrides] = initPoseCellLocs(imSize)
     
     imSize = [imSize,pi]; % append range of angles in pose space
     
@@ -15,10 +15,10 @@ function [cellLocs,cellDims,cellStrides] = initPoseCellLocs(imSize)
         temp2 = 1:cellStrides(i,2):(imSize(2)+1)-cellDims(i,2);
         temp3 = 0:cellStrides(i,3):imSize(3)-cellDims(i,3); % angle starts from 0
         [temp,temp2,temp3] = meshgrid(temp,temp2,temp3);
-        cellLocs{i} = [temp(:),temp2(:),temp3(:)]; 
+        cellCentres{i} = [temp(:),temp2(:),temp3(:)]; 
         % re-centre
-        cellLocs{i}(:,1:2) = bsxfun(@plus,cellLocs{i}(:,1:2),((cellDims(i,1:2))-1)/2);
-        cellLocs{i}(:,3) = bsxfun(@plus,cellLocs{i}(:,3),cellDims(i,3)/2);
+        cellCentres{i}(:,1:2) = bsxfun(@plus,cellCentres{i}(:,1:2),((cellDims(i,1:2))-1)/2);
+        cellCentres{i}(:,3) = bsxfun(@plus,cellCentres{i}(:,3),cellDims(i,3)/2);
     end
 
 end

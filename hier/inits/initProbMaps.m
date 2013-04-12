@@ -6,8 +6,7 @@ function [probMapStruct] = initProbMaps(ruleStruct,templates)
     covCentres = cell(numel(parents),1); % covariances for each slot
 
     for (i=1:size(parents,1))
-        pa = parents(i);
-        tp = templates{pa};
+        tp = templates{ parents(i)};
         ch = ruleStruct.children(i,:);
         
         validChildren = ch(ch~=0);

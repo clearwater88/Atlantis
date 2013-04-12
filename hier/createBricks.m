@@ -36,6 +36,7 @@ function [bricks,connChild,connPar] = createBricks(allProbMaps,poseCellLocs,rule
        bricks(4:5,i) = round(2*rand(2,1)-1); % round offsets to integer
        bricks(6,i) = mod(0.1*randn(1),2*pi);
        
+       
        if(bricks(1,i) == 0) continue; end; %not on? then you don't geto a parent
 
        [connChild,connPar,connOK] = sampleParents(i,bricks(:,1:i),connChild,connPar,ruleStruct,allProbMaps);

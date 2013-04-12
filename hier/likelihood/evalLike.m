@@ -1,4 +1,6 @@
 function [likes,boundaries,counts] = evalLike(data,templateStruct,params)
+    % evalutes likelihood at all positions in pose space (discretized)
+
 
     % last element is always background model
     nTemplates = numel(templateStruct.app)-1;
@@ -21,12 +23,11 @@ function [likes,boundaries,counts] = evalLike(data,templateStruct,params)
             for (x=1:size(data,1))
                 for(y=1:size(data,2))
                     poseCentre = [x,y,ag];
-                    boundary(:,1) = (poseCentre(1:2)-(size(rotTemplate)-1)/2)';
-                    boundary(:,2) = (poseCentre(1:2)+(size(rotTemplate)-1)/2)';
-                    boundary(:,3) = ag;
+                    boundary(:,1) = [(poseCentre(1:2)-(size(rotTemplate)-1)/2)';ag];
+                    boundary(:,2) = [(poseCentre(1:2)+(size(rotTemplate)-1)/2)';ag];
                     % rotated patch falls outside? Then forget it
-                    if(any(boundary(:,1) < 1)) continue; end;
-                    if(any(boundary(:,2) > size(data)')) continue; end;
+                    if(any(boundary(1:2,1) < 1)) continue; end;
+                    if(any(boundary(1:2,2) > size(data)')) continue; end;
                     
                     boundariesTemp = cat(3,boundariesTemp,boundary);
                     

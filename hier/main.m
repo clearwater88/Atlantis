@@ -28,12 +28,8 @@ counts{1} = countsTemp;
 
 [likePx,boundariesPx,countsPx] = evalLike(data,templateStruct,params);
 
-cellType = 1;
-cellCentre = cellCentres{cellType}(30,:);
-cellDim = cellDims(cellType,:);
-boundary = boundariesPx{cellType};
 
-id = getLikePxIdx(cellCentre,cellDim,boundary);
+[pose,poseOffset] = samplePose(cellType,centreIdx,cellCentres,cellDims,boundariesPx,likePx,countsPx);
  
 %sampleParticles(initParticles,particleProbs,like,counts,allProbMaps);
 

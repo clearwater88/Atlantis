@@ -1,4 +1,4 @@
-function res = viewBricks(bricks,poseCellLocs,templateStruct,imSize)
+function res = viewBricks(bricks,templateStruct,imSize)
     
     res = zeros(imSize);
     
@@ -8,6 +8,9 @@ function res = viewBricks(bricks,poseCellLocs,templateStruct,imSize)
         type = bricksOn(2,i);
         template = templateStruct.app{type};
         template = double(template > 0.5);
+        
+        pose = bricks(
+        
         [patchRange,template] = getPatchTransformInds(bricksOn(:,i),poseCellLocs,template);
         
         res(patchRange(1,1):patchRange(1,2), patchRange(2,1):patchRange(2,2)) = ...

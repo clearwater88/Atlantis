@@ -1,13 +1,22 @@
-function res = getLikePxIdx(cellCentre,cellDims,boundaryPx)
+function res = getLikePxIdx(cellCentre,cellDims,boundaryPx,params)
 
-    cellBoundaries = [cellCentre-(cellDims-1)/2;  cellCentre+(cellDims-1)/2]';
+    cellBoundaries = [cellCentre(1:2)-(cellDims(1:2)-1)/2;  cellCentre(1:2)+(cellDims(1:2)-1)/2]';
 
-    low = squeeze(sum(bsxfun(@ge,boundaryPx(:,1,:),cellBoundaries(:,1)),1));
-    low = low ==3; % 3 dimensions; have to pass checks for all 3
+    spatialLow = squeeze(sum(bsxfun(@ge,boundaryPx(1:2,1,:),cellBoundaries(:,1)),1));
+    spatialLow = spatialLow ==2; % 2 dimensions; have to pass checks for all 3
     
-    high = squeeze(sum(bsxfun(@le,boundaryPx(:,2,:),cellBoundaries(:,2)),1));
-    high = high ==3; % 3 dimensions; have to pass checks for all 3
+    spatialHigh = squeeze(sum(bsxfun(@le,boundaryPx(1:2,2,:),cellBoundaries(:,2)),1));
+    spatialHigh = spatialHigh ==2; % 2 dimensions; have to pass checks for all 3
     
-    res = bsxfun(@and,low,high);
+    resSpatial = bsxfun(@and,spatialLow,spatialHigh);
+    
+    angleLow = cellCentre(3)-cellDims(3);
+    angleHigh = cellCentre(3)+cellDims(3);
+    
+    ags = squeeze(boundaryPx(3,1,:)); 
+    resAngle = checkAngle(ags,angleLow,angleHigh);
+    
+    res = bsxfun(@and,resSpatial,resAngle);
+    
 end
 

@@ -4,7 +4,7 @@ function [params] = initParams()
     params.nParticles = 50;
     
     % start,increment,end
-    params.angleDisc = [0,pi/8,2*pi];
+    params.angleDisc = [-pi,pi/8,pi];
     % std devs to use for sampling particle locations
 %     params.mixPropFact = 2;
 %     params.bgMix = 0.01;

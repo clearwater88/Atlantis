@@ -26,14 +26,20 @@ particleProbs  = 1;
 like{1} = likeTemp;
 counts{1} = countsTemp;
 
-[likePx,boundariesPx,countsPx] = evalLike(data,templateStruct,params);
-
-
-[pose,poseOffset] = samplePose(cellType,centreIdx,cellCentres,cellDims,boundariesPx,likePx,countsPx);
- 
+[likePxStruct] = evalLike(data,templateStruct,params);
+% 
+% cellType = 1;
+% centreIdx = 22;
+% 
+% pose = samplePose(like{1},counts{1}, ...
+%                   likePxStruct, ...
+%                   cellType,centreIdx,cellCentres,cellDims,params);
+              
+saliency = getLikeCell(likePxStruct,cellCentres,cellDims,params);
+              
 %sampleParticles(initParticles,particleProbs,like,counts,allProbMaps);
 
-% bricks: on/off, type, [cellCentreIndex],[poseOffsetFromCentreX,Y,theta]
+% bricks: on/off, type, [cellCentreIndex],[poseX,Y,theta]
 % connChild{i}: children of brick i, in indices of all bricks in bricks
 % connParr{i}: parents of brick i, in indices of all bricks in bricks
 %[bricks,connChild,connPar] = createBricks(allProbMaps,poseCellLocs,ruleStruct,params.probRoot);

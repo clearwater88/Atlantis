@@ -13,11 +13,14 @@ function [likeStructPx] = evalLike(data,templateStruct,params)
     
     for (type=1:nTemplates)
 
-        boundariesTemp = [];
-        posesTemp = [];
-        likesTemp = {};
-        countsTemp = {};
+
         
+        maxElem = size(data,1)*size(data,2)*numel(params.angleDisc(1):params.angleDisc(2):params.angleDisc(3));
+        posesTemp = zeros(maxElem,3);
+        likesTemp = cell(maxElem,1);
+        countsTemp = cell(maxElem,1);
+        boundariesTemp = zeros(3,2,maxElem);
+                
         template = templateStruct.app{type};
         ct = 1;
         for (ag=params.angleDisc(1):params.angleDisc(2):params.angleDisc(3))
@@ -50,6 +53,12 @@ function [likeStructPx] = evalLike(data,templateStruct,params)
                 end
             end
         end
+        
+        %clean up
+        posesTemp(ct:end,:) = [];
+        likesTemp(ct:end) = [];
+        countsTemp(ct:end) = [];
+        boundariesTemp(:,:,ct:end) = [];
 
         likeStructPx.boundaries{type} = boundariesTemp;
         likeStructPx.poses{type} = posesTemp;

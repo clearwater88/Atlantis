@@ -3,21 +3,25 @@ startup;
 params = initParams;
 params.imSize = [80,40];
 
-data = dataRand(params.imSize);
-
 ruleStruct = initRules;
 templateStruct = initTemplates;
 probMapStruct = initProbMaps(ruleStruct,templateStruct.app);
 
-[cellCentres,cellDims,cellStrides] = initPoseCellLocs(params.imSize);
+cellParams = initPoseCellLocs(params.imSize);
+
+% tic;
+% data = dataRand(params.imSize);
+% saliency = getLikeCell(likePxStruct,cellParams,params);
+% toc;
+% save('saliency','saliency','data');
+load('saliency');
 
 % tic
-% %size of [ruleId,slot,loc] cell: each is an array
-% [allProbMaps] = getAllProbMapCells(cellCentres,cellDims,probMapStruct,ruleStruct,params);
+% %allProbMaps: size of [ruleId,slot,loc] cell: each is an array
+% [allProbMaps] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
 % toc;
 % save('allProbMaps','allProbMaps');
 load('allProbMaps');
-
 
 initParticles{1} = [];
 particleProbs  = 1;
@@ -26,7 +30,20 @@ particleProbs  = 1;
 like{1} = likeTemp;
 counts{1} = countsTemp;
 
-[likePxStruct] = evalLike(data,templateStruct,params);
+connChild = {};
+connPar = {};
+
+sampleParticles(initParticles,particleProbs,like,counts,allProbMaps,saliency,cellParams,params,ruleStruct,templateStruct)
+
+
+
+
+
+
+
+
+
+%[likePxStruct] = evalLike(data,templateStruct,params);
 % 
 % cellType = 1;
 % centreIdx = 22;
@@ -35,7 +52,7 @@ counts{1} = countsTemp;
 %                   likePxStruct, ...
 %                   cellType,centreIdx,cellCentres,cellDims,params);
               
-saliency = getLikeCell(likePxStruct,cellCentres,cellDims,params);
+
               
 %sampleParticles(initParticles,particleProbs,like,counts,allProbMaps);
 

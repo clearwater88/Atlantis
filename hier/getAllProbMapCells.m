@@ -1,4 +1,7 @@
-function [res] = getAllProbMapCells(cellCentres,cellDims,probMapStruct,ruleStruct,params)
+function [res] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params)
+
+    cellCentres = cellParams.centres;
+    cellDims = cellParams.dims;
 
     for (ruleId=1:numel(ruleStruct.parents))
         

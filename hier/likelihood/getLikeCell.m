@@ -1,5 +1,8 @@
-function [res] = getLikeCell(likePxStruct,cellCentres,cellDims,params)
+function [res] = getLikeCell(likePxStruct,cellParams,params)
 % Get (log)sum of log likelihoods in a specific cell: \int_cell P (I|pose)
+
+    cellCentres = cellParams.centres;
+    cellDims = cellParams.dims;
 
     nTypes = numel(cellCentres);
 

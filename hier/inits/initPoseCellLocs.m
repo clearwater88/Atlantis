@@ -1,5 +1,5 @@
 %centre of pose cells of each type
-function [cellCentres,cellDims,cellStrides] = initPoseCellLocs(imSize)
+function cellParams = initPoseCellLocs(imSize)
     
     imSize = [imSize,pi]; % append range of angles in pose space
     
@@ -21,5 +21,9 @@ function [cellCentres,cellDims,cellStrides] = initPoseCellLocs(imSize)
         cellCentres{i}(:,3) = bsxfun(@plus,cellCentres{i}(:,3),cellDims(i,3)/2);
     end
 
+    cellParams.centres = cellCentres;
+    cellParams.dims = cellDims;
+    cellParams.strides = cellStrides;
+    
 end
 

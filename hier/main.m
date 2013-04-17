@@ -1,7 +1,7 @@
 startup;
 
 params = initParams;
-params.imSize = [80,40];
+params.imSize = [30,20];
 
 ruleStruct = initRules;
 templateStruct = initTemplates;
@@ -9,31 +9,15 @@ probMapStruct = initProbMaps(ruleStruct,templateStruct.app);
 
 cellParams = initPoseCellLocs(params.imSize);
 
-% tic;
-% data = dataRand(params.imSize);
-% saliency = getLikeCell(likePxStruct,cellParams,params);
-% toc;
-% save('saliency','saliency','data');
-load('saliency');
-
 % tic
-% %allProbMaps: size of [ruleId,slot,loc] cell: each is an array
-% [allProbMaps] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
+% %allProbMapCells: size of [ruleId,slot,loc] cell: each is an array
+% [allProbMapCells] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
 % toc;
 % save('allProbMaps','allProbMaps');
 load('allProbMaps');
 
-initParticles{1} = [];
-particleProbs  = 1;
-[likeTemp,countsTemp] = initLike(templateStruct,data);
 
-like{1} = likeTemp;
-counts{1} = countsTemp;
-
-connChild = {};
-connPar = {};
-
-sampleParticles(initParticles,particleProbs,like,counts,allProbMaps,saliency,cellParams,params,ruleStruct,templateStruct)
+sampleParticles(data,allProbMapCells,cellParams,params,ruleStruct,templateStruct);
 
 
 
@@ -43,7 +27,7 @@ sampleParticles(initParticles,particleProbs,like,counts,allProbMaps,saliency,cel
 
 
 
-%[likePxStruct] = evalLike(data,templateStruct,params);
+
 % 
 % cellType = 1;
 % centreIdx = 22;
@@ -56,7 +40,7 @@ sampleParticles(initParticles,particleProbs,like,counts,allProbMaps,saliency,cel
               
 %sampleParticles(initParticles,particleProbs,like,counts,allProbMaps);
 
-% bricks: on/off, type, [cellCentreIndex],[poseX,Y,theta]
+% bricks: on/off, type, cellCentreIndex,[poseX,Y,theta]
 % connChild{i}: children of brick i, in indices of all bricks in bricks
 % connParr{i}: parents of brick i, in indices of all bricks in bricks
 %[bricks,connChild,connPar] = createBricks(allProbMaps,poseCellLocs,ruleStruct,params.probRoot);

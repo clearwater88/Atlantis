@@ -1,7 +1,6 @@
-function [mask] = getCompatibleRules(brickId,slots,bricks,ruleStruct)
+function [mask] = getCompatibleRules(type,slots,bricks,ruleStruct)
     % mask for valid rules
 
-    type = bricks(2,brickId);
     % child entry may be 0 to specify not selected yet
     % no ability to say "this slot is blank"
     

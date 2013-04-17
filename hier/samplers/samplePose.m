@@ -1,8 +1,8 @@
-function pose = samplePose(likeIm,countsIm,likePxStruct,cellType,centreIdx,cellCentres,cellDims,params)
+function pose = samplePose(likeIm,countsIm,likePxStruct,cellType,centreIdx,cellParams,params)
     % need to provide particle
 
-    cellCentre = cellCentres{cellType}(centreIdx,:);
-    cellDim = cellDims(cellType,:);
+    cellCentre = cellParams.centres{cellType}(centreIdx,:);
+    cellDim = cellParams.dims(cellType,:);
     bound = likePxStruct.boundaries{cellType};
     likes = likePxStruct.likes{cellType};
     counts = likePxStruct.counts{cellType};

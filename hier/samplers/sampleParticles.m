@@ -35,7 +35,8 @@ function sampleParticles(data,allProbMapCells,cellParams,params,ruleStruct,templ
             connChild{ind} = [];
             connPar{ind} = [];
             
-            %[connChild,connPar,connOK] = sampleParents(i,bricks(:,1:i),connChild,connPar,ruleStruct,allProbMaps);
+            %[connChild,connPar,connOK] = sampleParents2(i,bricks(:,1:i),connChild,connPar,ruleStruct,allProbMaps);
+            sampleParents(particleId,particle,connChild,connPar,ruleStruct,allProbMaps);
             % bricks: on/off, type, cellCentreIndex,[poseX,Y,theta]
             particle(1,end) = 1; % brick on, lets say
             particle(2,end) = cellType;

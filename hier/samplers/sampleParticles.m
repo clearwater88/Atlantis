@@ -30,14 +30,13 @@ function sampleParticles(data,saliencyMap,likePxStruct,allProbMapCells,cellParam
             connPar{brickIdx} = [];
             
             %[connChild,connPar,connOK] = sampleParents2(i,bricks(:,1:i),connChild,connPar,ruleStruct,allProbMaps);
-            sampleParents(brickIdx,particle,connChild,connPar,ruleStruct,allProbMapCells);
+            sampleParents(brickIdx,particle,connChild,ruleStruct,allProbMapCells);
             % bricks: on/off, type, cellCentreIndex,[poseX,Y,theta]
             particle(1,end) = 1; % brick on, lets say
       
             pose = samplePose(like{particleId}, counts{particleId}, likePxStruct,cellType,cellLocIdx,cellParams,params);
             particle(4:6,end) = pose;
  
-            
             
             [connChild,connPar,connOK] = sampleChildren(brickIdx,allProbMapCells,particle,ruleStruct,connChild,connPar,params);
             

@@ -14,7 +14,6 @@ function [mask] = getCompatibleRules(type,slots,bricks,ruleStruct)
         mask = ones(size(ruleStruct.parents,1),1);
     else
         ruleParts = ruleStruct.children(:,validChildren);
-        tic
         %mask = ismember(ruleParts,childTypes(validChildren),'rows');
         mask = jIsMemberRows(ruleParts,childTypes(validChildren));        
     end

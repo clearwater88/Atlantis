@@ -6,3 +6,4 @@ addpath(genpath('utils'));
 addpath(genpath('localizer'));
 addpath(genpath('likelihood'));
 addpath(genpath('samplers'));
+addpath(genpath('brickGetters'));

@@ -13,11 +13,20 @@ cellParams = initPoseCellLocs(params.imSize);
 % %allProbMapCells: size of [ruleId,slot,loc] cell: each is an array
 % [allProbMapCells] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
 % toc;
-% save('allProbMaps','allProbMaps');
+% save('allProbMaps','allProbMapCells');
 load('allProbMaps');
 
+% [likePxStruct] = evalLike(data,templateStruct,params);
+% save('likePxStruct','likePxStruct');
+load('likePxStruct');
 
-sampleParticles(data,allProbMapCells,cellParams,params,ruleStruct,templateStruct);
+% data = dataRand(params.imSize);
+% saliencyMap = getLikeCell(likePxStruct,cellParams,params);
+% save('saliency','saliencyMap','data');
+load('saliency');
+
+
+sampleParticles(data,saliencyMap,likePxStruct,allProbMapCells,cellParams,params,ruleStruct,templateStruct);
 
 
 

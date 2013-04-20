@@ -1,8 +1,8 @@
 function [connect,noConnect] = sampleParents(brickIdx, bricks,connChild,ruleStruct,allProbMapCells)
-    [connect,noConnect] = sampleParentsProbs(brickIdx, bricks,connChild,ruleStruct,allProbMapCells);
-   
+    [connect,noConnect] = sampleParentsProbs(brickIdx, bricks,connChild,ruleStruct,allProbMapCells)
 end
 
+% prob of each parent being connect/not connect
 function [connect,noConnect] = sampleParentsProbs(brickIdx, bricks,connChild,ruleStruct,allProbMapCells)
 
     nParents = size(bricks,2);
@@ -18,9 +18,11 @@ function [connect,noConnect] = sampleParentsProbs(brickIdx, bricks,connChild,rul
         if(bricks(1,parentId) == 0) continue; end; %brick off? then can't be parent
 
         parentLocIdx = getLocIdx(parentId,bricks);
+        parentType = getType(parentId,bricks);
         slotsAvailable = (connChild{parentId} == 0);
 
-        ruleInds = find(getCompatibleRules(parentId,connChild{parentId},bricks,ruleStruct)==1);
+        
+        ruleInds = find(getCompatibleRules(parentType,connChild{parentId},bricks,ruleStruct)==1);
         slotProbs = zeros(numel(ruleStruct.parents),ruleStruct.maxChildren);
 
         noConnect(parentId) = noConnect(parentId) + sum(ruleStruct.probs(ruleInds));
@@ -33,9 +35,9 @@ function [connect,noConnect] = sampleParentsProbs(brickIdx, bricks,connChild,rul
             validSlots = find(slotsAvailable & (ruleChildren == childType));
 
             for (s=1:numel(validSlots))
-                probMapCellUse = adjustProbMap(allProbMapCells,ruleInd,validSlot(s),parentLocIdx,bricks);
-                %probMap = allProbMapCells{ruleInd,validSlots(s),parentLocIdx};
+                probMapCellUse = adjustProbMap(allProbMapCells,ruleInd,validSlots(s),parentLocIdx,bricks);
                 probMap = probMapCellUse;
+
                 slotProbs(ruleInd,validSlots(s)) = ruleStruct.probs(ruleInd)*probMap(childLoc);
             end
         end

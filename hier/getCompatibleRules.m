@@ -1,4 +1,4 @@
-function [mask] = getCompatibleRules(type,slots,bricks,ruleStruct)
+function [mask] = getCompatibleRules(parentType,slots,bricks,ruleStruct)
     % mask for valid rules
 
     % child entry may be 0 to specify not selected yet
@@ -17,6 +17,6 @@ function [mask] = getCompatibleRules(type,slots,bricks,ruleStruct)
         %mask = ismember(ruleParts,childTypes(validChildren),'rows');
         mask = jIsMemberRows(ruleParts,childTypes(validChildren));        
     end
-    mask = mask & (ruleStruct.parents==type);
+    mask = mask & (ruleStruct.parents==parentType);
 end
 

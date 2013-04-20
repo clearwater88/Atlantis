@@ -9,12 +9,8 @@ probMapStruct = initProbMaps(ruleStruct,templateStruct.app);
 
 cellParams = initPoseCellLocs(params.imSize);
 
-% tic
-% %allProbMapCells: size of [ruleId,slot,loc] cell: each is an array
-% [allProbMapCells] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
-% toc;
-% save('allProbMaps','allProbMapCells');
-load('allProbMaps');
+%allProbMapCells: size of [ruleId,slot,loc] cell: each is an array
+[allProbMapCells] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
 
 % [likePxStruct] = evalLike(data,templateStruct,params);
 % save('likePxStruct','likePxStruct');

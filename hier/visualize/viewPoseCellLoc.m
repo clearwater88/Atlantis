@@ -1,4 +1,4 @@
-function viewPoseCell(cellId,poseCellLocs,figNum)
+function viewPoseCellLoc(cellId,poseCellLocs,figNum)
 
     if (nargin < 3) figNum = 3; end
 

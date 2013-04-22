@@ -1,6 +1,7 @@
 function [likeStructPx] = evalLike(data,templateStruct,params)
     % evalautes likelihood at all positions in pose space (discretized)
-
+    % boundary says which pixels the patch overlaps, given appropriate pose
+    
     % last element is always background model
     nTemplates = numel(templateStruct.app)-1;
 
@@ -13,8 +14,6 @@ function [likeStructPx] = evalLike(data,templateStruct,params)
     
     for (type=1:nTemplates)
 
-
-        
         maxElem = size(data,1)*size(data,2)*numel(params.angleDisc(1):params.angleDisc(2):params.angleDisc(3));
         posesTemp = zeros(maxElem,3);
         likesTemp = cell(maxElem,1);

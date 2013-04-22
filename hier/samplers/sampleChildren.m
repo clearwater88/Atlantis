@@ -1,10 +1,7 @@
-function [connChild,connPar,connOK] = sampleChildren(parentId,allProbMaps,bricks,ruleStruct,connChild,connPar,params)
-% do at creation of brick
-
-
-    connOK = 0;
+function [connChild,connPar] = sampleChildren(parentId,allProbMaps,bricks,ruleStruct,connChild,connPar,params)
+    
     parentType = bricks(2,parentId);
-    ruleMask = getCompatibleRules(parentType,connPar{parentId},bricks,ruleStruct)==1;
+    ruleMask = getCompatibleRules(parentType,connChild{parentId},bricks,ruleStruct)==1;
     ruleId = find(mnrnd(1,ruleStruct.probs.*ruleMask)==1);
     
     nSlots = sum(ruleStruct.children(ruleId,:)~=0);
@@ -31,7 +28,6 @@ function [connChild,connPar,connOK] = sampleChildren(parentId,allProbMaps,bricks
             display(['Connecting parent: ', int2str(parentId), ' to child: ',int2str(childId), ' in sampleChildren']);
             connChild{parentId}(i) = childId;
             connPar{childId} = [connPar{childId},parentId];
-            connOK = 1;
         end
     end
 end

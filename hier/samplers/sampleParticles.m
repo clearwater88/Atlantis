@@ -1,4 +1,4 @@
-function sampleParticles(data,saliencyMap,likePxStruct,allProbMapCells,cellParams,params,ruleStruct,templateStruct)
+function sampleParticles(data,saliencyMap,likePxStruct,probMapCells,cellParams,params,ruleStruct,templateStruct)
 
     particles{1} = [];
     particleProbs  = 1;
@@ -26,23 +26,21 @@ function sampleParticles(data,saliencyMap,likePxStruct,allProbMapCells,cellParam
             particle(2,end) = cellType;
             particle(3,end) = cellLocIdx; 
             
-            connChild{brickIdx} = [];
+            connChild{brickIdx} = zeros(1,ruleStruct.maxChildren);
             connPar{brickIdx} = [];
             
             %[connChild,connPar,connOK] = sampleParents2(i,bricks(:,1:i),connChild,connPar,ruleStruct,allProbMaps);
-            sampleParents(brickIdx,particle,connChild,ruleStruct,allProbMapCells);
+            [state,connPar,connChild] = sampleParents(brickIdx,particle,connChild,connPar,ruleStruct,probMapCells,like{particleId}, counts{particleId},likePxStruct,cellParams,params);
             % bricks: on/off, type, cellCentreIndex,[poseX,Y,theta]
-            particle(1,end) = 1; % brick on, lets say
+            particle(1,end) = state;
       
-            pose = samplePose(like{particleId}, counts{particleId}, likePxStruct,cellType,cellLocIdx,cellParams,params);
+            pose = samplePose(like{particleId}, counts{particleId}, likePxStruct,cellType,cellLocIdx,cellParams);
             particle(4:6,end) = pose;
  
-            
-            [connChild,connPar,connOK] = sampleChildren(brickIdx,allProbMapCells,particle,ruleStruct,connChild,connPar,params);
-            
-            if(connOK)
-                connOK
+            if (particle(1,end) == 1)
+                [connChild,connPar] = sampleChildren(brickIdx,probMapCells,particle,ruleStruct,connChild,connPar,params);
             end
+                
        
         end
         particles{1} = particle;

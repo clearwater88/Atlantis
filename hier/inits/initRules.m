@@ -19,6 +19,7 @@ function [ruleStruct] = initRules()
         ruleProbs(ids) = temp;
     end
 
+    ruleStruct.rules = rules;
     ruleStruct.parents = rules(:,1);
     ruleStruct.children = rules(:,2:end);
     ruleStruct.probs = ruleProbs;

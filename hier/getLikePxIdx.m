@@ -1,4 +1,4 @@
-function res = getLikePxIdx(cellCentre,cellDims,boundaryPx,params)
+function res = getLikePxIdx(cellCentre,cellDims,boundaryPx)
 
     cellBoundaries = [cellCentre(1:2)-(cellDims(1:2)-1)/2;  cellCentre(1:2)+(cellDims(1:2)-1)/2]';
 

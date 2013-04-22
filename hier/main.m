@@ -1,28 +1,29 @@
 startup;
 
 params = initParams;
-params.imSize = [30,20];
+params.imSize = [20,20];
 
 ruleStruct = initRules;
 templateStruct = initTemplates;
 probMapStruct = initProbMaps(ruleStruct,templateStruct.app);
 
-cellParams = initPoseCellLocs(params.imSize);
+cellParams = initPoseCellCentres(params.imSize);
 
-%allProbMapCells: size of [ruleId,slot,loc] cell: each is an array
-[allProbMapCells] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
+%probMapCells: size of [ruleId,slot,loc] cell: each is an array
+[probMapCells] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
+
+data = dataRand(params.imSize);
 
 % [likePxStruct] = evalLike(data,templateStruct,params);
 % save('likePxStruct','likePxStruct');
 load('likePxStruct');
 
-% data = dataRand(params.imSize);
 % saliencyMap = getLikeCell(likePxStruct,cellParams,params);
 % save('saliency','saliencyMap','data');
 load('saliency');
 
 
-sampleParticles(data,saliencyMap,likePxStruct,allProbMapCells,cellParams,params,ruleStruct,templateStruct);
+sampleParticles(data,saliencyMap,likePxStruct,probMapCells,cellParams,params,ruleStruct,templateStruct);
 
 
 

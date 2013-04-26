@@ -1,0 +1,114 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Short Sectioned Assignment
+% LaTeX Template
+% Version 1.0 (5/5/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Frits Wenneker (http://www.howtotex.com)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[paper=a4, fontsize=11pt]{article} % A4 paper and 11pt font size
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage{subfigure}
+\usepackage{placeins}
+\usepackage{longtable}
+
+\usepackage[pdftex]{graphicx}
+\usepackage{epstopdf}
+
+\usepackage{times}
+\usepackage{graphicx}
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+%\usepackage{float}
+%\floatstyle{boxed} 
+%\restylefloat{figure}
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs - comment this line for an assignment with lots of text
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{	
+\normalfont \normalsize 
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge Line model \\ % The assignment title
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+}
+
+\author{Jeroen Chua} % Your name
+
+\date{\normalsize\today} % Today's date or a custom date
+
+\begin{document}
+
+\maketitle % Print the title
+
+\section{Notation}
+
+\begin{itemize}
+\item $\beta$: Finite set of bricks
+\item $t$: brick index (we will imagine that associate with each brick in the active set is an index).
+\item $s_t \in [0,1]$: random variable indicating on/off state of brick $t$
+\item $s_{1:t} \in [0,1]^t$: set of random variables on/off state of bricks $[1..t]$.
+\item $x_t$ : pose of brick $t$.
+\item $G_{t,i} \in 0 \cup [1..G] $: random variable indicating whether brick $i$ is the \textbf{child} of brick $t$, and if so, which of the $G$ slots it is in. $0$ indicates not a child, any other value indicates slot number.
+\item $R_{t} = \{G_{i,t}, \forall i\}$: set of random variables indicating whether each brick is a parent of $t$.
+
+\end{itemize}
+
+\section{Model}
+
+
+
+
+%\begin{table}[h]
+%\caption{Generated data with description of the data and subject answers. Although potentially useful, to save space, repeat answers were removed.} %title of the table
+%\centering
+%% centering table
+%\begin{tabular}{|c|c|c|}
+%\hline
+%dataset & description & human answers \\
+%\hline
+%$D=[1,6,2,24]$ & Factorials & $[1,2,6,24]$ \\
+%\hline
+%$D=[31,41,59]$ & Digits of $\pi$, broken into $2$-digit numbers & $[17,10,23]$ \\
+%\hline
+%$D=[1,4,9,16]$ & Perfect squares & $[25,36,49,64]$ \\
+%\hline
+%\end{tabular}
+%\label{data}
+%\end{table}
+
+
+
+%\begin{figure}[htbp]
+%\begin{center}
+%\includegraphics[width=\textwidth]{Q1eigenvalue.eps}
+%\caption{Eigenvalues of training faces dataset. Values sorted in decreasing order.}
+%\label{Q1eigenval}
+%\end{center}
+%\end{figure}
+
+%\FloatBarrier
+\end{document}

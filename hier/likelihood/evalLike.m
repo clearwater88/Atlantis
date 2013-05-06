@@ -1,7 +1,12 @@
-function [likeStructPx] = evalLike(data,templateStruct,params)
+function [likeStructPx] = evalLike(data,templateStruct,params,initLikes,initCounts)
     % evalautes likelihood at all positions in pose space (discretized)
     % boundary says which pixels the patch overlaps, given appropriate pose
     
+    if (nargin < 4)
+        initLikes = zeros(size(data));
+        initCounts = zeros(size(data));
+    end
+
     % last element is always background model
     nTemplates = numel(templateStruct.app)-1;
 
@@ -24,7 +29,7 @@ function [likeStructPx] = evalLike(data,templateStruct,params)
         ct = 1;
         for (ag=params.angleDisc(1):params.angleDisc(2):params.angleDisc(3))
             rotTemplate = imrotate(template,-180*(ag)/pi,'nearest','loose');
-            
+            templateMask = (rotTemplate ~= 0);
             for (x=1:size(data,1))
                 for(y=1:size(data,2))
                     pt = [x,y,ag];
@@ -36,9 +41,15 @@ function [likeStructPx] = evalLike(data,templateStruct,params)
 
                     dataUse = data(boundary(1,1):boundary(1,2), ...
                                    boundary(2,1):boundary(2,2));
-                    
+                    likeUse = initLikes(boundary(1,1):boundary(1,2), ...
+                                        boundary(2,1):boundary(2,2));
+                    countsUse = initCounts(boundary(1,1):boundary(1,2), ...
+                                           boundary(2,1):boundary(2,2));
+
                     likePatch = templateStruct.mix(type)*((rotTemplate.^dataUse).*((1-rotTemplate).^(1-dataUse)));
-                    
+                    likePatch = likePatch.*templateMask;
+                    likePatch = likePatch + likeUse;
+
                     % hack for numerical stability
                     counts2 = templateStruct.mix(type)*ones(size(likePatch));
                     counts2(likePatch==0) = eps;
@@ -46,7 +57,7 @@ function [likeStructPx] = evalLike(data,templateStruct,params)
                     
                     posesTemp(ct,:) = [x,y,ag];
                     likesTemp{ct,1} = likePatch;
-                    countsTemp{ct,1} = counts2;
+                    countsTemp{ct,1} = counts2 + countsUse;
                     boundariesTemp(:,:,ct) = boundary;
                     ct = ct+1;
                 end

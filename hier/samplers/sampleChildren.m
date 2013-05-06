@@ -11,18 +11,25 @@ function [connChild,connPar] = sampleChildren(parentId,allProbMaps,bricks,ruleSt
         chType = ruleStruct.children(ruleId,i);
         % access allProbMaps with probMap{ruleId,slot,loc index}
 
-        probMapPrior = allProbMaps{ruleId,i,bricks(3,parentId)};
+        probMap = allProbMaps{ruleId,i,bricks(3,parentId)};
         % modify with rooting probs for children who would no longer have
         % to root themselves
-        [selfRootMask] = isSelfRooted(bricks,chType,connPar,numel(probMapPrior));
-        probMap = probMapPrior.*((1/params.probRoot(chType)).^selfRootMask);
+        % child may no longer root itself, if pointed to by previous slot.
+        % if brick is not there, assume if we don't point, no one will
+        % (off)
+        selfRoot = isSelfRooted(bricks,connPar);
+        selfRootIdx = find((selfRoot & (getType(bricks)==chType)) == 1);
+        
+        selfRootLocs = getLocIdx(bricks,selfRootIdx);
+
+        probMap(selfRootLocs) = probMap(selfRootLocs).*(1/params.probRoot(chType));
         probMap = probMap/sum(probMap);
         
-        childLoc = sampleChild(probMap);     
+        childLoc = find(mnrnd(1,probMap)==1);  
         
-        childId = find((bricks(1,:) == 1) & ... % brick on
-                       (bricks(2,:) == chType) & ... % brick is right type
-                       (bricks(3,:) == childLoc) ==1,1,'first'); % brick is in right location
+        childId = find((getOn(bricks) == 1) & ... % brick on
+                       (getType(bricks) == chType) & ... % brick is right type
+                       (getLocIdx(bricks) == childLoc) ==1,1,'first'); % brick is in right location
                    
         if(~isempty(childId))
             display(['Connecting parent: ', int2str(parentId), ' to child: ',int2str(childId), ' in sampleChildren']);
@@ -32,9 +39,6 @@ function [connChild,connPar] = sampleChildren(parentId,allProbMaps,bricks,ruleSt
     end
 end
 
-function res = sampleChild(probMap)
-    res=find(mnrnd(1,probMap)==1);
-end
 
 
 

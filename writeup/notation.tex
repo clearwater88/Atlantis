@@ -1,0 +1,62 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{caption}
+
+\renewcommand\baselinestretch{1.5}
+\newcommand{\reals}{\mathbb{R}}
+
+\begin{document}
+
+\title{Jeroen's model}
+\maketitle
+
+\section{Notation}
+
+\begin{itemize}
+
+\item $\Sigma$: ordered list of symbols (types).
+
+\item ${\cal B} = (b_1,\ldots,b_N)$: set of bricks.
+
+\item ${\cal A} = (a_1,\ldots,a_M)$: set of active bricks.
+
+\item ${\cal A} \subseteq {\cal B}$.
+
+\item ${\cal P}$: pose space.
+
+\item ${\cal P}_b$: pose cell of brick $b$- a set of poses
+
+\item $t_b$: type of brick $b$.
+
+\item ${\cal R}$: set of production rules of the form
+$A \rightarrow B_1,\ldots,B_k$ with $A,B_1,\ldots,B_k \in \Sigma$.
+
+\item $n_r$: number of slots/children associated with rule $r \in {\cal R}$
+
+\item $p_{r,n}(x_i|x)$, $r \in {\cal R}$, $x,x_i \in {\cal P}$, $n \in [1...n_r]$: 
+conditional probability density over pose for $B_i$ given pose for $A$ for this rule and slot.
+
+\item ${\cal R}$ is acyclic.
+
+\item ${\cal R}(A)$: rules with $A$ in the left-hand-side (LHS).
+
+\item $p_A$: distribution over ${\cal R}(A)$.
+
+\item $s_b \in \{0,1\}$: on/off state of brick $b$.
+
+\item $r_b \in {\cal R}(t_b)$: rule used by brick $b$.
+
+\item $V_t$: set of symbols listed before symbol $t \in Sigma$ in the ordered list of symbols.
+
+\item $W_t$: set of symbols listed after symbol $t \in Sigma$ in the ordered list of symbols.
+
+\item $x_b \in {\cal P}_b$: pose for brick $b$
+
+\end{itemize}
+
+\end{document}

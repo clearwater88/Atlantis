@@ -1,5 +1,6 @@
-function pose = samplePose(likeIm,countsIm,likePxStruct,cellType,centreIdx,cellParams)
+function [pose,likeNew,countNew] = samplePose(likeIm,countsIm,likePxStruct,cellType,centreIdx,cellParams)
     % need to provide particle
+    % also updates likelihood maps
 
     cellCentre = cellParams.centres{cellType}(centreIdx,:);
     cellDim = cellParams.dims(cellType,:);
@@ -10,11 +11,13 @@ function pose = samplePose(likeIm,countsIm,likePxStruct,cellType,centreIdx,cellP
     
     ids = find(getLikePxIdx(cellCentre,cellDim,bound) == 1);
     
-    [logProbs] = cellLogProbs(ids,likeIm,countsIm,likes,counts,bound);
+    [logProbs,likesNew,countsNew] = cellLogProbs(ids,likeIm,countsIm,likes,counts,bound);
      
     probs = exp(logProbs-logsum(logProbs));
     probs = probs/sum(probs); %MATLAB lacks precision, apparently.
-    sampleId = ids(mnrnd(1,probs')==1);
-    pose = poses(sampleId,:)';
+    sampleId = mnrnd(1,probs')==1;
+    pose = poses(ids(sampleId),:)';
+    likeNew = likesNew{sampleId};
+    countNew = countsNew{sampleId};
 end
 

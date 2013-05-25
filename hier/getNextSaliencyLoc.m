@@ -1,17 +1,18 @@
-function [type,cellLocIdx,val,stop] = getNextSaliencyLoc(data,particles,likesIm,countsIm,particleProbs,templateStruct,cellParams,params)
-
+function [type,cellLocIdx,val,ratiosIm,stop] = getNextSaliencyLoc(particles,likesIm,countsIm,particleProbs,dirtyRegion,likePxStruct,ratiosIm,cellParams)
+    
     BOUNDARY = -2;
-
-    %type = randi(numel(saliencyMap),1,1);
-    %cellLocIdx = randi(numel(saliencyMap{type}),1,1);
     
     particleUse = particles{1}; %just need one
 
+    
     for (i=1:numel(particleProbs))
         display(['Computing saliency on particle: ', int2str(i), ' of ', int2str(numel(particleProbs))]);
-        [likePxStruct] = evalLike(data,templateStruct,params,likesIm{i},countsIm{i});
+        %[likePxStruct] = evalLike(data,templateStruct,likesIm{i},countsIm{i},params);
         
-        saliencyMap = getLogLikeCell(likePxStruct,cellParams);
+        [ratiosIm] = evalNewLikeRatio(likesIm{i},countsIm{i},likePxStruct,dirtyRegion,ratiosIm);
+        saliencyMap = getLogLikeCellRatio(ratiosIm,likePxStruct.boundaries,cellParams);
+
+
         if (i==1)
             saliencyMaps = cell(numel(saliencyMap),1);
             for (j=1:numel(saliencyMap))
@@ -24,8 +25,20 @@ function [type,cellLocIdx,val,stop] = getNextSaliencyLoc(data,particles,likesIm,
         end
     end
 
+    nTry = 0;
+    nTotLoc = 0;
+    for (i=1:numel(saliencyMaps))
+       nTotLoc = nTotLoc + numel(saliencyMaps{i}); 
+    end
+    
     % #types x [value,idx]
     while(1)
+        
+        if (nTry >= nTotLoc)
+            type = 0; cellLocIdx = 0; val = -inf; stop = 1;
+            break;            
+        end
+        
         winners = zeros(numel(saliencyMaps),2);
         for (i=1:numel(saliencyMaps))
             [val,win] = max(saliencyMaps{i});
@@ -42,6 +55,7 @@ function [type,cellLocIdx,val,stop] = getNextSaliencyLoc(data,particles,likesIm,
         if (any((getType(particleUse) == type) & (getLocIdx(particleUse) == cellLocIdx)))
             saliencyMaps{type}(cellLocIdx) = -Inf;
             display(['Ignoring already-found salient brick']);
+            nTry = nTry + 1;
         else
             break;
         end

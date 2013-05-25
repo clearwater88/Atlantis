@@ -18,11 +18,16 @@ function [allParticles,allParticleProbs,allLikes,allCounts,allConnPars,allConnCh
     allConnChilds = {};
     saliencyScores = [];
 
+    % initialize
     brickIdx = 1;
+    dirtyRegion = [];
+    ratiosIm = [];
     while(1)
         display(['On ind: ', int2str(brickIdx)]);
         
-        [cellType,cellLocIdx,saliencyScores(end+1),stop] = getNextSaliencyLoc(data,particles,likes,counts,particleProbs,templateStruct,cellParams,params);
+        [cellType,cellLocIdx,saliencyScores(end+1),ratiosIm,stop] = getNextSaliencyLoc(particles,likes,counts,particleProbs,dirtyRegion,likePxStruct,ratiosIm,cellParams);
+        dirtyRegion = findCellBounds(cellType,cellLocIdx,cellParams);
+        
         if (stop) break; end;
     
         newParticles = cell(params.nParticles,1);
@@ -46,7 +51,6 @@ function [allParticles,allParticleProbs,allLikes,allCounts,allConnPars,allConnCh
             particle(3,end) = cellLocIdx; 
             
             % who its children can be
-
             connChild{end+1} = zeros(1,ruleStruct.maxChildren);
             % who its parents are
             connPar{end+1} = [];
@@ -56,13 +60,14 @@ function [allParticles,allParticleProbs,allLikes,allCounts,allConnPars,allConnCh
             toc
             probOptions = exp(logProbOptions - logsum(logProbOptions,1));
             probOptions = probOptions/sum(probOptions); % fucking matlab
+            
             optionId = find(mnrnd(1,probOptions)==1);
         
             particle(1,end) = optionId ~= 1;
             
             switch (optionId)
                 case 1
-                    
+                    a=1; %pass
                 case 2
                     [connChild,connPar] = sampleChildren(brickIdx,probMapCells,particle,ruleStruct,connChild,connPar,params);
                 case 3
@@ -72,7 +77,6 @@ function [allParticles,allParticleProbs,allLikes,allCounts,allConnPars,allConnCh
                     error('Bad optionId');
             end
             
-            %[state,connPar,connChild] = sampleParents(brickIdx,particle,connChild,connPar,ruleStruct,probMapCells,like{particleId}, counts{particleId},likePxStruct,cellParams,params);
             % bricks: on/off, type, cellCentreIndex,[poseX,Y,theta]            
             [pose,newLike,newCount] = samplePose(likesParticle,countsParticle,likePxStruct,cellType,cellLocIdx,cellParams);
             particle(4:6,end) = pose;
@@ -98,9 +102,11 @@ function [allParticles,allParticleProbs,allLikes,allCounts,allConnPars,allConnCh
         allConnPars{end+1} = connPars;
         allConnChilds{end+1} = connChilds;
 
-        
-
         brickIdx=brickIdx+1;
-        save('tempRes','allParticles','allParticleProbs','allLikes','allCounts','allConnPars','allConnChilds','templateStruct','saliencyScores','params','-v7.3');
+        %save('tempRes','allParticles','allParticleProbs','allLikes','allCounts','allConnPars','allConnChilds','templateStruct','saliencyScores','params','data','-v7.3');
+        
+        figure(2); imagesc(data); colormap(gray);
+        viewAllParticles(newParticles(1),templateStruct,params.imSize,1);
+        pause(0.2);
     end
 end

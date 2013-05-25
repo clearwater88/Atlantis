@@ -19,5 +19,6 @@ function [pose,likeNew,countNew] = samplePose(likeIm,countsIm,likePxStruct,cellT
     pose = poses(ids(sampleId),:)';
     likeNew = likesNew{sampleId};
     countNew = countsNew{sampleId};
+    
 end
 

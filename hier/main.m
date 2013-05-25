@@ -1,6 +1,5 @@
 startup;
-dataFolder = '../BSDSdata/';
-nTest = 10;
+nTest = 1;
 
 params = initParams;
 
@@ -10,33 +9,30 @@ probMapStruct = initProbMaps(ruleStruct,templateStruct.app);
 
 testData = cell(nTest,1);
 cleanTestData = cell(nTest,1);
-for (i=8:nTest)
+for (i=1:nTest)
 
-    downSampFact = 8;
-    cleanTestData{i} = im2double(imread([dataFolder, 'test', int2str(i), '.jpg']));
-    cleanTestData{i} = cleanTestData{i}<0.5;
-    cleanTestData{i} = bwmorph(cleanTestData{i},'dilate',log2(downSampFact));
-    cleanTestData{i} = imresize(cleanTestData{i},1/downSampFact,'nearest');
+    [cleanTestData,testData] = readData(params,templateStruct.app{end},i);
     
-    bg = find(cleanTestData{i}==0);
-    testDataTemp = cleanTestData{i};
-    for (j=1:numel(bg))
-        testDataTemp(bg(j)) = rand(1,1) < templateStruct.app{end}; %background model
-    end
-    testData{i} = testDataTemp;
-
-    params.imSize = size(testData{i});
+%     cleanTestData = ones(size(cleanTestData));
+%     cleanTestData(:,1:2:end) = 0;
+%     testData = cleanTestData;
+    
+    params.imSize = size(testData);
     cellParams = initPoseCellCentres(params.imSize);
 
     %probMapCells: size of [ruleId,slot,loc] cell: each is an array
     [probMapCells] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
-
-    %data = dataRand(params.imSize);
-
-    [likePxStruct] = evalLike(testData{i},templateStruct,params);
-    % save('likePxStruct','likePxStruct');
-    % load('likePxStruct');
-
-    [allParticles{i},allParticleProbs{i},allLikes{i},allCounts{i},allConnPars{i},allConnChilds{i}, saliencyScores{i}] = sampleParticles(testData{i},likePxStruct,probMapCells,cellParams,params,ruleStruct,templateStruct);
-    save('allRes','allParticles','allParticleProbs','allLikes','allCounts','allConnPars','allConnChilds', 'saliencyScores', '-v7.3');
+    
+    %[likePxStruct] = evalLike(testData,templateStruct,initLikes,initCounts,params);
+    [likePxStruct] = evalLike(cleanTestData,templateStruct,zeros(size(testData)),zeros(size(testData)),params);
+    
+    % end is always bg
+    initCounts = templateStruct.mix(end).*ones(size(testData));
+    initLikes = templateStruct.mix(end)*(templateStruct.app{end}.^testData).*((1-templateStruct.app{end}).^(1-testData));
+    
+    saveStr = ['allRes', int2str(i)];
+    [allParticles,allParticleProbs,allLikes,allCounts,allConnPars,allConnChilds, saliencyScores] = sampleParticles(testData,likePxStruct,probMapCells,cellParams,params,ruleStruct,templateStruct);
+    save(saveStr,'cleanTestData', 'testData', ...
+                 'templateStruct','params', ...
+                 'allParticles','allParticleProbs','allLikes','allCounts','allConnPars','allConnChilds', 'saliencyScores', '-v7.3');
 end

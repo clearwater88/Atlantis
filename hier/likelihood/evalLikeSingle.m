@@ -1,5 +1,5 @@
 function [like,counts] = evalLikeSingle(data,bricks,like,counts,poseCellLocs,templateStruct)
-    
+    error('blah');
     bricksOn = bricks(:,bricks(1,:) == 1);
         
     for (i=1:size(bricksOn,2))

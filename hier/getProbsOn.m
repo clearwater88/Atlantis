@@ -26,25 +26,23 @@ function [logProbOptions,noConnectParent,parentSlotProbs] = getProbsOn(type,locI
     [noConnectParent,parentSlotProbs] = sampleParentProbs(type, locIdx, bricks,connChild,ruleStruct,allProbMapCells);
     parentProbNoConnect = prod(noConnectParent);
     
-    fromParentUpdate = [log(1-params.probRoot(type)) + log(parentProbNoConnect); ...
-                        log(params.probRoot(type)) + log(parentProbNoConnect); ...
+    fromParentUpdate = [log(1-params.probRoot) + log(parentProbNoConnect); ...
+                        log(params.probRoot) + log(parentProbNoConnect); ...
                         log(1 - parentProbNoConnect)];
     logProbOptions = logProbOptions + fromParentUpdate;
-    
+
     % bottom-up messages
     noConnectChild = sampleChildProbs(type,locIdx, bricks,ruleStruct,allProbMapCells);
-    selfRooted = find(isSelfRooted(bricks,connPar)==1);
-    selfRootingProb = ones(1,nBricks);
-    selfRootingProb(selfRooted) = params.probRoot(types(selfRooted));
+    selfRootMask = isSelfRooted(bricks,connPar);
+    nSelfRoot = sum(selfRootMask);
     
-    % on: p(s_child | brick on) = \sum_{connect,noconnect} p(s_child | connected, brick on) p(connected | brick on)
-    % off: p(s_child | brick off), imples connected = off
-    on = 1*(1-noConnectChild) + selfRootingProb.*noConnectChild;
-    off = selfRootingProb;
-    
-    fromChildUpdate = [sum(log(off)); ...
-                       sum(log(on)); ...
-                       sum(log(on))];
+    connectOrphan = (1-noConnectChild).*selfRootMask;
+    expectedChild = sum(connectOrphan);
+    expectedChild
+
+    fromChildUpdate = [nSelfRoot*log(params.probRoot); ...
+                       nSelfRoot*log(params.probRoot) - (nSelfRoot-expectedChild)*log(params.probRoot); ...
+                       nSelfRoot*log(params.probRoot) - (nSelfRoot-expectedChild)*log(params.probRoot)];
     logProbOptions = logProbOptions+ fromChildUpdate;
-    
+
 end

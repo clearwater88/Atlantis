@@ -22,7 +22,7 @@ function [connChild,connPar] = sampleChildren(parentId,allProbMaps,bricks,ruleSt
         
         selfRootLocs = getLocIdx(bricks,selfRootIdx);
 
-        probMap(selfRootLocs) = probMap(selfRootLocs).*(1/params.probRoot(chType));
+        probMap(selfRootLocs) = probMap(selfRootLocs).*(1/params.probRoot);
         probMap = probMap/sum(probMap);
         
         childLoc = find(mnrnd(1,probMap)==1);  

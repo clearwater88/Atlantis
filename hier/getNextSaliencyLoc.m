@@ -1,16 +1,17 @@
-function [type,cellLocIdx,val,ratiosIm,stop] = getNextSaliencyLoc(particles,likesIm,countsIm,particleProbs,dirtyRegion,likePxStruct,ratiosIm,cellParams)
+function [type,cellLocIdx,val,ratiosIm,stop] = getNextSaliencyLoc(particles,likesIm,countsIm,particleProbs,dirtyRegion,likePxStruct,ratiosImOld,cellParams)
     
-    BOUNDARY = -2;
+    BOUNDARY = 1;
     
     particleUse = particles{1}; %just need one
 
-    
+    ratiosIm = cell(numel(particleProbs),1);
     for (i=1:numel(particleProbs))
         display(['Computing saliency on particle: ', int2str(i), ' of ', int2str(numel(particleProbs))]);
         %[likePxStruct] = evalLike(data,templateStruct,likesIm{i},countsIm{i},params);
         
-        [ratiosIm] = evalNewLikeRatio(likesIm{i},countsIm{i},likePxStruct,dirtyRegion,ratiosIm);
-        saliencyMap = getLogLikeCellRatio(ratiosIm,likePxStruct.boundaries,cellParams);
+        temp = evalNewLikeRatio(likesIm{i},countsIm{i},likePxStruct,dirtyRegion,ratiosImOld{i});
+        ratiosIm{i} = temp;
+        saliencyMap = getLogLikeCellRatio(ratiosIm{i},likePxStruct.boundaries,cellParams);
 
 
         if (i==1)

@@ -18,19 +18,27 @@ function [ratios] = evalNewLikeRatio(initLike,initCounts,likePxStruct,dirtyRegio
         ratioTemp = cell(numel(likesUse),1);
         for (i=1:numel(likesUse))
             
-%             if(regionIntersect(i) == 0)
-%                ratioTemp(i) = oldRatiosUse(i); 
-%                continue;
-%             end
+            if(regionIntersect(i) == 0)
+               ratioTemp{i} = oldRatiosUse{i}; 
+               continue;
+            end
             
             bd = boundariesUse(:,:,i);
             initLikeUse = initLike(bd(1,1):bd(1,2),bd(2,1):bd(2,2));
             initCountsUse = initCounts(bd(1,1):bd(1,2),bd(2,1):bd(2,2));
             
-            likeTemp = likesUse{i} + initLikeUse;
+            likesTemp = likesUse{i} + initLikeUse;
             countsTemp = countsUse{i} + initCountsUse;
             
-            ratioTemp{i} = (likeTemp./countsTemp) ./ (initLikeUse./initCountsUse);            
+            ratioTemp{i} = (likesTemp./countsTemp) ./ (initLikeUse./initCountsUse);
+            
+%             if(regionIntersect(i) == 0)
+%                 temp = sum(abs(ratioTemp{i}(:) - oldRatiosUse{i}(:)));
+%                 assert(temp < 0.0001);
+%                 
+%                 %continue;
+%             end
+            
         end
         ratios{n} = ratioTemp;
     end

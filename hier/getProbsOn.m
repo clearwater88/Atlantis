@@ -7,9 +7,6 @@ function [logProbOptions,noConnectParent,parentSlotProbs] = getProbsOn(type,locI
     childCounts = likePxStruct.counts{type};
     childBounds = likePxStruct.boundaries{type};
     
-    types = getType(bricks);
-    nBricks = size(bricks,2);
-    
     defaultLogLikeIm = sum(log(likeIm(:)./countsIm(:)));
 
     ids = find(getLikePxIdx(childCentre,cellParams.dims(type,:),childBounds) == 1);
@@ -18,17 +15,24 @@ function [logProbOptions,noConnectParent,parentSlotProbs] = getProbsOn(type,locI
     cellLogLike = logsum(logProbs,1);
         
     % off,on/self-root,on/with-parent
-    logProbOptions(1,1) = defaultLogLikeIm;
-    logProbOptions(2,1) = cellLogLike;
+    logProbOptions(1,1) = defaultLogLikeIm + log(1-params.probRoot);
+    logProbOptions(2,1) = cellLogLike + log(params.probRoot);
     logProbOptions(3,1) =  cellLogLike;
     
     % top-down messages
-    [noConnectParent,parentSlotProbs] = sampleParentProbs(type, locIdx, bricks,connChild,ruleStruct,allProbMapCells);
-    parentProbNoConnect = prod(noConnectParent);
+    [PsumGNoPoint,PsumG,parentSlotProbs] = sampleParentProbs(type, locIdx, bricks,connChild,ruleStruct,allProbMapCells);
+    logsumPsumG = sum(log(PsumG));
+    logsumPsumGNoPoint = sum(log(PsumGNoPoint));
     
-    fromParentUpdate = [log(1-params.probRoot) + log(parentProbNoConnect); ...
-                        log(params.probRoot) + log(parentProbNoConnect); ...
-                        log(1 - parentProbNoConnect)];
+    noConnectParent = PsumGNoPoint./PsumG;
+    noConnectParent
+    %pause(0.1)
+    
+    logDiff = log(exp(logsumPsumG-logsumPsumGNoPoint)-1) + logsumPsumGNoPoint;
+    
+    fromParentUpdate = [logsumPsumGNoPoint; ...
+                        logsumPsumGNoPoint; ...
+                        logDiff];
     logProbOptions = logProbOptions + fromParentUpdate;
 
     % bottom-up messages
@@ -38,11 +42,12 @@ function [logProbOptions,noConnectParent,parentSlotProbs] = getProbsOn(type,locI
     
     connectOrphan = (1-noConnectChild).*selfRootMask;
     expectedChild = sum(connectOrphan);
-    expectedChild
 
     fromChildUpdate = [nSelfRoot*log(params.probRoot); ...
                        nSelfRoot*log(params.probRoot) - (nSelfRoot-expectedChild)*log(params.probRoot); ...
                        nSelfRoot*log(params.probRoot) - (nSelfRoot-expectedChild)*log(params.probRoot)];
     logProbOptions = logProbOptions+ fromChildUpdate;
 
+   
+    
 end

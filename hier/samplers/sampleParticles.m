@@ -21,11 +21,11 @@ function [allParticles,allParticleProbs,allLikes,allCounts,allConnPars,allConnCh
     % initialize
     brickIdx = 1;
     dirtyRegion = [];
-    ratiosIm = [];
+    ratiosIm = cell(params.nParticles,1);
     while(1)
         display(['On ind: ', int2str(brickIdx)]);
         
-        [cellType,cellLocIdx,saliencyScores(end+1),ratiosIm,stop] = getNextSaliencyLoc(particles,likes,counts,particleProbs,dirtyRegion,likePxStruct,ratiosIm,cellParams);
+        [cellType,cellLocIdx,saliencyScores(end+1),ratiosImOldParticle,stop] = getNextSaliencyLoc(particles,likes,counts,particleProbs,dirtyRegion,likePxStruct,ratiosIm,cellParams);
         dirtyRegion = findCellBounds(cellType,cellLocIdx,cellParams);
         
         if (stop) break; end;
@@ -55,9 +55,8 @@ function [allParticles,allParticleProbs,allLikes,allCounts,allConnPars,allConnCh
             % who its parents are
             connPar{end+1} = [];
             
-            tic
+
             [logProbOptions,noConnectParent,parentSlotProbs] = getProbsOn(cellType,cellLocIdx,particle,connChild,connPar,ruleStruct,probMapCells,likesParticle,countsParticle,likePxStruct,cellParams,params);
-            toc
             probOptions = exp(logProbOptions - logsum(logProbOptions,1));
             probOptions = probOptions/sum(probOptions); % fucking matlab
             
@@ -86,6 +85,9 @@ function [allParticles,allParticleProbs,allLikes,allCounts,allConnPars,allConnCh
             newLikes{n} = newLike;
             newConnPars{n} = connPar;
             newConnChilds{n} = connChild;
+            
+            ratiosIm{n} = ratiosImOldParticle{particleId};
+            
         end
         particles = newParticles;
         particleProbs = ones(numel(particles),1)/numel(particles); %uniform

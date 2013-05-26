@@ -10,7 +10,7 @@ function [res] = viewAllParticles(particles,templateStruct,imSize,figNum)
     
     for (i=1:nParticles)
         figure(figNum);
-        imagesc(res(:,:,i)); colormap(gray); axis off;
+        imagesc(res(:,:,i)); colormap(gray);
     end
 end
 

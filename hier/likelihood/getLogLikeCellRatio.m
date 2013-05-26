@@ -19,15 +19,6 @@ function [res] = getLogLikeCellRatio(ratios,boundaries,cellParams)
         resType = zeros(size(centreUse,1),1);
         
         for (i=1:size(centreUse,1));
-%             id = find(getLikePxIdx(centreUse(i,:),cellDimsUse,boundsType) == 1);
-%             
-%             a = zeros(numel(id),1);
-%             for (j=1:numel(id))
-%                 
-%                 temp = ratiosType{id(j)};
-%                 a(j) = sum(log(temp(:)));
-%             end
-% %             
             id = getLikePxIdx(centreUse(i,:),cellDimsUse,boundsType) == 1;
             
             b=ratiosType(id);

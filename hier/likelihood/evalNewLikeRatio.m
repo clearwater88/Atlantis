@@ -14,14 +14,15 @@ function [ratios] = evalNewLikeRatio(initLike,initCounts,likePxStruct,dirtyRegio
         else
             regionIntersect = ones(size(boundariesUse,3),1);
         end
+        dirty = find(regionIntersect==1);
         
         ratioTemp = cell(numel(likesUse),1);
-        for (i=1:numel(likesUse))
-            
-            if(regionIntersect(i) == 0)
-               ratioTemp{i} = oldRatiosUse{i}; 
-               continue;
-            end
+        if(~isempty(dirtyRegion)) % if have dirtyRegion, then have oldRatios
+            ratioTemp(regionIntersect==0) = oldRatiosUse(regionIntersect==0);
+        end
+        
+        for (j=1:numel(dirty))
+            i= dirty(j);
             
             bd = boundariesUse(:,:,i);
             initLikeUse = initLike(bd(1,1):bd(1,2),bd(2,1):bd(2,2));
@@ -31,13 +32,6 @@ function [ratios] = evalNewLikeRatio(initLike,initCounts,likePxStruct,dirtyRegio
             countsTemp = countsUse{i} + initCountsUse;
             
             ratioTemp{i} = (likesTemp./countsTemp) ./ (initLikeUse./initCountsUse);
-            
-%             if(regionIntersect(i) == 0)
-%                 temp = sum(abs(ratioTemp{i}(:) - oldRatiosUse{i}(:)));
-%                 assert(temp < 0.0001);
-%                 
-%                 %continue;
-%             end
             
         end
         ratios{n} = ratioTemp;

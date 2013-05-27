@@ -1,28 +1,32 @@
-function [type,cellLocIdx,val,ratiosIm,stop] = getNextSaliencyLoc(particles,likesIm,countsIm,particleProbs,dirtyRegion,likePxStruct,ratiosImOld,cellParams)
+function [type,cellLocIdx,val,ratiosIm,logProbCell,stop] = getNextSaliencyLoc(particles,likesIm,countsIm,particleProbs,dirtyRegion,likePxStruct,ratiosImOld,logLikeCellOld,cellParams,likePxIdxCells)
     
     BOUNDARY = 1;
     
     particleUse = particles{1}; %just need one
 
     ratiosIm = cell(numel(particleProbs),1);
+    logProbCell = cell(numel(particleProbs),1);
+    
     for (i=1:numel(particleProbs))
         display(['Computing saliency on particle: ', int2str(i), ' of ', int2str(numel(particleProbs))]);
         %[likePxStruct] = evalLike(data,templateStruct,likesIm{i},countsIm{i},params);
         
         temp = evalNewLikeRatio(likesIm{i},countsIm{i},likePxStruct,dirtyRegion,ratiosImOld{i});
         ratiosIm{i} = temp;
-        saliencyMap = getLogLikeCellRatio(ratiosIm{i},likePxStruct.boundaries,cellParams);
-
-
+        
+        temp = getLogLikeCellRatio(ratiosIm{i},cellParams,likePxIdxCells,dirtyRegion,logLikeCellOld{i});
+        logProbCell{i} = temp;
+        
+        
         if (i==1)
-            saliencyMaps = cell(numel(saliencyMap),1);
-            for (j=1:numel(saliencyMap))
-                saliencyMaps{j} = log(zeros(size(saliencyMap{j})));
+            saliencyMaps = cell(numel(logProbCell{i}),1);
+            for (j=1:numel(logProbCell{i}))
+                saliencyMaps{j} = log(zeros(size(logProbCell{i}{j})));
             end
         end
         
         for (j=1:numel(saliencyMaps))
-            saliencyMaps{j} = logsum([saliencyMaps{j},saliencyMap{j}+log(particleProbs(i))],2);
+            saliencyMaps{j} = logsum([saliencyMaps{j},logProbCell{i}{j}+log(particleProbs(i))],2);
         end
     end
 

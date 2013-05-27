@@ -1,4 +1,4 @@
-function [res,resPixels] = getProbMapCells(ruleId,slot,cellCentre,probMapStruct,ruleStruct,imSize,angleDisc,locsUse,cellDim)
+function [res,resPixels] = getProbMapCells(ruleId,slot,cellCentre,probMapStruct,imSize,angleDisc,locsUse,cellDim)
     % prob map in cells, [imSize x num angles]. Num angles steps in
     % angleDisc.
     % returns prob maps according to order in poseCellLocs

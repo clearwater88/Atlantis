@@ -18,8 +18,10 @@ for (i=1:nTest)
 %     testData = cleanTestData;
     
     params.imSize = size(testData);
-    cellParams = initPoseCellCentres(params.imSize);
-
+    params.imSize
+    
+    cellParams = initPoseCellCentres(params.imSize);    
+    
     %probMapCells: size of [ruleId,slot,loc] cell: each is an array
     [probMapCells] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
     
@@ -31,8 +33,8 @@ for (i=1:nTest)
     initLikes = templateStruct.mix(end)*(templateStruct.app{end}.^testData).*((1-templateStruct.app{end}).^(1-testData));
     
     saveStr = ['allRes', int2str(i)];
-    [allParticles,allParticleProbs,allLikes,allCounts,allConnPars,allConnChilds, saliencyScores] = sampleParticles(testData,likePxStruct,probMapCells,cellParams,params,ruleStruct,templateStruct);
+    [allParticles,allLikes,allCounts,allConnPars,allConnChilds, saliencyScores] = sampleParticles(testData,likePxStruct,probMapCells,cellParams,params,ruleStruct,templateStruct);
     save(saveStr,'cleanTestData', 'testData', ...
                  'templateStruct','params', ...
-                 'allParticles','allParticleProbs','allLikes','allCounts','allConnPars','allConnChilds', 'saliencyScores', '-v7.3');
+                 'allParticles','allLikes','allCounts','allConnPars','allConnChilds', 'saliencyScores', '-v7.3');
 end

@@ -23,10 +23,7 @@ function [logProbOptions,noConnectParent,parentSlotProbs] = getProbsOn(type,locI
     [PsumGNoPoint,PsumG,parentSlotProbs] = sampleParentProbs(type, locIdx, bricks,connChild,ruleStruct,allProbMapCells);
     logsumPsumG = sum(log(PsumG));
     logsumPsumGNoPoint = sum(log(PsumGNoPoint));
-    
     noConnectParent = PsumGNoPoint./PsumG;
-    noConnectParent
-    %pause(0.1)
     
     logDiff = log(exp(logsumPsumG-logsumPsumGNoPoint)-1) + logsumPsumGNoPoint;
     
@@ -40,8 +37,13 @@ function [logProbOptions,noConnectParent,parentSlotProbs] = getProbsOn(type,locI
     selfRootMask = isSelfRooted(bricks,connPar);
     nSelfRoot = sum(selfRootMask);
     
-    connectOrphan = (1-noConnectChild).*selfRootMask;
-    expectedChild = sum(connectOrphan);
+    if(~isempty(selfRootMask))
+        connectOrphan = (1-noConnectChild).*selfRootMask;
+        expectedChild = sum(connectOrphan);
+    else
+        expectedChild = 0;
+    end
+    
 
     fromChildUpdate = [nSelfRoot*log(params.probRoot); ...
                        nSelfRoot*log(params.probRoot) - (nSelfRoot-expectedChild)*log(params.probRoot); ...

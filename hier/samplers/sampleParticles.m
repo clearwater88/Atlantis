@@ -1,4 +1,4 @@
-function [allParticles,allParticleProbs,allLikes,allCounts,allConnPars,allConnChilds,saliencyScores] = sampleParticles(data,likePxStruct,probMapCells,cellParams,params,ruleStruct,templateStruct)
+function [allParticles,allLikes,allCounts,allConnPars,allConnChilds,saliencyScores] = sampleParticles(data,likePxStruct,probMapCells,cellParams,params,ruleStruct,templateStruct)
     [likeTemp,countsTemp] = initLike(templateStruct,data);
     
     particles{1} = [];
@@ -11,7 +11,6 @@ function [allParticles,allParticleProbs,allLikes,allCounts,allConnPars,allConnCh
             
 
     allParticles = {};
-    allParticleProbs = {};
     allLikes = {};
     allCounts = {};
     allConnPars = {};
@@ -22,10 +21,22 @@ function [allParticles,allParticleProbs,allLikes,allCounts,allConnPars,allConnCh
     brickIdx = 1;
     dirtyRegion = [];
     ratiosIm = cell(params.nParticles,1);
+    logLikeCell = cell(params.nParticles,1);
+    
+    % precompute
+    likePxIdxCells = cell(cellParams.nTypes,1);
+    for (n=1:cellParams.nTypes)
+        likePxIdxCells{n}=getLikePxIdxAll(cellParams.centres{n}, ...
+                                          cellParams.dims(n,:), ...
+                                          likePxStruct.boundaries{n});
+    end
+     
     while(1)
         display(['On ind: ', int2str(brickIdx)]);
         
-        [cellType,cellLocIdx,saliencyScores(end+1),ratiosImOldParticle,stop] = getNextSaliencyLoc(particles,likes,counts,particleProbs,dirtyRegion,likePxStruct,ratiosIm,cellParams);
+        [cellType,cellLocIdx,saliencyScores(end+1),ratiosImOldParticle,logLikeCellOldParticle,stop] = ...
+            getNextSaliencyLoc(particles,likes,counts,particleProbs,dirtyRegion,likePxStruct,ratiosIm,logLikeCell,cellParams,likePxIdxCells);
+        
         dirtyRegion = findCellBounds(cellType,cellLocIdx,cellParams);
         
         if (stop) break; end;
@@ -36,6 +47,25 @@ function [allParticles,allParticleProbs,allLikes,allCounts,allConnPars,allConnCh
         newConnChilds = cell(params.nParticles,1);
         newConnPars = cell(params.nParticles,1);
 
+        logProbOptions = zeros(3,numel(particles),1);
+        % particle reweight
+        for(n=1:numel(particles))
+            particle = particles{n};
+            
+            likesParticle = likes{n};
+            countsParticle = counts{n};
+            connChild = connChilds{n};
+            connPar = connPars{n};
+            
+            [logProbOptions(:,n)] = getProbsOn(cellType,cellLocIdx,particle,connChild,connPar,ruleStruct,probMapCells,likesParticle,countsParticle,likePxStruct,cellParams,params);
+        end
+        
+        totLogProbOptions=logsum(logProbOptions,1)';
+        particleProbs = exp(totLogProbOptions - logsum(totLogProbOptions,1));
+        particleProbs = particleProbs/sum(particleProbs); % matlab lacks precision for mnrnd
+        
+        particleProbs
+        
         for(n=1:params.nParticles)
             particleId = mnrnd(1,particleProbs)==1;
             particle = particles{particleId};
@@ -87,7 +117,7 @@ function [allParticles,allParticleProbs,allLikes,allCounts,allConnPars,allConnCh
             newConnChilds{n} = connChild;
             
             ratiosIm{n} = ratiosImOldParticle{particleId};
-            
+            logLikeCell{n} = logLikeCellOldParticle{particleId};
         end
         particles = newParticles;
         particleProbs = ones(numel(particles),1)/numel(particles); %uniform
@@ -98,7 +128,6 @@ function [allParticles,allParticleProbs,allLikes,allCounts,allConnPars,allConnCh
         
         
         allParticles{end+1} = particles;
-        allParticleProbs{end+1} = particleProbs;
         allLikes{end+1} = likes;
         allCounts{end+1} = counts;
         allConnPars{end+1} = connPars;

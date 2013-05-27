@@ -1,7 +1,11 @@
 function [res] = isSelfRooted(bricks,connPar)
 
     res = cellfun(@(x) isempty(x), connPar); % find bricks with no parents
-    res = res & (bricks(1,:) == 1);
+    if(~isempty(bricks))
+        res = res & (bricks(1,:) == 1);
+    else
+        res = [];
+    end
 
     
     

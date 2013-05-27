@@ -26,8 +26,6 @@ function [connChild,connPar] = sampleParents(brickIdx,connChild,connPar,noConnec
         connPar{brickIdx} = [connPar{brickIdx},id];
     end
     
-%     temp = find(connect > 0,1,'first');
-
 end
 
 

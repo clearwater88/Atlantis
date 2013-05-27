@@ -12,7 +12,12 @@ function cellParams = initPoseCellCentres(imSize)
     
     %cellStrides = cellDims;
     
-    for (i=1:size(cellDims,1))
+    nTypes = size(cellDims,1);
+    cellCentres = cell(nTypes,1);
+    cellBoundaries = cell(nTypes,1);
+    
+    
+    for (i=1:nTypes)
         temp = 1:cellStrides(i,1):(imSize(1)+1)-cellDims(i,1);
         temp2 = 1:cellStrides(i,2):(imSize(2)+1)-cellDims(i,2);
         temp3 = -pi:cellStrides(i,3):pi-0.0000001; % angle starts from -pi
@@ -21,11 +26,28 @@ function cellParams = initPoseCellCentres(imSize)
         % re-centre
         cellCentres{i}(:,1:2) = bsxfun(@plus,cellCentres{i}(:,1:2),((cellDims(i,1:2))-1)/2);
         cellCentres{i}(:,3) = mod(bsxfun(@plus,cellCentres{i}(:,3),cellDims(i,3)/2),2*pi)-pi;
+
+        % # 2 x cells
+        lowCell = bsxfun(@minus,cellCentres{i}(:,1:2),(cellDims(i,1:2)-1)/2)';
+        lowCell=reshape(lowCell,[size(lowCell,1),1,size(lowCell,2)]);
+        angleLow = cellCentres{i}(:,3)-cellDims(i,3)/2;
+        angleLow = reshape(angleLow,[1,1,numel(angleLow)]);
+        
+        
+        highCell = bsxfun(@plus,cellCentres{i}(:,1:2),(cellDims(i,1:2)-1)/2)';
+        highCell=reshape(highCell,[size(highCell,1),1,size(highCell,2)]);
+        angleHigh = cellCentres{i}(:,3)+cellDims(i,3)/2;
+        angleHigh = reshape(angleHigh,[1,1,numel(angleHigh)]);
+            
+    
+        cellBoundaries{i} = cat(2,lowCell,highCell);
+        cellBoundaries{i}(3,:,:) = cat(2,angleLow,angleHigh);
     end
 
     cellParams.centres = cellCentres;
     cellParams.dims = cellDims;
     cellParams.strides = cellStrides;
-    
+    cellParams.nTypes = nTypes;
+    cellParams.boundaries = cellBoundaries;
 end
 

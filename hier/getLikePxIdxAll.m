@@ -15,14 +15,16 @@ function res = getLikePxIdxAll(cellCentre,cellDims,boundaryPx)
     
     resSpatial = bsxfun(@and,spatialLow,spatialHigh);
     
-    angleLow = cellCentre(:,3)-cellDims(3)/2;
-    angleHigh = cellCentre(:,3)+cellDims(3)/2;
-    
-    ags = squeeze(boundaryPx(3,1,:)); % only 1 angle anyway
-    resAngle = checkAngle(ags',angleLow,angleHigh);
-    
-    res = bsxfun(@and,resSpatial,resAngle);
-    res=res';
+%     angleLow = cellCentre(:,3)-cellDims(3)/2;
+%     angleHigh = cellCentre(:,3)+cellDims(3)/2;
+%     
+%     ags = squeeze(boundaryPx(3,1,:)); % only 1 angle anyway
+%     resAngle = checkAngle(ags',angleLow,angleHigh);
+%     
+%     res = bsxfun(@and,resSpatial,resAngle);
+%     res=res';
+
+    res = resSpatial';
 end
 
 

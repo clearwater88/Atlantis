@@ -5,8 +5,17 @@ function [probMapStruct] = initProbMaps(ruleStruct,templates)
     offset = cell(numel(parents),1);
     covCentres = cell(numel(parents),1); % covariances for each slot
 
+    probMapStruct.version=1;
+    covCentresParents(:,:,1) = [10,0,0; ...
+                                0,10,0; ...
+                                0,0,pi/8];
+    
+    covCentresParents(:,:,2) = [5,0,0; ...
+                                0,5,0; ...
+                                0,0,pi/16];
+    
     for (i=1:size(parents,1))
-        tp = templates{ parents(i)};
+        tp = templates{parents(i)};
         ch = ruleStruct.children(i,:);
         
         validChildren = ch(ch~=0);
@@ -20,9 +29,7 @@ function [probMapStruct] = initProbMaps(ruleStruct,templates)
             offset{i}(j,2) = (size(tp,2)+1)/2;
             offset{i}(j,3) = 0;
             
-            covCentres{i}(:,:,j) = [3,0,0; ...
-                                    0,3,0; ...
-                                    0,0,pi/8];
+            covCentres{i}(:,:,j) = covCentresParents(:,:,parents(i));
         end
     end
     

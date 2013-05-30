@@ -1,4 +1,4 @@
-function [logProbOptions,noConnectParent,parentSlotProbs] = getProbsOn(type,locIdx,bricks,connChild,connPar,ruleStruct,allProbMapCells,likeIm,countsIm,likePxStruct,cellParams,params)
+function [logProbOptions,noConnectParent,parentSlotProbs] = getProbsOn(type,locIdx,bricks,connChild,connPar,ruleStruct,probMapCells,likeIm,countsIm,likePxStruct,cellParams,params,logProbOptionsAll)
     % optionId: off,on/self-root,on/with-parent
 
     childCentre = cellParams.centres{type}(locIdx,:);
@@ -20,7 +20,7 @@ function [logProbOptions,noConnectParent,parentSlotProbs] = getProbsOn(type,locI
     logProbOptions(3,1) =  cellLogLike;
     
     % top-down messages
-    [PsumGNoPoint,PsumG,parentSlotProbs] = sampleParentProbs(type, locIdx, bricks,connChild,ruleStruct,allProbMapCells);
+    [PsumGNoPoint,PsumG,parentSlotProbs] = sampleParentProbs(type, locIdx, bricks,connChild,ruleStruct,probMapCells);
     logsumPsumG = sum(log(PsumG));
     logsumPsumGNoPoint = sum(log(PsumGNoPoint));
     noConnectParent = PsumGNoPoint./PsumG;
@@ -31,9 +31,9 @@ function [logProbOptions,noConnectParent,parentSlotProbs] = getProbsOn(type,locI
                         logsumPsumGNoPoint; ...
                         logDiff];
     logProbOptions = logProbOptions + fromParentUpdate;
-
+    
     % bottom-up messages
-    noConnectChild = sampleChildProbs(type,locIdx, bricks,ruleStruct,allProbMapCells);
+    noConnectChild = sampleChildProbs(type,locIdx, bricks,ruleStruct,probMapCells);
     selfRootMask = isSelfRooted(bricks,connPar);
     nSelfRoot = sum(selfRootMask);
     
@@ -49,7 +49,7 @@ function [logProbOptions,noConnectParent,parentSlotProbs] = getProbsOn(type,locI
                        nSelfRoot*log(params.probRoot) - (nSelfRoot-expectedChild)*log(params.probRoot); ...
                        nSelfRoot*log(params.probRoot) - (nSelfRoot-expectedChild)*log(params.probRoot)];
     logProbOptions = logProbOptions+ fromChildUpdate;
-
-   
+    
+    [logProbOptionsAll(locIdx,:)', logProbOptions]
     
 end

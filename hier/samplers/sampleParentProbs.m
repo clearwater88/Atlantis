@@ -20,7 +20,7 @@ function [PsumGNoPoint,PsumG,slotProbs] = sampleParentProbs(childType, childLoc,
     PsumG = zeros(nParents,1);
     
     slotProbs = zeros(numel(ruleStruct.parents),ruleStruct.maxChildren,nParents);
-    ruleProbSum = ones(nParents,1);
+
     for (parentId=1:nParents)
          %brick off? then can't be parent, and r_i = "no child" rule
         if(bricks(1,parentId) == 0) 
@@ -35,7 +35,6 @@ function [PsumGNoPoint,PsumG,slotProbs] = sampleParentProbs(childType, childLoc,
 
         % get rules compatible with current children config
         ruleInds = find(getCompatibleRules(parentType,connChild{parentId},bricks,ruleStruct)==1);
-        ruleProbSum(parentId) = sum(ruleStruct.probs(ruleInds));
 
         for (r=1:numel(ruleInds))
             ruleInd = ruleInds(r);
@@ -43,21 +42,21 @@ function [PsumGNoPoint,PsumG,slotProbs] = sampleParentProbs(childType, childLoc,
             ruleChildren = ruleStruct.children(ruleInd,:);
             % where can this child go?
             validSlots = find(slotsAvailable & (ruleChildren == childType));
-            filledSlots = find(~slotsAvailable);
+            slotsFilled = find(~slotsAvailable);
             
             probNoPoint = 1; %(prod_{k. s.t g_{i,k} == empty} (1-p(g_{i,k} = a | r))
             for (s=1:numel(validSlots))
-                probMap = adjustProbMap(allProbMapCells,ruleInd,validSlots(s),parentLocIdx,bricks);
+                probMap = adjustProbMap(allProbMapCells,ruleInd,validSlots(s),bricks,parentLocIdx);
 
                 slotProbs(ruleInd,validSlots(s),parentId) = ruleStruct.probs(ruleInd)*probMap(childLoc);
                 probNoPoint = probNoPoint*(1-probMap(childLoc)); % P(noConnect|r)
             end
             
             probFilled = 1; %p(r_i)*(prod_{k. s.t g_{i,k} != empty}  p(g_{i,k} | r))
-            for (s=1:numel(filledSlots))
-                probMap = adjustProbMap(allProbMapCells,ruleInd,filledSlots(s),parentLocIdx,bricks);
+            for (s=1:numel(slotsFilled))
+                probMap = adjustProbMap(allProbMapCells,ruleInd,slotsFilled(s),bricks,parentLocIdx);
 
-                brickFilledId = connChild{parentId}(filledSlots(s));
+                brickFilledId = connChild{parentId}(slotsFilled(s));
                 brickFilledIdx = getLocIdx(bricks,brickFilledId);
                 
                 probFilled = probFilled*probMap(brickFilledIdx);

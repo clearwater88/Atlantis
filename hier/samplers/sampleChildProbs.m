@@ -23,7 +23,7 @@ function [noConnect] = sampleChildProbs(parentType, parentLocIdx, bricks,ruleStr
            
            childBrickLocIdx = getLocIdx(bricks,childBrickIdx);
            
-           probMap = adjustProbMap(allProbMapCells,ruleInd,s,parentLocIdx,bricks);
+           probMap = adjustProbMap(allProbMapCells,ruleInd,s,bricks,parentLocIdx);
            childProbs = probMap(childBrickLocIdx)';
            
            probNoPoint(childBrickIdx) = probNoPoint(childBrickIdx).*(1-childProbs);

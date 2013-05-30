@@ -13,8 +13,8 @@ for (i=1:nTest)
 
     [cleanTestData,testData] = readData(params,templateStruct.app{end},i);
     
-%     cleanTestData = ones(size(cleanTestData));
-%     cleanTestData(:,1:2:end) = 0;
+%     cleanTestData = zeros(size(cleanTestData));
+%     cleanTestData(:,1:10:end) = 1;
 %     testData = cleanTestData;
     
     params.imSize = size(testData);
@@ -22,8 +22,18 @@ for (i=1:nTest)
     
     cellParams = initPoseCellCentres(params.imSize);    
     
-    %probMapCells: size of [ruleId,slot,loc] cell: each is an array
-    [probMapCells] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
+    tic
+    % careful with new probMap distributions
+    probMapStr=['probMapCells',int2str(params.imSize(1)),'x',int2str(params.imSize(2)),'v',int2str(probMapStruct.version)];
+    if(exist([probMapStr,'.mat'],'file'))
+        display('loading probmap file');
+        load(probMapStr);
+    else
+        %probMapCells: size of [ruleId,slot,loc] cell: each is an array
+        [probMapCells] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
+        save(probMapStr,'probMapCells','-v7.3');
+    end
+    toc
     
     %[likePxStruct] = evalLike(testData,templateStruct,initLikes,initCounts,params);
     [likePxStruct] = evalLike(cleanTestData,templateStruct,zeros(size(testData)),zeros(size(testData)),params);

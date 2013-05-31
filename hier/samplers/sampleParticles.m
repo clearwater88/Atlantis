@@ -40,6 +40,8 @@ function [allParticles,allLikes,allCounts,allConnPars,allConnChilds,saliencyScor
         [cellType,cellLocIdx,saliencyScores(end+1),ratiosImOldParticle,logLikeCellOldParticle,logProbOptionsAll,logPsumGNoPoint,logPsumG,stop] = ...
             getNextSaliencyLoc(particles,likes,counts,particleProbs,dirtyRegion,likePxStruct,ratiosIm,logLikeCell,likePxIdxCells,connChilds,connPars,cellParams,ruleStruct,probMapCells,params);
         
+        display(['Cell type: ', int2str(cellType)]);
+        
         dirtyRegion = findCellBounds(cellType,cellLocIdx,cellParams);
         
         if (stop) break; end;
@@ -49,7 +51,6 @@ function [allParticles,allLikes,allCounts,allConnPars,allConnChilds,saliencyScor
         newCounts = cell(params.nParticles,1);
         newConnChilds = cell(params.nParticles,1);
         newConnPars = cell(params.nParticles,1);
-
 
         % particle reweight- this is wrong
 %          logProbOptions = zeros(3,numel(particles),1);
@@ -71,11 +72,8 @@ function [allParticles,allLikes,allCounts,allConnPars,allConnChilds,saliencyScor
         
         particleProbs = ones(numel(particles),1)/numel(particles);
         
-%         cellType = randi(cellParams.nTypes,1);
-%         cellLocIdx = randi(size(cellParams.centres{cellType},1),1);
-        
         for(n=1:params.nParticles)
-            particleId = mnrnd(1,particleProbs)==1;
+            particleId = find(mnrnd(1,particleProbs),1,'first');
             particle = particles{particleId};
             
             likesParticle = likes{particleId};
@@ -108,7 +106,6 @@ function [allParticles,allLikes,allCounts,allConnPars,allConnChilds,saliencyScor
             
             probOptions = exp(logProbOptions - logsum(logProbOptions,1));
             probOptions = probOptions/sum(probOptions); % fucking matlab
-            probOptions
             
             optionId = find(mnrnd(1,probOptions)==1);
 
@@ -157,7 +154,8 @@ function [allParticles,allLikes,allCounts,allConnPars,allConnChilds,saliencyScor
         %save('tempRes','allParticles','allParticleProbs','allLikes','allCounts','allConnPars','allConnChilds','templateStruct','saliencyScores','params','data','-v7.3');
         
         figure(2); imagesc(data); colormap(gray);
-        viewAllParticles(newParticles(1),templateStruct,params.imSize,1);
+        st = viewAllParticles(newParticles,templateStruct,params.imSize);
+        imagesc(st); colormap(gray);
         pause(0.2);
     end
 end

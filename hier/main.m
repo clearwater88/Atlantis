@@ -41,7 +41,7 @@ for (i=1:nTest)
     initCounts = templateStruct.mix(end).*ones(size(testData));
     initLikes = templateStruct.mix(end)*(templateStruct.app{end}.^testData).*((1-templateStruct.app{end}).^(1-testData));
     
-    saveStr = ['allRes2-', int2str(probMapStruct.strat), 'im-', int2str(i)];
+    saveStr = ['allRes3-', int2str(probMapStruct.strat), 'im-', int2str(i)];
     [allParticles,allLikes,allCounts,allConnPars,allConnChilds, saliencyScores] = sampleParticles(testData,likePxStruct,probMapCells,cellParams,params,ruleStruct,templateStruct);
     save(saveStr,'cleanTestData', 'testData', ...
                  'templateStruct','params', ...

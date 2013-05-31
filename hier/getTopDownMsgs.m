@@ -1,26 +1,29 @@
 function [logPsumGNoPoint,logPsumG] = getTopDownMsgs(bricks,cellParams,connChild,ruleStruct,probMapCells)
     
     % only on bricks can be parents
+    nBricks = size(bricks,2);
     isOn = getOn(bricks)==1;
-    bricksOn = bricks(:,isOn);
-    nBricksOn = size(bricksOn,2);
-    
-    pSumG = zeros(nBricksOn,1);
+ 
+    pSumG = zeros(nBricks,1);
     logPsumGNoPoint = cell(cellParams.nTypes,1);
     for (n=1:cellParams.nTypes)
-        logPsumGNoPoint{n} = zeros(size(cellParams.centres{n},1),1);
+        logPsumGNoPoint{n} = zeros(size(cellParams.centres{n},1),nBricks);
     end
+
+    for (k=1:nBricks)
+        if(~isOn(k))
+            pSumG(k) = 1; % special rule says it points to nothing
+            continue;
+        end
         
-    for (i=1:nBricksOn)
+        typeUse = getType(bricks,k);
+        locIdxUse = getLocIdx(bricks,k);
         
-        typeUse = getType(bricksOn,i);
-        locIdxUse = getLocIdx(bricksOn,i);
-        
-        slotsAvailable = connChild{i} == 0;
-        slotsFilled = find(connChild{i} ~= 0);
+        slotsAvailable = connChild{k} == 0;
+        slotsFilled = find(connChild{k} ~= 0);
         
         % dont use bricksOn, fucks up connChild{i} indexing
-        ruleInds = find(getCompatibleRules(typeUse,connChild{i},bricks,ruleStruct)==1);
+        ruleInds = find(getCompatibleRules(typeUse,connChild{k},bricks,ruleStruct)==1);
 
         brickNoPoint = cell(cellParams.nTypes,1);
         for (n=1:cellParams.nTypes)
@@ -36,13 +39,12 @@ function [logPsumGNoPoint,logPsumG] = getTopDownMsgs(bricks,cellParams,connChild
                 % use  bricks, not bricksOn, so can adjust for active bricks having 0 prob of being pointed to now
                 probMap = adjustProbMap(probMapCells,ruleInd,slotsFilled(s),bricks,locIdxUse);
 
-                brickFilledId = connChild{i}(slotsFilled(s));
-                brickFilledIdx = getLocIdx(bricksOn,brickFilledId);
+                brickFilledId = connChild{k}(slotsFilled(s));
+                brickFilledIdx = getLocIdx(bricks,brickFilledId);
                 
                 probFilled = probFilled*probMap(brickFilledIdx); % careful with probMap modifying
             end
-            pSumG(i) = pSumG(i) + ruleStruct.probs(ruleInd)*probFilled;
-            
+            pSumG(k) = pSumG(k) + ruleStruct.probs(ruleInd)*probFilled;
             
             brickNoPointTemp = cell(cellParams.nTypes,1);
             for (n=1:cellParams.nTypes)
@@ -64,9 +66,8 @@ function [logPsumGNoPoint,logPsumG] = getTopDownMsgs(bricks,cellParams,connChild
         end
         
         for (n=1:cellParams.nTypes)
-            logPsumGNoPoint{n} = logPsumGNoPoint{n} + log(brickNoPoint{n});
+            logPsumGNoPoint{n}(:,k) = log(brickNoPoint{n});
         end
-        
     end
-    logPsumG = sum(log(pSumG));
+    logPsumG = log(pSumG);
 end

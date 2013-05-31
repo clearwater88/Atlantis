@@ -21,10 +21,13 @@ function [saliencyMaps,logProbOptions] = computeSaliencyMap(defaultLogLikeIm,log
             logProbOptions{i}{n}(:,2) = logProbOptions{i}{n}(:,2) + defaultLogLikeIm(i) + logProbCellsRatio{i}{n} + log(params.probRoot);
             logProbOptions{i}{n}(:,3) = logProbOptions{i}{n}(:,3) + defaultLogLikeIm(i) + logProbCellsRatio{i}{n};
             
+            logPsumGNoPointsUse = sum(logPsumGNoPoints{i}{n},2);
+            logA= sum(logPsumGs{i});
+            logB= logPsumGNoPointsUse;
             % incorproate top-down messages
-            logDiff = log(exp(logPsumGs(i)-logPsumGNoPoints{i}{n})-1) + logPsumGNoPoints{i}{n};
-            logProbOptions{i}{n}(:,1) = logProbOptions{i}{n}(:,1) + logPsumGNoPoints{i}{n};
-            logProbOptions{i}{n}(:,2) = logProbOptions{i}{n}(:,2) + logPsumGNoPoints{i}{n};
+            logDiff = log(exp(logA-logB)-1) + logB;
+            logProbOptions{i}{n}(:,1) = logProbOptions{i}{n}(:,1) + logPsumGNoPointsUse;
+            logProbOptions{i}{n}(:,2) = logProbOptions{i}{n}(:,2) + logPsumGNoPointsUse;
             logProbOptions{i}{n}(:,3) = logProbOptions{i}{n}(:,3) + logDiff;
             
             % incorproate bottom-up messages
@@ -32,10 +35,9 @@ function [saliencyMaps,logProbOptions] = computeSaliencyMap(defaultLogLikeIm,log
             logProbOptions{i}{n}(:,2) = logProbOptions{i}{n}(:,2) + childMessages{i}{n};
             logProbOptions{i}{n}(:,3) = logProbOptions{i}{n}(:,3) + childMessages{i}{n};
              
-             saliencyMaps{n} = logsum(logProbOptions{i}{n}(:,2:3),2) + log(particleProbs(i));
+            saliencyMaps{n} = logsum(logProbOptions{i}{n}(:,2:3),2) + log(particleProbs(i));
              
         end
-    end
-    
+    end   
 end
 

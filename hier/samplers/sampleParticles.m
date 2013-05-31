@@ -8,8 +8,7 @@ function [allParticles,allLikes,allCounts,allConnPars,allConnChilds,saliencyScor
     counts{1} = countsTemp;
     connChilds{1} = {}; % who its children can be
     connPars{1} = {}; % who its parents are
-            
-
+    
     allParticles = {};
     allLikes = {};
     allCounts = {};
@@ -30,11 +29,15 @@ function [allParticles,allLikes,allCounts,allConnPars,allConnChilds,saliencyScor
                                           cellParams.dims(n,:), ...
                                           likePxStruct.boundaries{n});
     end
-     
+    
     while(1)
         display(['On ind: ', int2str(brickIdx)]);
+    
+        if(brickIdx > 75)
+            break;
+        end
         
-        [cellType,cellLocIdx,saliencyScores(end+1),ratiosImOldParticle,logLikeCellOldParticle,logProbOptionsAll,stop] = ...
+        [cellType,cellLocIdx,saliencyScores(end+1),ratiosImOldParticle,logLikeCellOldParticle,logProbOptionsAll,logPsumGNoPoint,logPsumG,stop] = ...
             getNextSaliencyLoc(particles,likes,counts,particleProbs,dirtyRegion,likePxStruct,ratiosIm,logLikeCell,likePxIdxCells,connChilds,connPars,cellParams,ruleStruct,probMapCells,params);
         
         dirtyRegion = findCellBounds(cellType,cellLocIdx,cellParams);
@@ -67,7 +70,10 @@ function [allParticles,allLikes,allCounts,allConnPars,allConnChilds,saliencyScor
 %         particleProbs = particleProbs/sum(particleProbs); % matlab lacks precision for mnrnd
         
         particleProbs = ones(numel(particles),1)/numel(particles);
-
+        
+%         cellType = randi(cellParams.nTypes,1);
+%         cellLocIdx = randi(size(cellParams.centres{cellType},1),1);
+        
         for(n=1:params.nParticles)
             particleId = mnrnd(1,particleProbs)==1;
             particle = particles{particleId};
@@ -87,14 +93,25 @@ function [allParticles,allLikes,allCounts,allConnPars,allConnChilds,saliencyScor
             % who its parents are
             connPar{end+1} = [];
             
-
-            [logProbOptions,noConnectParent,parentSlotProbs] = ...
-                getProbsOn(cellType,cellLocIdx,particle,connChild,connPar,ruleStruct,probMapCells,likesParticle,countsParticle,likePxStruct,cellParams,params,logProbOptionsAll{n}{cellType});
+            logProbOptions = logProbOptionsAll{particleId}{cellType}(cellLocIdx,:)';
+            parentSlotProbs = sampleParentSlots(cellType, cellLocIdx, particle,connChild,ruleStruct,probMapCells);
+            
+            logPsumGNoPointUse = logPsumGNoPoint{particleId}{cellType}(cellLocIdx,:)';
+            logPsumGUse = logPsumG{particleId};
+            noConnectParent = exp(logPsumGNoPointUse-logPsumGUse);
+            
+%             [logProbOptionsOld,noConnectParentOld,parentSlotProbsOld,PsumGNoPointOld,PsumGOld] = ...
+%                 getProbsOn(cellType,cellLocIdx,particle,connChild,connPar,ruleStruct,probMapCells,likesParticle,countsParticle,likePxStruct,cellParams,params);
+%             max(abs(parentSlotProbsOld(:)-parentSlotProbs(:)))
+%             [logProbOptionsOld,logProbOptions]
+%             [noConnectParentOld,noConnectParent]
+            
             probOptions = exp(logProbOptions - logsum(logProbOptions,1));
             probOptions = probOptions/sum(probOptions); % fucking matlab
+            probOptions
             
             optionId = find(mnrnd(1,probOptions)==1);
-        
+
             particle(1,end) = optionId ~= 1;
             
             switch (optionId)

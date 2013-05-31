@@ -1,4 +1,4 @@
-function [logProbOptions,noConnectParent,parentSlotProbs] = getProbsOn(type,locIdx,bricks,connChild,connPar,ruleStruct,probMapCells,likeIm,countsIm,likePxStruct,cellParams,params,logProbOptionsAll)
+function [logProbOptions,noConnectParent,parentSlotProbs,PsumGNoPoint,PsumG] = getProbsOn(type,locIdx,bricks,connChild,connPar,ruleStruct,probMapCells,likeIm,countsIm,likePxStruct,cellParams,params)
     % optionId: off,on/self-root,on/with-parent
 
     childCentre = cellParams.centres{type}(locIdx,:);
@@ -43,13 +43,10 @@ function [logProbOptions,noConnectParent,parentSlotProbs] = getProbsOn(type,locI
     else
         expectedChild = 0;
     end
-    
 
     fromChildUpdate = [nSelfRoot*log(params.probRoot); ...
                        nSelfRoot*log(params.probRoot) - (nSelfRoot-expectedChild)*log(params.probRoot); ...
                        nSelfRoot*log(params.probRoot) - (nSelfRoot-expectedChild)*log(params.probRoot)];
     logProbOptions = logProbOptions+ fromChildUpdate;
-    
-    [logProbOptionsAll(locIdx,:)', logProbOptions]
     
 end

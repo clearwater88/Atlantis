@@ -8,3 +8,4 @@ addpath(genpath('likelihood'));
 addpath(genpath('samplers'));
 addpath(genpath('brickGetters'));
 addpath(genpath('readData'));
+addpath(genpath('toString'));

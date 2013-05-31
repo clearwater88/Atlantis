@@ -10,6 +10,7 @@ function [res] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params)
         nSlots = sum(ch~=0);
         
         locsUse = cellCentres{type};
+        tic
         for (slot=1:nSlots)
             chType = ch(slot);            
             for (loc=1:size(locsUse,1))
@@ -20,6 +21,7 @@ function [res] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params)
                                     cellCentres{chType}, cellDims(chType,:));
             end
         end
+        toc
         
     end     
 end

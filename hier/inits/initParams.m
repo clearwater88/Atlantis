@@ -1,7 +1,7 @@
 function [params] = initParams()
     
-    params.probRoot = 0.000001; %epsilon
-    params.nParticles = 1;
+    params.probRoot = 0.0001; %epsilon
+    params.nParticles = 10;
     
     % start,increment,end
     params.angleDisc = [-pi,pi/8,pi];

@@ -4,22 +4,38 @@ function [res] = getProbMapPixels(ruleId,slot,cellCentre,probMapStruct,imSize,an
     covar = probMapStruct.cov{ruleId}(:,:,slot);
     centreUse = cellCentre+offset;
     
-    
     % consider over period of 3
-    angleRange = angleDisc(1)-2*pi:angleDisc(2):angleDisc(3)+2*pi;
+    angleRange = angleDisc(1):angleDisc(2):angleDisc(3);
     
     %approximate locations of mass
-    xLower = max(1,cellCentre(1)-4*covar(1,1));
+    xLower = max(1,cellCentre(1)-3*covar(1,1));
     xUpper = min(imSize(1),cellCentre(1)+3*covar(1,1));
     
-    yLower = max(1,cellCentre(2)-4*covar(2,2));
+    yLower = max(1,cellCentre(2)-3*covar(2,2));
     yUpper = min(imSize(2),cellCentre(2)+3*covar(2,2));
     
     tempProb = zeros([imSize(1),imSize(2),numel(angleRange)]);
     [x2,y2,angle2] = ndgrid(xLower:xUpper,yLower:yUpper,angleRange);
-    temp = mvnpdf([x2(:),y2(:),angle2(:)],centreUse,covar);
+    angle2 = angle2(:);
     
-    inds = sub2ind(size(tempProb),x2(:),y2(:),round(1+(2*pi-angleDisc(1)+angle2(:))/angleDisc(2)));
+    if (probMapStruct.strat == 1)
+        angle3D = reshape(angle2,[1,1,numel(angle2)]);
+        rotMat = [cos(angle3D), -sin(angle3D); sin(angle3D), cos(angle3D)];
+
+        centreOrient = repmat(centreUse(1:2),[numel(x2),1]);
+        centreOrient = bsxfun(@minus,centreOrient,cellCentre(1:2));
+
+        for (i=1:size(centreOrient,3))
+           centreOrient(i,:) = (rotMat(:,:,i)*(centreOrient(i,:)'))'; 
+        end
+        centreOrient = bsxfun(@plus,centreOrient,cellCentre(1:2));
+        centreOrient(:,3) = centreUse(3);
+        temp = mvnpdf([x2(:),y2(:),angle2(:)],centreOrient,covar);
+    else
+        temp = mvnpdf([x2(:),y2(:),angle2(:)],centreUse,covar);
+    end
+    
+    inds = sub2ind(size(tempProb),x2(:),y2(:),round(1+(angle2-angleDisc(1))/angleDisc(2)));
     tempProb(inds) = temp;
     
     % exact computation

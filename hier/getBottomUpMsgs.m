@@ -1,13 +1,11 @@
 function [childMessage,nBricksOnSelfRoot] = getBottomUpMsgs(bricks,cellParams,connPar,ruleStruct,probMapCells,params)
     
     % only on bricks can be children
-    isOn = getOn(bricks)==1;
-    bricksOn = bricks(:,isOn);
-    
+    isOn = getOn(bricks)==1;    
     % only self-rooted bricks will care if they get a parent
-    selfRoot = isSelfRooted(bricksOn,connPar)==1;
+    selfRoot = isSelfRooted(bricks,connPar)==1;
     
-    bricksOnSelfRoot = bricksOn(:,selfRoot);
+    bricksOnSelfRoot = bricks(:,isOn & selfRoot);
     nBricksOnSelfRoot = size(bricksOnSelfRoot,2);
         
     onSelfRootIdx = getLocIdx(bricksOnSelfRoot);

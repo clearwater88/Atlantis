@@ -1,5 +1,5 @@
 startup;
-nTest = 1;
+nTest = 10;
 
 params = initParams;
 
@@ -16,7 +16,7 @@ for (i=1:nTest)
 %     cleanTestData = zeros(size(cleanTestData));
 %     cleanTestData(:,1:10:end) = 1;
 %     testData = cleanTestData;
-    
+%     
     params.imSize = size(testData);
     params.imSize
     
@@ -24,25 +24,24 @@ for (i=1:nTest)
     
     tic
     % careful with new probMap distributions
-    probMapStr=['probMapCells',int2str(params.imSize(1)),'x',int2str(params.imSize(2)),'v',int2str(probMapStruct.version)];
+    probMapStr=toStringProbMap(params,probMapStruct);
     if(exist([probMapStr,'.mat'],'file'))
         display('loading probmap file');
         load(probMapStr);
     else
-        %probMapCells: size of [ruleId,slot,loc] cell: each is an array
+        % probMapCells: size of [ruleId,slot,loc] cell: each is an array
         [probMapCells] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
         save(probMapStr,'probMapCells','-v7.3');
     end
     toc
     
-    %[likePxStruct] = evalLike(testData,templateStruct,initLikes,initCounts,params);
     [likePxStruct] = evalLike(cleanTestData,templateStruct,zeros(size(testData)),zeros(size(testData)),params);
     
     % end is always bg
     initCounts = templateStruct.mix(end).*ones(size(testData));
     initLikes = templateStruct.mix(end)*(templateStruct.app{end}.^testData).*((1-templateStruct.app{end}).^(1-testData));
     
-    saveStr = ['allRes', int2str(i)];
+    saveStr = ['allRes2-', int2str(probMapStruct.strat), 'im-', int2str(i)];
     [allParticles,allLikes,allCounts,allConnPars,allConnChilds, saliencyScores] = sampleParticles(testData,likePxStruct,probMapCells,cellParams,params,ruleStruct,templateStruct);
     save(saveStr,'cleanTestData', 'testData', ...
                  'templateStruct','params', ...

@@ -65,5 +65,5 @@ function [type,cellLocIdx,val,ratiosIm,logProbCellRatio,logProbOptions,logPsumGN
         end
     end
     display(['Saliency score: ', num2str(val)]);
-
+    assert(val > -1000000000);
 end

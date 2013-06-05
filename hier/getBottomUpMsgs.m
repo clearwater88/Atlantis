@@ -34,7 +34,7 @@ function [childMessage,nBricksOnSelfRoot] = getBottomUpMsgs(bricks,cellParams,co
             childType = ruleStruct.children(r,s);
             idxUse = onSelfRootIdx(onSelfRootType == childType);
             
-            probMap = adjustProbMap(probMapCells,r,s,bricks); % use bricks for adjustment of probMap
+            probMap = adjustProbMap(probMapCells,childType,r,s,bricks); % use bricks for adjustment of probMap
             probMap = probMap(idxUse,:)'; % reshape to number of types at this parent level x numel(idxUse)
             %probMap = probMap';
             

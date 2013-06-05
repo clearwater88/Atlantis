@@ -1,11 +1,22 @@
-function res = adjustProbMap(allProbMapCells,ruleInd,slot,bricks,parentLocIdxs)
+function [res,resNoAdjust] = adjustProbMap(allProbMapCells,slotType,ruleInd,slot,bricks,parentLocIdxs)
     % returns [#entries x size of parentLocIdxs]
-    
-    if (nargin < 5)
-        res = allProbMapCells(ruleInd,slot,:);
+
+    if (nargin < 6)
+        resNoAdjust = allProbMapCells(ruleInd,slot,:);
     else
-        res = allProbMapCells(ruleInd,slot,parentLocIdxs);
+        resNoAdjust = allProbMapCells(ruleInd,slot,parentLocIdxs);
     end
-    res = cell2mat(res);
-    res = squeeze(res);
+
+    resNoAdjust = cell2mat(resNoAdjust);
+    resNoAdjust = squeeze(resNoAdjust);
+    
+    % renormalize; cannot point to already active bricks
+    % ignore last brick; that's the one we're thinking of adding
+    res = resNoAdjust;
+    slots = find(getType(bricks(:,1:end-1)) == slotType);
+    slotsIdx = getLocIdx(bricks(:,1:end-1),slots);
+    res(slotsIdx,:) = 0;
+    res = bsxfun(@rdivide,res,sum(res,1));
+    
+    assert(~any(isnan(res(:))));
 end

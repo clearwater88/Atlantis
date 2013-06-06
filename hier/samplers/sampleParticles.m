@@ -153,9 +153,9 @@ function [allParticles,allLikes,allCounts,allConnPars,allConnChilds,saliencyScor
         brickIdx=brickIdx+1;
         %save('tempRes','allParticles','allParticleProbs','allLikes','allCounts','allConnPars','allConnChilds','templateStruct','saliencyScores','params','data','-v7.3');
         
-        figure(2); imagesc(data); colormap(gray);
+        figure(1); subplot(1,2,1); imshow(data);
         st = viewAllParticles(newParticles,templateStruct,params.imSize);
-        imagesc(st); colormap(gray);
+        subplot(1,2,2); imshow(st);
         pause(0.2);
     end
 end

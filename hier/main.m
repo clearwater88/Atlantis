@@ -1,17 +1,26 @@
 startup;
-nTest = 10;
+trainInd = 6:10;
+testInd = 1:5;
+nTest = numel(testInd);
 
 params = initParams;
 
 ruleStruct = initRules;
 templateStruct = initTemplates;
-probMapStruct = initProbMaps(ruleStruct,templateStruct.app);
 
+trainData = cell(numel(trainInd),1);
+for (i=1:numel(trainInd))
+    temp = readData(params,templateStruct.bg,trainInd(i));
+    trainData{i} = temp;
+end
+templateStruct = learnTemplates(trainData,templateStruct);
+
+probMapStruct = initProbMaps(ruleStruct,templateStruct.app);
 testData = cell(nTest,1);
 cleanTestData = cell(nTest,1);
 for (i=1:nTest)
 
-    [cleanTestData,testData] = readData(params,templateStruct.app{end},i);
+    [cleanTestData,testData] = readData(params,templateStruct.app{end},testInd(i));
     
 %     cleanTestData = zeros(size(cleanTestData));
 %     cleanTestData(:,1:10:end) = 1;

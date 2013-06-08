@@ -1,11 +1,8 @@
 function [connChild,connPar] = sampleParents(brickIdx,connChild,connPar,noConnect,slotProbs)
 
-    connect = 1-noConnect;
-
     % rejection sampling. Determine parent first
-
     while(1)
-        isChild = rand(numel(connect),1) <= connect;
+        isChild = rand(numel(noConnect),1) > noConnect;
         if (sum(isChild) > 0)
             break;
         end

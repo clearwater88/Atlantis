@@ -42,12 +42,17 @@ function [templateStruct] = initTemplates()
                              0.9];
     templateStruct.app{end+1} = templateStruct.bg;
                          
-    templateStruct.sizes = [15,15; ...
-                            11,11; ...
-                            7,7];
+    templateStruct.sizes = [15,1; ...
+                            11,1; ...
+                            7,1];
                         
     templateStruct.doLearning = 0;
     templateStruct.SIGMA = 0.5;
     templateStruct.angles = 0:pi/8:pi;
+    templateStruct.toString = @toString;
+end
+
+function [res] = toString(templateStruct)
+    res = ['LearnTemplates-', int2str(templateStruct.doLearning)];
 end
 

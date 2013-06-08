@@ -1,5 +1,5 @@
 function [connChild,connPar] = sampleChildren(parentId,allProbMaps,bricks,ruleStruct,connChild,connPar,params)
-    
+   
     parentType = bricks(2,parentId);
     ruleMask = getCompatibleRules(parentType,connChild{parentId},bricks,ruleStruct)==1;
     ruleId = find(mnrnd(1,ruleStruct.probs.*ruleMask)==1);

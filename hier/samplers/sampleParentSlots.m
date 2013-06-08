@@ -1,5 +1,4 @@
 function [slotProbs] = sampleParentSlots(childType, childLoc, bricks,connChild,ruleStruct,allProbMapCells)
-
     nParents = size(bricks,2)-1; %last elem is the brick itself
     
     slotProbs = zeros(numel(ruleStruct.parents),ruleStruct.maxChildren,nParents);

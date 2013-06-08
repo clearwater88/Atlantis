@@ -1,4 +1,5 @@
 function [pose,likeNew,countNew] = samplePose(likeIm,countsIm,likePxStruct,cellType,centreIdx,cellParams)
+
     % need to provide particle
     % also updates likelihood maps
 

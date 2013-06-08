@@ -1,5 +1,4 @@
 function [res] = getProbMapPixels(ruleId,slot,cellCentre,probMapStruct,imSize,angleDisc)
-    
     offset = probMapStruct.offset{ruleId}(slot,:);
     covar = probMapStruct.cov{ruleId}(:,:,slot);
     centreUse = cellCentre+offset;

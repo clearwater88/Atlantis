@@ -1,5 +1,6 @@
-function [allParticles,allLikes,allCounts,allConnPars,allConnChilds,saliencyScores] = sampleParticles(data,likePxStruct,probMapCells,cellParams,params,ruleStruct,templateStruct)
-    [likeTemp,countsTemp] = initLike(templateStruct,data);
+function [allParticles,allConnPars,allConnChilds,saliencyScores] = sampleParticles(data,probMapCells,cellParams,params,ruleStruct,templateStruct)
+    [likeTemp,countsTemp] = initLike(data,templateStruct);
+    [likePxStruct] = evalLike(data,templateStruct,zeros(size(data)),zeros(size(data)),params);
     
     particles{1} = [];
     particleProbs  = 1;
@@ -10,8 +11,6 @@ function [allParticles,allLikes,allCounts,allConnPars,allConnChilds,saliencyScor
     connPars{1} = {}; % who its parents are
     
     allParticles = {};
-    allLikes = {};
-    allCounts = {};
     allConnPars = {};
     allConnChilds = {};
     saliencyScores = [];
@@ -145,8 +144,6 @@ function [allParticles,allLikes,allCounts,allConnPars,allConnChilds,saliencyScor
         
         
         allParticles{end+1} = particles;
-        allLikes{end+1} = likes;
-        allCounts{end+1} = counts;
         allConnPars{end+1} = connPars;
         allConnChilds{end+1} = connChilds;
 

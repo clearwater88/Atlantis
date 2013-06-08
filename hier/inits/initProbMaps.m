@@ -37,8 +37,8 @@ function [probMapStruct] = initProbMaps(ruleStruct,templates)
         end
     end
     
-    probMapStruct.version=6;
-    probMapStruct.strat = 0; %0 no line contig; 1 = line contig
+    probMapStruct.version=1;
+    probMapStruct.strat = 1; %0 no line contig; 1 = line contig
     probMapStruct.offset=offset;
     probMapStruct.cov=covCentres;
 end

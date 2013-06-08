@@ -9,9 +9,7 @@ function [templateStruct] = learnTemplates(trainData,templateStruct)
     count = 1;
     for (i=1:numel(trainData))
        dataUse = trainData{i};
-       [dX,dY] = gradient(double(dataUse));
-       angle = atan(dY./dX);
-       angle(isnan(angle)) = 0;
+       angle = getOrientation(double(dataUse),templateStruct.SIGMA,templateStruct.angles);
        
        inkLocs = find(dataUse(:) > 0.5);
        locInd = randi(numel(inkLocs),nLocs,1);
@@ -20,12 +18,14 @@ function [templateStruct] = learnTemplates(trainData,templateStruct)
         for (j=1:numel(locs))
             [y,x]= ind2sub(size(dataUse),locs(j));
             angleUse = angle(y,x);
+            if(isnan(angleUse)) continue; end;
             %angleUse = pi/2;
             
             [xP,yP] = meshgrid(-(templateMax(2)-1)/2:(templateMax(2)-1)/2,-(templateMax(1)-1)/2:(templateMax(1)-1)/2);
             ptsCentred = [yP(:),xP(:)];
             
             R = [cos(angleUse),sin(angleUse);-sin(angleUse),cos(angleUse)];
+
             ptsRotate = ptsCentred*R';
             ptsCentred = bsxfun(@plus,ptsRotate,[y,x]);
             ptsCentred = round(ptsCentred);
@@ -46,7 +46,9 @@ function [templateStruct] = learnTemplates(trainData,templateStruct)
             temp = reshape(dataUse(ptsInd),templateMax);
             
             templateStore(:,:,count) = temp;
+            ag(count) = angleUse;
             count = count+1;
+            
             
 %             [dXtemp,dYtemp] = gradient(double(temp));
             
@@ -67,6 +69,12 @@ function [templateStruct] = learnTemplates(trainData,templateStruct)
     templateStore(:,:,count:end) = [];
     res = mean(templateStore,3);
     
+%     for (i=1:size(templateStore,3))
+%         imagescGray(templateStore(:,:,i));
+%         ag(i)
+%         pause;
+%     end
+
     centre = (size(res)+1)/2;
     for (i=1:size(templateStruct.sizes,1))
         temp = res(centre(1)-(templateStruct.sizes(i,1)-1)/2:centre(1)+(templateStruct.sizes(i,1)-1)/2, ...
@@ -74,6 +82,8 @@ function [templateStruct] = learnTemplates(trainData,templateStruct)
         templateStruct.app{i} = temp;
     end
     templateStruct.app{end+1} = templateStruct.bg;
+
+
 
 end
 

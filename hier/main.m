@@ -8,12 +8,20 @@ params = initParams;
 ruleStruct = initRules;
 templateStruct = initTemplates;
 
+clear trainData;
 trainData = cell(numel(trainInd),1);
 for (i=1:numel(trainInd))
     temp = readData(params,templateStruct.bg,trainInd(i));
     trainData{i} = temp;
 end
-templateStruct = learnTemplates(trainData,templateStruct);
+
+% clear trainData;
+% trainData{1} = zeros([40,60]);
+% trainData{1}(:,1:10:end) = 1;
+
+if(templateStruct.doLearning == 1)
+    templateStruct = learnTemplates(trainData,templateStruct);
+end
 
 probMapStruct = initProbMaps(ruleStruct,templateStruct.app);
 testData = cell(nTest,1);
@@ -50,7 +58,7 @@ for (i=1:nTest)
     initCounts = templateStruct.mix(end).*ones(size(testData));
     initLikes = templateStruct.mix(end)*(templateStruct.app{end}.^testData).*((1-templateStruct.app{end}).^(1-testData));
     
-    saveStr = ['allRes3-', int2str(probMapStruct.strat), 'im-', int2str(i)];
+    saveStr = ['allRes2LearnTemplates-', int2str(templateStruct.doLearning), '_', int2str(probMapStruct.strat), 'im-', int2str(i)];
     [allParticles,allLikes,allCounts,allConnPars,allConnChilds, saliencyScores] = sampleParticles(testData,likePxStruct,probMapCells,cellParams,params,ruleStruct,templateStruct);
     save(saveStr,'cleanTestData', 'testData', ...
                  'templateStruct','params', ...

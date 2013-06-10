@@ -53,7 +53,7 @@
 
 \item $t(b)$: type of brick $b$.
 
-\item $orph(\Am)$: the set of bricks in $\Am$ that are orphans (\emph{ie}, do not have a parent).
+\item $orph(\Am)$: the set of bricks in $\Am$ that are on ($s_a = 1$, $a \in \Am$), and are orphans (\emph{ie}, do not have a parent).
 
 \item $\#(C)$: the cardinality (size) of some set $C$. \emph{E.g.} $\#(\A)=M$.
 
@@ -199,7 +199,7 @@ P^{\Am}(X^{\Am}, I)
 Representing the configuration of an image for a \textbf{non-localized} model requires specifying $s_b$, $g_b$, $r_b$, $\qb$, $\forall b \in \B$. For a \textbf{localized} model, the same random variables could be used as the state representation (but with $\mathbf{g^{\Am}}$ defined over a different domain than $\mathbf{g}$). However, requiring specification of the $r_b$'s is unnecessary and too restrictive; we may not be able to well predict the rule a brick has used by examining the set of active bricks. This is especially true if the active set only contains one brick! Instead, we represent the state representation of the localized model by the random variables $\Xrm = \{s_a$, $g_a$, $\qa\}$, $\forall a \in \Am$, and we marginalize over $r_a$ wherever it is used. In particular
 
 \begin{eqnarray}
-\sum_{\mathbf{r}} P^{\Am}(\X^{\Am}, I) &=& P^{\Am}(\Xrm, I) \\
+P^{\Am}(\Xrm, I) &=& \sum_{\mathbf{r}} P^{\Am}(\X^{\Am}, I)  \\
 &=& \big( \prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({b})}) \big ) \label{eqn.localJointXrm} \\
 & & \times \big( \prod_{a \in {\Am}} \sum_{r_a} \big(P(r_a \mid s_a) {\displaystyle \prod_{k=1}^{n(a)}} P^{\Am}(g_{a,k} \mid r_a) \big) \big) \nonumber \\
 & & \times \prod_{a \in {\Am}} P(\qa \mid s_a) \nonumber \\
@@ -210,7 +210,7 @@ Representing the configuration of an image for a \textbf{non-localized} model re
 
 Inference proceeds by iteratively adding one brick at a time to the active set. At any iteration, $m$, our goal is to maintain a representation of the localized posterior distribution $P^{\Am}(\Xrm \mid I)$. To maintain this representation, we employ a particle filtering approach. We treat samples from the previous localized posterior distribution $P^{\A_{m-1}}(\X^{\A_{m-1}}_{-r} \mid I)$ as draws from a proposal distribution, and re-weight these particles accordingly (discuss re-weighting and evaluating marginals later). Note that $P^{\A_{m-1}}(\X^{\A_{m-1}}_{-r} \mid I) \neq P^{\A_{m}}(\X^{\A_{m-1}}_{-r} \mid I)$; the model defined by $P^{\A_{m}}$ is different than the one defined by $P^{\A_{m-1}}$.
 
-Suppose we have sampled a previous state $\X^{\A_{m-1}}_{-r}$, and suppose the brick we are adding to the active set is denoted $b$. To generate $\Xrm$, we need to draw values for the set of random variables defined by $\Xrm \setminus \X^{\A_{m-1}}_{-r} = \{s_b$, $\qb$, $\mathbf{g^{\Am}_b}$, $comp(g^{\A_{m-1}})\}$. That is, we need to ``expand'' the representation of $\X^{\A_{m-1}}_{-r}$ to include brick $b$. As such, we need to draw a sample from $P^{\Am}(s_b, \qb, \mathbf{g^{\Am}_b}, comp(g^{\A_{m-1}}) \mid \X^{\A_{m-1}}_{-r}, I)$. We note that for $g \in \gcomp$, the only possible values that can be sampled for $g$ are $g = \emptyset$, $g= b$. That is, each not-yet-assigned brick slot choose either to point to the newly-added active brick $b$, or remain empty. Note that
+Suppose we have sampled a previous state $\X^{\A_{m-1}}_{-r}$, and suppose the brick we are adding to the active set is denoted $b$. To generate $\Xrm$, we need to draw values for the set of random variables defined by $\Xrm \setminus \X^{\A_{m-1}}_{-r} = \{s_b$, $\qb$, $\mathbf{g^{\Am}_b}$, $comp(g^{\A_{m-1}})\}$. That is, we need to ``expand'' the representation of $\X^{\A_{m-1}}_{-r}$ to include brick $b$. As such, we need to draw a sample from $P^{\Am}(s_b, \qb, \mathbf{g^{\Am}_b}, comp(g^{\A_{m-1}}) \mid \X^{\A_{m-1}}_{-r}, I)$. We note that for $g \in \gcomp$, the only possible values that can be sampled for $g$ are $g = \emptyset$, $g= b$. That is, each not-yet-assigned brick slot can choose either to point to the newly-added active brick $b$, or remain empty. Note that
 \begin{eqnarray}
 	P^{\Am}(s_b, \qb, \mathbf{g^{\Am}_b}, comp(g^{\A_{m-1}}) \mid \X^{\A_{m-1}}_{-r}, I) &=& \frac{P^{\Am}(s_b, \qb, \mathbf{g^{\Am}_b}, comp(g^{\A_{m-1}}), \X^{\A_{m-1}}_{-r} \mid I)}{\sum_{s_b} \sum_{g_b}\sum_{\mathbf{g^{\Am}_b}}\sum_{comp(g^{\A_{m-1}})} P^{\Am}(s_b, \qb, \mathbf{g^{\Am}_b}, comp(g^{\A_{m-1}}), \X^{\A_{m-1}}_{-r} \mid I)} \label{eqn.localPost1} \\
 P^{\Am}(s_b, \qb, \mathbf{g^{\Am}_b}, comp(g^{\A_{m-1}}), \X^{\A_{m-1}}_{-r} \mid I) &=& P^{\Am}(\Xrm \mid I) \\
@@ -225,7 +225,7 @@ For this event, there is only one setting of the random variables $\{s_b, \qb, \
 
 \subsection*{Event 1: brick $b$ is on and has no parents}
 
-There are many settings of the random variables $\{s_b, \qb, \mathbf{g^{\Am}_b}, comp(g^{\A_{m-1}})\}$ that fall under this event. They can be characterized as: $s_b=1$, $\qb \neq \perp$, $g = \emptyset$ $\forall g \in \gcompPrev$, and $g^{\Am}_{b,k} = \{\emptyset, a \text{ s.t. } a \in {\Am}\}$, $\forall k$. So, the probability mass associated with this event is given by
+There are many settings of the random variables $\{s_b, \qb, \mathbf{g^{\Am}_b}, comp(g^{\A_{m-1}})\}$ that fall under this event. They can be characterized as: $s_b=1$, $\qb \neq \perp$ (or equivalently, $\qb \in P(b)$), $g = \emptyset$ $\forall g \in \gcompPrev$, and $g^{\Am}_{b,k} = \{\emptyset, a \text{ s.t. } a \in {\Am}\}$, $\forall k$. So, the probability mass associated with this event is given by
 \begin{eqnarray}
 \sum_{\vec{q}_b \in P(b)} \sum_{\vec{g}^{\Am}_{b}} P^{\Am}(s_b=1, \vec{q}_b, \vec{g}^{\Am}_{b} \gcompPrev = \emptyset, \XrmPrev, I)
 \end{eqnarray}
@@ -234,15 +234,28 @@ where we have used $\gcompPrev = \emptyset$ as a shorthand for $g = \emptyset$ $
 
 \begin{eqnarray}
 % \sum_{\vec{q}_b \neq \perp} \sum_{\vec{g}^{\Am}_{b}} P^{\Am}(s_b=1, \vec{q}_b, \vec{g}^{\Am}_{b} \gcompPrev = \emptyset, \X^{\A_{m-1}}, I)  \nonumber \\
-&=& \sum_{\vec{g}^{\Am}_{b}} \big( \prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({b})}) \big ) \big( \prod_{a \in {\A_{m}}} \sum_{r_a} \big(P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \big) \\
+&=& \sum_{\vec{g}^{\Am}_{b}} \big( \prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({b})}) \big ) \big( \prod_{a \in {\A_{m}}} \sum_{r_a} \big(P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \big) \label{eqn.child} \\
 %
 & & \big( \prod_{a \in {\A_{m-1}}} P(\qa \mid s_a)\big) \big( \sum_{\vec{q}_b \in P(b)} P(\qb \mid s_b = 1)\big) P^{\Am}(I \mid \mathbf{q^{\A_{m-1}}}, \vec{q}_b) \big). \nonumber
 \end{eqnarray}
 
-The term $\big( \prod_{a \in {\A_{m-1}}} P(\qa \mid s_a)\big) \big( \sum_{\vec{q}_b \in P(b)} P(\qb \mid s_b = 1)\big) P^{\Am}(I \mid \mathbf{q^{\A_{m-1}}}, \vec{q}_b) \big)$ can be evaluated by enumerating all possible values for $\vec{q}_b \in P(b)$. In practice, whether this is practical or not is dependent on $\#(P(b))$. If $\#(P(b))$ is ``small enough'', then $\big( \prod_{a \in {\A_{m-1}}} P(\qa \mid s_a)\big) \big( \sum_{\vec{q}_b \neq \perp} P(\qb \mid s_b = 1)\big) P^{\Am}(I \mid \mathbf{q^{\A_{m-1}}}, \vec{q}_b) \big)$ can be computed. However, in general, it is not possible to efficiently compute the term $\big( \prod_{a \in {\A_{m-1}}} P(\qa \mid s_a)\big) \big( \sum_{\vec{q}_b \neq \perp} P(\qb \mid s_b = 1)\big) P^{\Am}(I \mid \mathbf{q^{\A_{m-1}}}, \vec{q}_b) \big)$ (explain why- each slot can have $\#(Am)$ possibilities, and needs to be enumerated for each of the possible rules $b$ can take. So, this term is exponential in $\#(Am)$. This term can be decomposed into events stating how many unique children are pointed to, but this still requires lots of computation.), and so we come up with approximations for it.
+The second term in Eqn. \ref{eqn.child}, $\big( \prod_{a \in {\A_{m-1}}} P(\qa \mid s_a)\big) \big( \sum_{\vec{q}_b \in P(b)} P(\qb \mid s_b = 1)\big) P^{\Am}(I \mid \mathbf{q^{\A_{m-1}}}, \vec{q}_b) \big)$, can be evaluated by enumerating all possible values for $\vec{q}_b \in P(b)$. In practice, whether this is practical or not is dependent on $\#(P(b))$. If $\#(P(b))$ is ``small enough'', then $\big( \prod_{a \in {\A_{m-1}}} P(\qa \mid s_a)\big) \big( \sum_{\vec{q}_b \neq \perp} P(\qb \mid s_b = 1)\big) P^{\Am}(I \mid \mathbf{q^{\A_{m-1}}}, \vec{q}_b) \big)$ can be computed. 
 
-Noting the definition given in Eqn. \ref{eqn.probS}, we see that $\prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({b})}) = \epsilon^{\#(oprh(\Am))}$.
+Turning our attention to the first term in Eqn. \ref{eqn.child}, we note that it is not possible to efficiently compute this quantity (explain why- each slot can have $\#(Am)$ possibilities, and needs to be enumerated for each of the possible rules $b$ can take. So, this term is exponential in $\#(\Am)$. This term can be decomposed into events stating how many unique children are pointed to, but this still requires lots of computation). So we come up with approximations for it.
 
+We note that the definition given in Eqn. \ref{eqn.probS}, we see that $\prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({b})}) = \epsilon^{\#(oprh(\Am))}$. Next, we note that in the first term of Eqn. \ref{eqn.child}, we are reasoning about which bricks can be children of brick $b$, and marginalizing over all possibilities, $\vec{g}_b^{\Am}$. The effect of becoming another brick's parent is shown in Eqn. \ref{eqn.probS}; becoming a parent of an orphan brick, $a$, changes the probability that that brick is on. In particular, the probability changes from $\epsilon$ to $1$. Therefore, for a given $\vec{g}^{\Am}_{b}$, we can write
+%
+\begin{eqnarray}
+\prod_{a \in {\Am}} P^{\Am}(s_a \mid \vec{g}^{\Am}_{V({b})}) = \epsilon^{\#(oprh(\A_{m-1}) - \#unique( \vec{g}_b^{\Am})})
+\end{eqnarray}
+
+where $\#unique(\vec{g}_b^{\Am})$ is how many unique bricks $\vec{g}_b^{\Am}$ points to. We rewrite the first term of Eqn. \ref{eqn.child} as
+%
+\begin{align}
+& & \sum_{\vec{g}^{\Am}_{b}}  \epsilon^{\#(oprh(\A_{m-1}) - \#unique( \vec{g}_b^{\Am})}) \big( \prod_{a \in {\A_{m}}} \sum_{r_a} \big(P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \big) \\
+&=&  s
+\end{align}
+%
 For coming child approximations, do both slot-centric view (Pedro's approximation) and child-centric view (Jeroen's approximation)
 
 

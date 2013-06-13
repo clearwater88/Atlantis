@@ -109,6 +109,8 @@ $A \rightarrow B_1,\ldots,B_k$ with $r = A,B_1,\ldots,B_k \in \Sigma$. ${\cal R}
 
 \item $orph(\Xrm)$: the set of bricks that are orphans according to the assignments in $\Xrm$ (see definition of ``orphan'' below).
 
+\item $off(\Xrm)$: the set of bricks that are off (have $s = 0$) according to the assignments in $\Xrm$. Note that if a brick is off, then $\nexists \{a,k\}$, $a \in \Am$ s.t. $g^{\Am}_{a,k} = b$ where $b$ is the off-brick in question.
+
 \item $Y$: the image.
 
 \end{itemize}
@@ -237,7 +239,7 @@ For this event, there is only one setting of the random variables $\{s_b, \qb, \
 
 There are many settings of the random variables $\{s_b, \qb, \mathbf{g^{\Am}_b}, comp(g^{\A_{m-1}})\}$ that fall under this event. They can be characterized as: $s_b=1$, $\qb \neq \perp$ (or equivalently, $\qb \in P(b)$), $g = \emptyset$ $\forall g \in \gcompPrev$, and $g^{\Am}_{b,k} = \{\emptyset, a \text{ s.t. } a \in {\Am}\}$, $\forall k$. So, the probability mass associated with this event is given by
 \begin{eqnarray}
-\sum_{\vec{q}_b \in P(b)} \sum_{\vec{g}^{\Am}_{b}} P^{\Am}(s_b=1, \vec{q}_b, \vec{g}^{\Am}_{b} \gcompPrev = \emptyset, \XrmPrev, Y)
+\text{P(Event 2)} = \sum_{\vec{q}_b \in P(b)} \sum_{\vec{g}^{\Am}_{b}} P^{\Am}(s_b=1, \vec{q}_b, \vec{g}^{\Am}_{b}, \gcompPrev = \emptyset, \XrmPrev, Y)
 \end{eqnarray}
 
 where we have used $\gcompPrev = \emptyset$ as a shorthand for $g = \emptyset$ $\forall g \in \gcompPrev$. Expanding, we get
@@ -256,7 +258,7 @@ Turning our attention to the first term in Eqn. \ref{eqn.child}, we note that it
 From the definition given in Eqn. \ref{eqn.probS}, 
 %
 \begin{eqnarray}
-\prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({b})}) = \epsilon^{\#(orph(\Xrm))}. \label{eqn.orphan}
+\prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({b})}) = \epsilon^{\#(orph(\Xrm))} \times (1-\epsilon)^{\#(off(\A_{m-1}))}. \label{eqn.orphan}
 \end{eqnarray}
 %
 So to evaluate $\prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({b})})$ it is only necessary to find the number of orphan bricks in $\Am$.
@@ -270,27 +272,31 @@ Next, we derive a relationship between $\#(orph(\XrmPrev))$ and $\#(orph(\Xrm))$
 \end{eqnarray}
 %
 Combining Eqn. \ref{eqn.orphanM1} with Eqn. \ref{eqn.orphan} yields
-
+%
 \begin{eqnarray}
-\prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({b})}) &=& \epsilon^{\#(orph(\Xrm))} \\
+\prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({b})}) &=& \epsilon^{\#(orph(\Xrm))} \times (1-\epsilon)^{\#(off(\A_{m-1}))} \\
 %
-&=&\epsilon^{\#(orph(\XrmPrev)) + I(\text{b is orphan}) - \#(H^{\X_{m-1}}(\vec{g}_b^{\Am}))} \\
+&=&\epsilon^{\#(orph(\XrmPrev)) + I(\text{b is orphan}) - \#(H^{\X_{m-1}}(\vec{g}_b^{\Am}))} \times (1-\epsilon)^{\#(s(\A_{m-1}))} \\
 %
-&=& \epsilon^{\#(orph(\XrmPrev)) + I(\text{b is orphan})} \times \epsilon^{- \#(H^{\X_{m-1}}(\vec{g}_b^{\Am}))} \label{eqn.orphan2}.
+&=& \epsilon^{\#(orph(\XrmPrev)) + I(\text{b is orphan})} \times \epsilon^{- \#(H^{\X_{m-1}}(\vec{g}_b^{\Am}))} \times (1-\epsilon)^{\#(off(\A_{m-1}))} \label{eqn.orphan2}.
 \end{eqnarray}
 %
 Combining Eqn. \ref{eqn.orphan2} and the first term of Eqn. \ref{eqn.child}, and noting for this event that $ I(\text{b is orphan})=1$ yields
 \begin{eqnarray}
 & &\sum_{\vec{g}^{\Am}_{b}} \big( \prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({b})})  \big( \prod_{a \in {\A_{m}}} \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \big ) \\
 %
-&=& \sum_{\vec{g}^{\Am}_{b}} \big(\epsilon^{\#(orph(\XrmPrev)) + I(\text{b is orphan})} \times \epsilon^{- \#(H^{\X_{m-1}}(\vec{g}_b^{\Am}))}   \big( \prod_{a \in {\A_{m}}} \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \big) \\
+&=& \sum_{\vec{g}^{\Am}_{b}} \big(\epsilon^{\#(orph(\XrmPrev)) + I(\text{b is orphan})} \times (1-\epsilon)^{\#(off(\A_{m-1}))} \times \epsilon^{- \#(H^{\X_{m-1}}(\vec{g}_b^{\Am}))}  \nonumber \\
+& & \times \big( \prod_{a \in {\A_{m}}} \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \big) \\
 %
-&=& \epsilon^{\#(orph(\XrmPrev)) + 1} \times  \sum_{\vec{g}^{\Am}_{b}} \big( \epsilon^{- \#(H^{\X_{m-1}}(\vec{g}_b^{\Am}))}  \big( \prod_{a \in {\A_{m}}} \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \big) \\
+&=& \epsilon^{\#(orph(\XrmPrev)) + 1} \times (1-\epsilon)^{\#(off(\A_{m-1}))} \nonumber \\
+& & \times  \sum_{\vec{g}^{\Am}_{b}} \big( \epsilon^{- \#(H^{\X_{m-1}}(\vec{g}_b^{\Am}))}  \big( \prod_{a \in {\A_{m}}} \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \big) \\
 %
-&=& \epsilon^{\#(orph(\XrmPrev)) + 1} \big( \prod_{a \in {\A_{m}}, a \neq b} \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \\
+&=& \epsilon^{\#(orph(\XrmPrev)) + 1} \times (1-\epsilon)^{\#(off(\A_{m-1}))} \nonumber \\
+& &\times  \big( \prod_{a \in {\A_{m}}, a \neq b} \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \\
 & & \times \sum_{\vec{g}^{\Am}_{b}} \big( \epsilon^{- \#(H^{\X_{m-1}}(\vec{g}_b^{\Am}))} \big( \sum_{r_b} P(r_b \mid s_b = 1) \prod_{k=1}^{n(b)} P^{\Am}(g_{b,k} \mid r_b) \big) \big) \nonumber \\
 %
-&=& \epsilon^{\#(orph(\XrmPrev)) + 1} \big( \prod_{a \in {\A_{m}}, a \neq b} \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \label{bottomup} \\
+&=& \epsilon^{\#(orph(\XrmPrev)) + 1} \times (1-\epsilon)^{\#(off(\A_{m-1}))} \nonumber \\
+& & \times \big( \prod_{a \in {\A_{m}}, a \neq b} \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \label{bottomup} \\
 & & \times \sum_{r_b} \big(P(r_b \mid s_b = 1) \sum_{\vec{g}^{\Am}_{b}} \big( \epsilon^{-\#(H^{\X_{m-1}})}(\vec{g}^{\Am}_b) \prod_{k=1}^{n(b)} P^{\Am}(g_{b,k} \mid r_b) \big) \big) \nonumber
 \end{eqnarray} 
 
@@ -305,7 +311,6 @@ It is intractable to compute the quantity given in Eqn. \ref{bottomup}. Note tha
  
 We expect the approximation given in Eqn. \ref{approx1} to be a good approximation when the probability of the event $\exists \{k,k'\}, k \neq k'$ s.t. $g^{\Am}_{b,k}=g^{\Am}_{b,k'}$ is small. That is, it is unlikely that two slots will point to the same child.
 
-
 With the approximation outlined in Eqn. \ref{approx1}, we can approximately compute the second term in $\ref{bottomup}$. For a given $r_b$, we can compute the probability that each of the $n(b)$ slots will point to a previously-orphaned child separately. We then average this quantity over the $r_b$'s. In other words, with the approximation in Eqn. \ref{approx1}, the computation factorizes across the slots for a given $r_b$:
 
 \begin{eqnarray}
@@ -315,29 +320,40 @@ With the approximation outlined in Eqn. \ref{approx1}, we can approximately comp
 %
 &=& \sum_{r_b} \big( P(r_b \mid s_b = 1) \sum_{\vec{g}^{\Am}_{b}} \big( \prod_{k=1}^{n(b)} \epsilon^{-\#(\tilde{H}^{\X_{m-1}}(g^{\Am}_{b,k}))}P^{\Am}(g_{b,k} \mid r_b) \big) \big) \\
 %
-&=& \sum_{r_b} \big( P(r_b \mid s_b = 1)\big( \prod_{k=1}^{n(b)}  \sum_{g^{\Am}_{b,k}} \epsilon^{-\#(\tilde{H}^{\X_{m-1}}(g^{\Am}_{b,k}))}P^{\Am}(g_{b,k} \mid r_b) \big) \big) \\
+&=& \sum_{r_b} \big( P(r_b \mid s_b = 1) \prod_{k=1}^{n(b)} \big( \sum_{g^{\Am}_{b,k}} \epsilon^{-\#(\tilde{H}^{\X_{m-1}}(g^{\Am}_{b,k}))}P^{\Am}(g_{b,k} \mid r_b) \big) \big) \\
 %
 &=& \sum_{r_b} \big( P(r_b \mid s_b = 1) \prod_{k=1}^{n(b)} \big ( \epsilon^{-1}P^{\Am}(g_{b,k} = a, a \in orph(\XrmPrev) \mid r_b) \\ 
-& & \qquad \qquad \qquad \qquad \qquad + \epsilon^{0}(1-P^{\Am}(g_{b,k} = a, a \in orph(\XrmPrev) \mid r_b)) \big) \big). \label{eqn.approxBottomUpFinal}
+& & \qquad \qquad \qquad \qquad \qquad + \epsilon^{0}(1-P^{\Am}(g_{b,k} = a, a \in orph(\XrmPrev) \mid r_b)) \big) \big). \nonumber \label{eqn.approxBottomUpFinal}
 \end{eqnarray}
 
 Notice the $~\tilde{}$ above the $H$ in Eqn. \ref{eqn.bottomupTilde}. It is trivial to compute $P^{\Am}(g_{b,k} = a, a \in orph(\XrmPrev) \mid r_b)$ for each rule $r_b$ since $P^{\Am}(g_{b,k} \mid r_b)$ is a \emph{Discrete} distribution (table of probabilities) and the set $orph(\XrmPrev)$ can be easily enumerated.
 
-Combining the derived approximation, Eqn. \ref{eqn.approxBottomUpFinal}, and Eqn. \ref{eqn.child} yields
+Combining the derived approximation, Eqn. \ref{eqn.approxBottomUpFinal}, Eqn. \ref{bottomup}, and Eqn. \ref{eqn.child} yields
 %
 \begin{eqnarray}
-P(\text{Event 2}) &\approx& \sum_{r_b} \big( P(r_b \mid s_b = 1) \prod_{k=1}^{n(b)} \big ( \epsilon^{-1}P^{\Am}(g_{b,k} = a, a \in orph(\XrmPrev) \mid r_b) \\ 
-& & \qquad \qquad \qquad \qquad \qquad + \epsilon^{0}(1-P^{\Am}(g_{b,k} = a, a \in orph(\XrmPrev) \mid r_b)) \big) \big) \nonumber \\
+P(\text{Event 2}) &\approx& \epsilon^{\#(orph(\XrmPrev)) + 1} \times (1-\epsilon)^{\#(off(\A_{m-1}))} \nonumber \\
 %
-&\times& \prod_{a \in {\A_{m-1}}} \big( P(\qa \mid s_a) \big) \sum_{\vec{q}_b \in P(b)} \big( P(\qb \mid s_b = 1) P^{\Am}(Y \mid \mathbf{q^{\A_{m-1}}}, \vec{q}_b) \big). \nonumber
+&\times& \prod_{a \in {\A_{m-1}}} \big( \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \nonumber  \\
+%
+&\times&  \big( \sum_{r_b} \big( P(r_b \mid s_b = 1) \prod_{k=1}^{n(b)} \big ( \epsilon^{-1}P^{\Am}(g_{b,k} = a, a \in orph(\XrmPrev) \mid r_b) \\ 
+%
+& & \qquad \qquad \qquad \qquad \qquad + \epsilon^{0}(1-P^{\Am}(g_{b,k} = a, a \in orph(\XrmPrev) \mid r_b)) \big) \big) \big) \nonumber \\
+%
+&\times& \big( \prod_{a \in {\A_{m-1}}} P(\qa \mid s_a) \big) \nonumber \\
+&\times& \sum_{\vec{q}_b \in P(b)} \big( P(\qb \mid s_b = 1) P^{\Am}(Y \mid \mathbf{q^{\A_{m-1}}}, \vec{q}_b) \big) \big) \nonumber 
 \end{eqnarray} 
+
+where we have made use of the equality $\{ a: a \in \Am, a \neq b\} = \{a : a \in \A_{m-1}$ \}.
 
 Now do alternate approximation (Jeroen's approx)...although Jeroen's approx is probably worse.
 
 \subsection*{Event 3: brick $b$ is on, and has at least $1$ parent}
 
-%This is the source of our inability to compute the probability mass associated with this event exactly. Each of the $g_{b,k}$ slots has $\#(\Am)$ possibilities, and so exact inference would require enumerating all of the $\#(\Am)^{n(b)+1}$ possibilities for $\vec{g}_{b}$ for each of the $\#(c(b))$ possible rules. We outline two strategies for dealing with the intractability: For coming child approximations, do both slot-centric view (Pedro's approximation) and child-centric view (Jeroen's approximation)
-
+There are many settings of the random variables $\{s_b, \qb, \mathbf{g^{\Am}_b}, comp(g^{\A_{m-1}})\}$ that fall under this event. They can be characterized as: $s_b=1$, $\qb \neq \perp$ (or equivalently, $\qb \in P(b)$), $\{\gcompPrev : \exists \{a,k\}$ s.t. $ g^{\Am}_{a,k} = b \}$, and $g^{\Am}_{b,k} = \{\emptyset, a \text{ s.t. } a \in {\Am}\}$, $\forall k$. So, the probability mass associated with this event is given by
+\begin{eqnarray}
+\sum_{\{\gcompPrev : \exists \{a,k\} \text{ s.t. } g^{\Am}_{a,k} = b \}} \sum_{\vec{q}_b \in P(b)} \sum_{\vec{g}^{\Am}_{b}} P^{\Am}(s_b=1, \vec{q}_b, \vec{g}^{\Am}_{b}, \gcompPrev = \emptyset, \XrmPrev, Y) \\
+&=&
+\end{eqnarray}
 
 %\begin{figure}[htbp]
 %\begin{center}

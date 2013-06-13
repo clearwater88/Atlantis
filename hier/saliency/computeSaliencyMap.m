@@ -32,9 +32,14 @@ function [saliencyMaps,logProbOptions] = computeSaliencyMap(defaultLogLikeIm,log
             
             % incorproate bottom-up messages
             logProbOptions{i}{n}(:,1) = logProbOptions{i}{n}(:,1) + nBricksOnSelfRoots(i)*log(params.probRoot);
-            logProbOptions{i}{n}(:,2) = logProbOptions{i}{n}(:,2) + childMessages{i}{n};
-            logProbOptions{i}{n}(:,3) = logProbOptions{i}{n}(:,3) + childMessages{i}{n};
+            logProbOptions{i}{n}(:,2) = logProbOptions{i}{n}(:,2) + nBricksOnSelfRoots(i)*log(params.probRoot) + childMessages{i}{n};
+            logProbOptions{i}{n}(:,3) = logProbOptions{i}{n}(:,3) + nBricksOnSelfRoots(i)*log(params.probRoot) + childMessages{i}{n};
              
+            % this is what i was using before. It's wrong.
+%             logProbOptions{i}{n}(:,1) = logProbOptions{i}{n}(:,1) + nBricksOnSelfRoots(i)*log(params.probRoot);
+%             logProbOptions{i}{n}(:,2) = logProbOptions{i}{n}(:,2) + childMessages{i}{n};
+%             logProbOptions{i}{n}(:,3) = logProbOptions{i}{n}(:,3) + childMessages{i}{n};
+
             saliencyMaps{n} = logsum(logProbOptions{i}{n}(:,2:3),2) + log(particleProbs(i));
              
         end

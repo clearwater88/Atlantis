@@ -1,12 +1,9 @@
-function [childMessage,nBricksOnSelfRoot] = getBottomUpMsgs(bricks,cellParams,connPar,ruleStruct,probMapCells,params)
-    
-    % only on bricks can be children
-    isOn = getOn(bricks)==1;    
+function [childMessage] = getBottomUpMsgs(bricks,cellParams,connPar,ruleStruct,probMapCells,params)
+     
     % only self-rooted bricks will care if they get a parent
     selfRoot = isSelfRooted(bricks,connPar)==1;
     
-    bricksOnSelfRoot = bricks(:,isOn & selfRoot);
-    nBricksOnSelfRoot = size(bricksOnSelfRoot,2);
+    bricksOnSelfRoot = bricks(:,selfRoot);
         
     onSelfRootIdx = getLocIdx(bricksOnSelfRoot);
     onSelfRootType = getType(bricksOnSelfRoot);
@@ -34,7 +31,7 @@ function [childMessage,nBricksOnSelfRoot] = getBottomUpMsgs(bricks,cellParams,co
             childType = ruleStruct.children(r,s);
             idxUse = onSelfRootIdx(onSelfRootType == childType);
             
-            probMap = adjustProbMap(probMapCells,childType,r,s,bricks); % use bricks for adjustment of probMap
+            [~,probMap] = adjustProbMap(probMapCells,childType,r,s,bricks); % use bricks for adjustment of probMap
             probMap = probMap(idxUse,:)'; % reshape to number of types at this parent level x numel(idxUse)
             %probMap = probMap';
             
@@ -50,7 +47,7 @@ function [childMessage,nBricksOnSelfRoot] = getBottomUpMsgs(bricks,cellParams,co
     childMessage = cell(cellParams.nTypes,1);
     
     for (n=1:cellParams.nTypes)
-        childMessage{n} = nBricksOnSelfRoot*log(params.probRoot)-(nBricksOnSelfRoot-childSum{n})*log(params.probRoot);
+        childMessage{n} = log(params.probRoot)*childSum{n};
     end
     
 end

@@ -2,7 +2,7 @@ function [mask] = getCompatibleRules(parentType,slots,bricks,ruleStruct)
     % mask for valid rules
 
     % child entry may be 0 to specify not selected yet
-    % no ability to say "this slot is blank"
+    % no ability to say "this slot will not be used"
     
     % zeros are sentinel to indicate not used yet
     childTypes = zeros(1,numel(slots));

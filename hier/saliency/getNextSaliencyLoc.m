@@ -23,11 +23,18 @@ function [type,cellLocIdx,val,ratiosIm,logProbCellRatio,logProbOptions,logPsumGN
         logProbCellRatio{i} = temp;
         
         [logPsumGNoPoint{i},logPsumG{i}] = getTopDownMsgs(particles{i},cellParams,connChilds{i},ruleStruct,probMapCells);
-        [childMessages{i},nBricksOnSelfRoot(i)] = getBottomUpMsgs(particles{i},cellParams,connPars{i},ruleStruct,probMapCells,params);
+        %[childMessages{i}] = getBottomUpMsgs(particles{i},cellParams,connPars{i},ruleStruct,probMapCells,params);
+        [childMessages{i}] = getBottomUpMsgs2(particles{i},cellParams,connPars{i},ruleStruct,probMapCells,params);
+        
+        % only self-rooted bricks will care if they get a parent
+        selfRoot = isSelfRooted(particles{i},connPars{i})==1;
+        bricksOnSelfRoot = particles{i}(:,selfRoot);
+        nBricksOnSelfRoot(i) = size(bricksOnSelfRoot,2);
+        
     end
-    
-    [saliencyMaps,logProbOptions] = computeSaliencyMap(defaultLogLikeIm,logProbCellRatio,logPsumGNoPoint,logPsumG,childMessages,nBricksOnSelfRoot,particleProbs,cellParams,params);
 
+    [saliencyMaps,logProbOptions] = computeSaliencyMap(defaultLogLikeIm,logProbCellRatio,logPsumGNoPoint,logPsumG,childMessages,nBricksOnSelfRoot,particleProbs,cellParams,params);
+    
     nTry = 0;
     nTotLoc = 0;
     for (i=1:numel(saliencyMaps))

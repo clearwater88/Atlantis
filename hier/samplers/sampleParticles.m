@@ -2,6 +2,8 @@ function [allParticles,allConnPars,allConnChilds,saliencyScores] = sampleParticl
     [likeTemp,countsTemp] = initLike(data,templateStruct);
     [likePxStruct] = evalLike(data,templateStruct,zeros(size(data)),zeros(size(data)),params);
     
+    nPosesCell = getNumPoses(cellParams,likePxStruct);
+    
     particles{1} = [];
     particleProbs  = 1;
     
@@ -34,6 +36,9 @@ function [allParticles,allConnPars,allConnChilds,saliencyScores] = sampleParticl
     
         if(brickIdx > 75)
             break;
+        end
+        for (i=1:numel(particles))
+           logProbParticle(i) =  evalParticleLogProbPrior(particles{i},connChilds{i}, connPars{i}, ruleStruct, nPosesCell, probMapCells, params);
         end
         
         [cellType,cellLocIdx,saliencyScores(end+1),ratiosImOldParticle,logLikeCellOldParticle,logProbOptionsAll,logPsumGNoPoint,logPsumG,stop] = ...
@@ -97,14 +102,10 @@ function [allParticles,allConnPars,allConnChilds,saliencyScores] = sampleParticl
             logPsumGUse = logPsumG{particleId};
             noConnectParent = exp(logPsumGNoPointUse-logPsumGUse);
             
-%             [logProbOptionsOld,noConnectParentOld,parentSlotProbsOld,PsumGNoPointOld,PsumGOld] = ...
-%                 getProbsOn(cellType,cellLocIdx,particle,connChild,connPar,ruleStruct,probMapCells,likesParticle,countsParticle,likePxStruct,cellParams,params);
-%             max(abs(parentSlotProbsOld(:)-parentSlotProbs(:)))
-%             [logProbOptionsOld,logProbOptions]
-%             [noConnectParentOld,noConnectParent]
-            
             probOptions = exp(logProbOptions - logsum(logProbOptions,1));
             probOptions = probOptions/sum(probOptions); % fucking matlab
+            
+            probOptions
             
             optionId = find(mnrnd(1,probOptions)==1);
 
@@ -154,5 +155,6 @@ function [allParticles,allConnPars,allConnChilds,saliencyScores] = sampleParticl
         st = viewAllParticles(newParticles,templateStruct,params.imSize);
         subplot(1,2,2); imshow(st);
         pause(0.2);
+
     end
 end

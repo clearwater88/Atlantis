@@ -116,7 +116,7 @@ $A \rightarrow B_1,\ldots,B_k$ with $r = A,B_1,\ldots,B_k \in \Sigma$. ${\cal R}
 \end{itemize}
 
 \begin{definition}
-A brick $b$ is an \textbf{orphan} according to the assignment of random variables for $\Xrm$ iff $s_b=1$ and $\nexists \{a,k\}$ s.t. $g^{\Am}_{a,k} = b$ according to $\Xrm$.
+\textbf{Orphan}: A brick $b$ is an \textbf{orphan} according to the assignment of random variables for $\Xrm$ iff $s_b=1$ and $\nexists \{a,k\}$ s.t. $g^{\Am}_{a,k} = b$ according to $\Xrm$.
 \end{definition}
 
 
@@ -239,7 +239,7 @@ For this event, there is only one setting of the random variables $\{s_b, \qb, \
 
 There are many settings of the random variables $\{s_b, \qb, \mathbf{g^{\Am}_b}, comp(g^{\A_{m-1}})\}$ that fall under this event. They can be characterized as: $s_b=1$, $\qb \neq \perp$ (or equivalently, $\qb \in P(b)$), $g = \emptyset$ $\forall g \in \gcompPrev$, and $g^{\Am}_{b,k} = \{\emptyset, a \text{ s.t. } a \in {\Am}\}$, $\forall k$. So, the probability mass associated with this event is given by
 \begin{eqnarray}
-\text{P(Event 2)} = \sum_{\vec{q}_b \in P(b)} \sum_{\vec{g}^{\Am}_{b}} P^{\Am}(s_b=1, \vec{q}_b, \vec{g}^{\Am}_{b}, \gcompPrev = \emptyset, \XrmPrev, Y)
+\text{P(Event 2)} = \sum_{\vec{q}_b \in P(b)} \sum_{\vec{g}^{\Am}_{b}} P^{\Am}(s_b=1, \vec{q}_b, \vec{g}^{\Am}_{b}, \gcompPrev = \emptyset, \XrmPrev, Y) \label{eqn.event2}
 \end{eqnarray}
 
 where we have used $\gcompPrev = \emptyset$ as a shorthand for $g = \emptyset$ $\forall g \in \gcompPrev$. Expanding, we get
@@ -295,8 +295,8 @@ Combining Eqn. \ref{eqn.orphan2} and the first term of Eqn. \ref{eqn.child}, and
 & &\times  \big( \prod_{a \in {\A_{m}}, a \neq b} \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \\
 & & \times \sum_{\vec{g}^{\Am}_{b}} \big( \epsilon^{- \#(H^{\X_{m-1}}(\vec{g}_b^{\Am}))} \big( \sum_{r_b} P(r_b \mid s_b = 1) \prod_{k=1}^{n(b)} P^{\Am}(g_{b,k} \mid r_b) \big) \big) \nonumber \\
 %
-&=& \epsilon^{\#(orph(\XrmPrev)) + 1} \times (1-\epsilon)^{\#(off(\A_{m-1}))} \nonumber \\
-& & \times \big( \prod_{a \in {\A_{m}}, a \neq b} \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \label{bottomup} \\
+&=& \epsilon^{\#(orph(\XrmPrev)) + 1} \times (1-\epsilon)^{\#(off(\A_{m-1}))} \label{bottomup}  \\
+& & \times \big( \prod_{a \in {\A_{m}}, a \neq b} \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big)  \\
 & & \times \sum_{r_b} \big(P(r_b \mid s_b = 1) \sum_{\vec{g}^{\Am}_{b}} \big( \epsilon^{-\#(H^{\X_{m-1}})}(\vec{g}^{\Am}_b) \prod_{k=1}^{n(b)} P^{\Am}(g_{b,k} \mid r_b) \big) \big) \nonumber
 \end{eqnarray} 
 
@@ -331,11 +331,11 @@ Notice the $~\tilde{}$ above the $H$ in Eqn. \ref{eqn.bottomupTilde}. It is triv
 Combining the derived approximation, Eqn. \ref{eqn.approxBottomUpFinal}, Eqn. \ref{bottomup}, and Eqn. \ref{eqn.child} yields
 %
 \begin{eqnarray}
-P(\text{Event 2}) &\approx& \epsilon^{\#(orph(\XrmPrev)) + 1} \times (1-\epsilon)^{\#(off(\A_{m-1}))} \nonumber \\
+P(\text{Event 2}) &\approx& \epsilon^{\#(orph(\XrmPrev)) + 1} \times (1-\epsilon)^{\#(off(\A_{m-1}))}  \label{eqn.even2final} \\
 %
 &\times& \prod_{a \in {\A_{m-1}}} \big( \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \nonumber  \\
 %
-&\times&  \big( \sum_{r_b} \big( P(r_b \mid s_b = 1) \prod_{k=1}^{n(b)} \big ( \epsilon^{-1}P^{\Am}(g_{b,k} = a, a \in orph(\XrmPrev) \mid r_b) \\ 
+&\times&  \big( \sum_{r_b} \big( P(r_b \mid s_b = 1) \prod_{k=1}^{n(b)} \big ( \epsilon^{-1}P^{\Am}(g_{b,k} = a, a \in orph(\XrmPrev) \mid r_b) \nonumber \\ 
 %
 & & \qquad \qquad \qquad \qquad \qquad + \epsilon^{0}(1-P^{\Am}(g_{b,k} = a, a \in orph(\XrmPrev) \mid r_b)) \big) \big) \big) \nonumber \\
 %
@@ -349,11 +349,45 @@ Now do alternate approximation (Jeroen's approx)...although Jeroen's approx is p
 
 \subsection*{Event 3: brick $b$ is on, and has at least $1$ parent}
 
-There are many settings of the random variables $\{s_b, \qb, \mathbf{g^{\Am}_b}, comp(g^{\A_{m-1}})\}$ that fall under this event. They can be characterized as: $s_b=1$, $\qb \neq \perp$ (or equivalently, $\qb \in P(b)$), $\{\gcompPrev : \exists \{a,k\}$ s.t. $ g^{\Am}_{a,k} = b \}$, and $g^{\Am}_{b,k} = \{\emptyset, a \text{ s.t. } a \in {\Am}\}$, $\forall k$. So, the probability mass associated with this event is given by
+There are many settings of the random variables $\{s_b, \qb, \mathbf{g^{\Am}_b}, comp(g^{\A_{m-1}})\}$ that fall under this event. They can be characterized as: $s_b=1$, $\qb \neq \perp$ (or equivalently, $\qb \in P(b)$), $\{\gcompPrev : \exists \{a,k\}$ s.t. $ g^{\Am}_{a,k} = b \}$, and $g^{\Am}_{b,k} = \{\emptyset, a \text{ s.t. } a \in {\Am}\}$, $\forall k$. For brevity, we will use the shorthand $\gcompPrev = b$ for $\{\gcompPrev : \exists \{a,k\}$ s.t. $ g^{\Am}_{a,k} = b \}$
+
+So, the probability of this event is given by
 \begin{eqnarray}
-\sum_{\{\gcompPrev : \exists \{a,k\} \text{ s.t. } g^{\Am}_{a,k} = b \}} \sum_{\vec{q}_b \in P(b)} \sum_{\vec{g}^{\Am}_{b}} P^{\Am}(s_b=1, \vec{q}_b, \vec{g}^{\Am}_{b}, \gcompPrev = \emptyset, \XrmPrev, Y) \\
-&=&
+P(\text{Event 3}) &=& \sum_{\gcompPrev = b} \sum_{\vec{q}_b \in P(b)} \sum_{\vec{g}^{\Am}_{b}} P^{\Am}(s_b=1, \vec{q}_b, \vec{g}^{\Am}_{b}, \gcompPrev, \XrmPrev, Y) \\
+%
+&=& \sum_{\gcompPrev = b} \sum_{\vec{g}^{\Am}_{b}} \big( \prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({b})}) \big ) \big( \prod_{a \in {\A_{m}}} \big( \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \big) \label{eqn.topdown2} \\
+%
+& & \big( \prod_{a \in {\A_{m-1}}} P(\qa \mid s_a)\big) \big( \sum_{\vec{q}_b \in P(b)} P(\qb \mid s_b = 1) P^{\Am}(Y \mid \mathbf{q^{\A_{m-1}}}, \vec{q}_b) \big) \nonumber
 \end{eqnarray}
+
+where we have already outlined how to deal with $\big( \prod_{a \in {\A_{m-1}}} P(\qa \mid s_a)\big) \big( \sum_{\vec{q}_b \in P(b)} P(\qb \mid s_b = 1) P^{\Am}(Y \mid \mathbf{q^{\A_{m-1}}}, \vec{q}_b) \big)$ in detailing how to approximate the probability of Event 2. So, we focus on computing $\sum_{\gcompPrev}  \sum_{\vec{g}^{\Am}_{b}} \big( \prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({b})}) \big ) \big( \prod_{a \in {\A_{m}}} \big( \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \big)$.
+
+Recall that $g = \{b, \emptyset\}, \forall g \in \gcompPrev$ for this event, and note that the $g \in \gcompPrev$'s are \textbf{not} conditionally independent given $s_b$ (see the graphical model in Fig. \ref{gm}) due to explaining away; the term that ``ties'' them together is  $P(s_b = 1 \mid \mathbf{g}_{V(b)})$. However, we use the particular definition of  $P(s_b = 1 \mid \mathbf{g}_{V(b)})$  given in Eqn. \ref{eqn.probS} to derive an efficient way of computing the first term in Eqn. \ref{eqn.topdown2} exactly. In specific, we use the fact that  the quantity $P(s_b = 1 \mid \mathbf{g}_{V(b)})$  depends only on whether there exists at least one brick that has $b$ as a child.
+
+Suppose for some $\{k,m'\}, g_{m',k} = b, g_{m',k} \in \gcompPrev$. Then, $P(s_b = 1 \mid \mathbf{g}_{V(b)}) = 1$ regardless of the values the other random variables in $\gcompPrev$ take. So, the remaining random variables $\gcompPrev$ become conditionally independent given that $\exists \{k,m'\}, g_{m',k} = b, g_{m',k} \in \gcompPrev$.
+
+To take advantage of the above observation, we partition the event $\gcompPrev = b$ into $m-1$ distinct events. Recall that the bricks in
+$\A_{m-1}$ are ordered, and each brick is in $\A_{m-1}$  can be denoted as $a_{m'}, m' \in [1...m-1]$. We define the $m$th event as the event that brick $a_{m}$ takes brick $b$ as a child, and brick $a_{m'}$ does not take $b$ as a child $\forall m' < m$. Formally, the $m$th event is defined as $\{\gcompPrev : \exists k$ s.t. $g^{\Am}_{m,k} = b, \nexists k$ s.t. $g^{\Am}_{m',k} = b, \forall m' < m \}$. We use the notation $e_{m'}$ to denote the $m'$th event.  We can then write the first term in Eqn. \ref{eqn.topdown2} as
+
+\begin{eqnarray}
+&=&\sum_{\gcompPrev = b} \sum_{\vec{g}^{\Am}_{b}} \big( \prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({b})}) \big ) \big( \prod_{a \in {\A_{m}}} \big( \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \big) \\
+%
+&=& \sum_{m'=1}^{m-1} \sum_{\gcompPrev \in e_{m'}} \big(  \sum_{\vec{g}^{\Am}_{b}} \big( \prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({b})}) \big ) \big( \prod_{a \in {\A_{m}}} \big( \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \big) \big)  \label{eqn.temp1} \\
+%
+&=& \sum_{m'=1}^{m-1} \sum_{\gcompPrev \in e_{m'}}  \big(  \epsilon^{\#(orph(\XrmPrev)) + 1} \times (1-\epsilon)^{\#(off(\A_{m-1}))}  \label{eqn.temp2} \\ 
+& & \times \big( \prod_{a \in {\A_{m}}, a \neq b} \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big)  \\
+& & \times \sum_{r_b} \big(P(r_b \mid s_b = 1) \sum_{\vec{g}^{\Am}_{b}} \big( \epsilon^{-\#(H^{\X_{m-1}})}(\vec{g}^{\Am}_b) \prod_{k=1}^{n(b)} P^{\Am}(g_{b,k} \mid r_b) \big) \big) \big) \nonumber \\
+%
+&=& \sum_{m'=1}^{m-1} \sum_{\gcompPrev \in e_{m'}}  \big(  \epsilon^{\#(orph(\XrmPrev)) + 1} \times (1-\epsilon)^{\#(off(\A_{m-1}))}  \label{eqn.temp2} \\ 
+& & \times \big( \prod_{a \in {\A_{m}}, a \neq b} \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big)  \\
+& & \times \sum_{r_b} \big(P(r_b \mid s_b = 1) \sum_{\vec{g}^{\Am}_{b}} \big( \epsilon^{-\#(H^{\X_{m-1}})}(\vec{g}^{\Am}_b) \prod_{k=1}^{n(b)} P^{\Am}(g_{b,k} \mid r_b) \big) \big) \big) \nonumber \\
+\end{eqnarray}
+
+where we have used the result from Eqn. \ref{bottomup} in going from Eqn. \ref{eqn.temp1} to Eqn. \ref{eqn.temp2}.
+
+
+
+ %, where the $m$th event is the event that $\exists k$ s.t. $g^{\Am}_{c,k} = b$
 
 %\begin{figure}[htbp]
 %\begin{center}

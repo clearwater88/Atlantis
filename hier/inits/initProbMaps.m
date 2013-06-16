@@ -5,17 +5,20 @@ function [probMapStruct] = initProbMaps(ruleStruct,templates)
     offset = cell(numel(parents),1);
     covCentres = cell(numel(parents),1); % covariances for each slot
 
-    covCentresParents(:,:,1) = [1,0,0; ...
+    covCentresParents(:,:,1) = [2,0,0; ...
                                 0,1,0; ...
-                                0,0,pi/8];
+                                0,0,pi/16];
     
-    covCentresParents(:,:,2) = [1,0,0; ...
-                                0,1,0; ...
-                                0,0,pi/8];
+    covCentresParents(:,:,2) = covCentresParents(:,:,1);
+    covCentresParents(:,:,3) = covCentresParents(:,:,1);
     
-    covCentresParents(:,:,3) = [1,0,0; ...
-                                0,1,0; ...
-                                0,0,pi/8];
+%     covCentresParents(:,:,2) = [2,0,0; ...
+%                                 0,1,0; ...
+%                                 0,0,pi/16];
+%     
+%     covCentresParents(:,:,3) = [2,0,0; ...
+%                                 0,2,0; ...
+%                                 0,0,pi/16];
     
     for (i=1:size(parents,1))
         tp = templates{parents(i)};
@@ -28,15 +31,15 @@ function [probMapStruct] = initProbMaps(ruleStruct,templates)
             % split up probMap top to bottom, use middle for width
             
             % x,y,angle
-            offset{i}(j,1) = round(j*(1+size(tp,1))/(1+totCh)); % offset along length of template
-            offset{i}(j,2) = (size(tp,2)+1)/2;
+            offset{i}(j,1) = round(j*(1+size(tp,1))/(1+totCh))-(1+size(tp,1))/2; % offset along length of template
+            offset{i}(j,2) = 0;
             offset{i}(j,3) = 0;
             
             covCentres{i}(:,:,j) = covCentresParents(:,:,parents(i));
         end
     end
     
-    probMapStruct.version=5;
+    probMapStruct.version=1;
     probMapStruct.strat = 1; %0 no line contig; 1 = line contig
     probMapStruct.offset=offset;
     probMapStruct.cov=covCentres;

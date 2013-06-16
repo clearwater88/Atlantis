@@ -35,8 +35,8 @@ for (i=1:nTest)
         load(mapStr);
     else
         % probMapCells: size of [ruleId,slot,loc] cell: each is an array
-        [probMapCells] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
-        save(mapStr,'probMapCells','-v7.3');
+        [probMapCells,probMapPixels] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
+        save(mapStr,'probMapCells','probMapPixels', '-v7.3');
     end
     
     [allParticles,allConnPars,allConnChilds, saliencyScores] = sampleParticles(testData,probMapCells,cellParams,params,ruleStruct,templateStruct);

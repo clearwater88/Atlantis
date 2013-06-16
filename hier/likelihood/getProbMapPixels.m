@@ -3,38 +3,36 @@ function [res] = getProbMapPixels(ruleId,slot,cellCentre,probMapStruct,imSize,an
     covar = probMapStruct.cov{ruleId}(:,:,slot);
     centreUse = cellCentre+offset;
     
-    % consider over period of 3
-    angleRange = angleDisc(1):angleDisc(2):angleDisc(3);
+    if (probMapStruct.strat == 1)
+        angle = centreUse(3);
+        rotMat = [cos(angle), sin(angle); -sin(angle), cos(angle)];
+        centreUse = (rotMat*offset(1:2)')' + cellCentre(1:2);
+        covar(1:2,1:2) = rotMat*covar(1:2,1:2)*rotMat';
+        
+        centreUse(:,3) = angle;
+    end
     
-    %approximate locations of mass
-    xLower = max(1,cellCentre(1)-3*covar(1,1));
-    xUpper = min(imSize(1),cellCentre(1)+3*covar(1,1));
+            
+    xLower = max(1,floor(centreUse(1)-6*sqrt(covar(1,1))));
+    xUpper = min(imSize(1),ceil(centreUse(1)+6*sqrt(covar(1,1))));
     
-    yLower = max(1,cellCentre(2)-3*covar(2,2));
-    yUpper = min(imSize(2),cellCentre(2)+3*covar(2,2));
-    
+    yLower = max(1,floor(centreUse(2)-6*sqrt(covar(2,2))));
+    yUpper = min(imSize(2),ceil(centreUse(2)+6*sqrt(covar(2,2))));
+    angleRange = -pi+angleDisc(1):angleDisc(2):angleDisc(3)+pi;
+      
+%     xLower = 1;
+%     xUpper = imSize(1);
+%     
+%     yLower = 1;
+%     yUpper = imSize(2);
+
     tempProb = zeros([imSize(1),imSize(2),numel(angleRange)]);
     [x2,y2,angle2] = ndgrid(xLower:xUpper,yLower:yUpper,angleRange);
     angle2 = angle2(:);
     
-    if (probMapStruct.strat == 1)
-        angle3D = reshape(angle2,[1,1,numel(angle2)]);
-        rotMat = [cos(angle3D), -sin(angle3D); sin(angle3D), cos(angle3D)];
-
-        centreOrient = repmat(centreUse(1:2),[numel(x2),1]);
-        centreOrient = bsxfun(@minus,centreOrient,cellCentre(1:2));
-
-        for (i=1:size(centreOrient,3))
-           centreOrient(i,:) = (rotMat(:,:,i)*(centreOrient(i,:)'))'; 
-        end
-        centreOrient = bsxfun(@plus,centreOrient,cellCentre(1:2));
-        centreOrient(:,3) = centreUse(3);
-        temp = mvnpdf([x2(:),y2(:),angle2(:)],centreOrient,covar);
-    else
-        temp = mvnpdf([x2(:),y2(:),angle2(:)],centreUse,covar);
-    end
+    temp = mvnpdf([x2(:),y2(:),angle2(:)],centreUse,covar);
     
-    inds = sub2ind(size(tempProb),x2(:),y2(:),round(1+(angle2-angleDisc(1))/angleDisc(2)));
+    inds = sub2ind(size(tempProb),x2(:),y2(:),round(1+(angle2-(angleDisc(1)-pi))/angleDisc(2)));
     tempProb(inds) = temp;
     
     % exact computation
@@ -47,6 +45,7 @@ function [res] = getProbMapPixels(ruleId,slot,cellCentre,probMapStruct,imSize,an
     for (i=1:size(tempProb,3))
        res(:,:,mod(i,period)+1) = res(:,:,mod(i,period)+1) + tempProb(:,:,i);
     end
+    assert(~any(isnan(res(:)/sum(res(:)))));
     res = res/sum(res(:));
     
 end

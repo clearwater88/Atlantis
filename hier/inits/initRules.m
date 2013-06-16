@@ -7,8 +7,7 @@ function [ruleStruct] = initRules()
              2,0,0,0; ...
              2,3,3 0; ...
              2,3,3,3; ...
-             3,0,0,0
-             ];
+             3,0,0,0];
 
     nSymbols = max(rules(:,1));
     ruleProbs = zeros(size(rules,1),1);

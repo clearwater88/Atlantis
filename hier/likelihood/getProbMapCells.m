@@ -25,5 +25,6 @@ function [res,resPixels] = getProbMapCells(ruleId,slot,cellCentre,probMapStruct,
         res(i) = temp;
     end
     res = res/sum(res);
+    
 end
 

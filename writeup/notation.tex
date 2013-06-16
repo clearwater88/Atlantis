@@ -362,30 +362,94 @@ P(\text{Event 3}) &=& \sum_{\gcompPrev = b} \sum_{\vec{q}_b \in P(b)} \sum_{\vec
 
 where we have already outlined how to deal with $\big( \prod_{a \in {\A_{m-1}}} P(\qa \mid s_a)\big) \big( \sum_{\vec{q}_b \in P(b)} P(\qb \mid s_b = 1) P^{\Am}(Y \mid \mathbf{q^{\A_{m-1}}}, \vec{q}_b) \big)$ in detailing how to approximate the probability of Event 2. So, we focus on computing $\sum_{\gcompPrev}  \sum_{\vec{g}^{\Am}_{b}} \big( \prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({b})}) \big ) \big( \prod_{a \in {\A_{m}}} \big( \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \big)$.
 
+We present two ways to compute Eqn. \ref{eqn.topdown2} efficiently.
+
+
+\subsubsection*{Jeroen's method: 1- trick}
+
+Let us rewrite the first term of Eqn. \ref{eqn.topdown2}.
+
+\begin{eqnarray}
+& & \sum_{\gcompPrev = b} \sum_{\vec{g}^{\Am}_{b}} \big( \prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({a})}) \big ) \big( \prod_{a \in {\A_{m}}} \big( \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \big)  \\
+&=& \epsilon^{\#(orph(\XrmPrev))} \times (1-\epsilon)^{\#(off(\A_{m-1}))}  \label{eqn.topdownAlternate} \\ 
+& & \times \sum_{\gcompPrev = b} P^{\Am}(s_{a_m} \mid \mathbf{g}^{\Am}_{V({a_m})}) \big( \prod_{t=1}^{m-1} \sum_{r_{a_t}} P(r_{a_t} \mid s_{a_t}) \prod_{k=1}^{n({a_t})} P^{\Am}(g_{{a_t},k} \mid r_{a_t}) \big)  \nonumber \\
+& & \times \sum_{r_{a_m}} \big(P(r_{a_m} \mid s_{a_m} = 1) \sum_{\vec{g}^{\Am}_{{a_m}}} \big( \epsilon^{-\#(H^{\X_{m-1}})}(\vec{g}^{\Am}_{a_m}) \prod_{k=1}^{n({a_m})} P^{\Am}(g_{{a_m},k} \mid r_{a_m}) \big) \big) \big). 
+\end{eqnarray}
+
+The middle line of Eqn. \ref{eqn.topdownAlternate} requires further analysis- the computation of the other lines in the equation of been previously analyzed, and an efficient method of (approximate) computation outlined. We can rewrite the middle line of Eqn. \ref{eqn.topdownAlternate} as:
+%
+\begin{eqnarray}
+&=& \sum_{\gcompPrev=b} \big( P^{\Am}(s_{a_m} \mid \mathbf{g}^{\Am}_{V({a_m})}) \\
+& & \times \prod_{t=1}^{m-1} \big( \sum_{r_{a_t}} P(r_{a_t} \mid s_{a_t}) \big( \prod_{\substack{k : \vec{g}^{\A{m-1}}_{a_t,k} \not \in \\ \gcompPrev }} P^{\Am}(g_{{a_t},k} \mid r_{a_t}) \big) \big( \prod_{\substack{k : \vec{g}^{\A{m-1}}_{a_t,k} \in \\ \gcompPrev }} P^{\Am}(g_{{a_t},k} = \mid r_{a_t}) \big) \big) \big) \nonumber\\
+%
+&=& \big( \sum_{\gcompPrev} \big( P^{\Am}(s_{a_m} \mid \mathbf{g}^{\Am}_{V({a_m})}) \label{eqn.temp3} \\
+& & \times \prod_{t=1}^{m-1} \big( \sum_{r_{a_t}} P(r_{a_t} \mid s_{a_t}) \big( \prod_{\substack{k : \vec{g}^{\A{m-1}}_{a_t,k} \not \in \\ \gcompPrev }} P^{\Am}(g_{{a_t},k} \mid r_{a_t}) \big) \big( \prod_{\substack{k : \vec{g}^{\A{m-1}}_{a_t,k} \in \\ \gcompPrev }} P^{\Am}(g_{{a_t},k} \mid r_{a_t}) \big) \big) \big) \big) \nonumber\\
+& &- \big( \epsilon \times \prod_{t=1}^{m-1} \big( \sum_{r_{a_t}} P(r_{a_t} \mid s_{a_t}) \big( \prod_{\substack{k : \vec{g}^{\A{m-1}}_{a_t,k} \not \in \\ \gcompPrev }} P^{\Am}(g_{{a_t},k} \mid r_{a_t}) \big) \big( \prod_{\substack{k : \vec{g}^{\A{m-1}}_{a_t,k} \in \\ \gcompPrev }} P^{\Am}(g_{{a_t},k} = \emptyset \mid r_{a_t}) \big) \big) \big) \big) \nonumber
+\end{eqnarray}
+
+where we have used the fact that $\sum_{\gcompPrev=b}(\cdot) = \sum_{\gcompPrev}(\cdot) - \sum_{\gcompPrev= \emptyset} (\cdot)$ since $\{ g=\{\emptyset, b\}, \forall g \in \gcompPrev\}$. We now observe that for all settings of $\gcompPrev$ except $\gcompPrev= \emptyset$, we have $P^{\Am}(s_{a_m} \mid \mathbf{g}^{\Am}_{V({a_m})})$ = 1. That is, for all but one setting of $\gcompPrev$ we can treat $P^{\Am}(s_{a_m} \mid \mathbf{g}^{\Am}_{V({a_m})})$ as a constant, and so we can ``push'' $\gcompPrev$ through $P^{\Am}(s_{a_m} \mid \mathbf{g}^{\Am}_{V({a_m})})$. We compensate for the fact that we use the wrong value of $P^{\Am}(s_{a_m} \mid \mathbf{g}^{\Am}_{V({a_m})})$ for the single case of $\gcompPrev= \emptyset$ by adding an appropriate correction factor. So, we can write  Eqn. \ref{eqn.temp3} as
+
+\begin{eqnarray}
+&=&  \prod_{t=1}^{m-1} \big( \sum_{r_{a_t}} P(r_{a_t} \mid s_{a_t}) \big( \prod_{\substack{k : \vec{g}^{\A{m-1}}_{a_t,k} \not \in \\ \gcompPrev }} P^{\Am}(g_{{a_t},k} \mid r_{a_t}) \big)\big) \\
+%
+& & + \underbrace{(\epsilon-1) \big( \prod_{t=1}^{m-1} \big( \sum_{r_{a_t}} P(r_{a_t} \mid s_{a_t}) \big( \prod_{\substack{k : \vec{g}^{\A{m-1}}_{a_t,k} \not \in \\ \gcompPrev }} P^{\Am}(g_{{a_t},k} \mid r_{a_t}) \big) \big( \prod_{\substack{k : \vec{g}^{\A{m-1}}_{a_t,k} \in \\ \gcompPrev }} P^{\Am}(g_{{a_t},k} =\emptyset \mid r_{a_t}) \big)\big)}_{\text{correction factor}} \nonumber \\
+%
+& &- \big(\epsilon \times \prod_{t=1}^{m-1} \big( \sum_{r_{a_t}} P(r_{a_t} \mid s_{a_t}) \big( \prod_{\substack{k : \vec{g}^{\A{m-1}}_{a_t,k} \in \\ \gcompPrev }} P^{\Am}(g_{{a_t},k} \mid r_{a_t}) \big) \big( \prod_{\substack{k : \vec{g}^{\A{m-1}}_{a_t,k} \not \in \\ \gcompPrev }} P^{\Am}(g_{{a_t},k} = \emptyset \mid r_{a_t}) \big) \big) \big) \big) \nonumber \\
+%
+&=&  \prod_{t=1}^{m-1} \big( \sum_{r_{a_t}} P(r_{a_t} \mid s_{a_t}) \big( \prod_{\substack{k : \vec{g}^{\A{m-1}}_{a_t,k} \not \in \\ \gcompPrev }} P^{\Am}(g_{{a_t},k} \mid r_{a_t}) \big)\big) \\
+%
+& & -\big( \prod_{t=1}^{m-1} \big( \sum_{r_{a_t}} P(r_{a_t} \mid s_{a_t}) \big( \prod_{\substack{k : \vec{g}^{\A{m-1}}_{a_t,k} \not \in \\ \gcompPrev }} P^{\Am}(g_{{a_t},k} \mid r_{a_t}) \big) \big( \prod_{\substack{k : \vec{g}^{\A{m-1}}_{a_t,k} \in \\ \gcompPrev }} P^{\Am}(g_{{a_t},k} =\emptyset \mid r_{a_t}) \big)\big). \nonumber
+\end{eqnarray}
+
+We can now compute Eqn. \ref{eqn.topdown2} using previously defined approximations/computations.
+
+\subsubsection*{Pedro's method: string of $0$'s and $1$'s}
+
 Recall that $g = \{b, \emptyset\}, \forall g \in \gcompPrev$ for this event, and note that the $g \in \gcompPrev$'s are \textbf{not} conditionally independent given $s_b$ (see the graphical model in Fig. \ref{gm}) due to explaining away; the term that ``ties'' them together is  $P(s_b = 1 \mid \mathbf{g}_{V(b)})$. However, we use the particular definition of  $P(s_b = 1 \mid \mathbf{g}_{V(b)})$  given in Eqn. \ref{eqn.probS} to derive an efficient way of computing the first term in Eqn. \ref{eqn.topdown2} exactly. In specific, we use the fact that  the quantity $P(s_b = 1 \mid \mathbf{g}_{V(b)})$  depends only on whether there exists at least one brick that has $b$ as a child.
 
 Suppose for some $\{k,m'\}, g_{m',k} = b, g_{m',k} \in \gcompPrev$. Then, $P(s_b = 1 \mid \mathbf{g}_{V(b)}) = 1$ regardless of the values the other random variables in $\gcompPrev$ take. So, the remaining random variables $\gcompPrev$ become conditionally independent given that $\exists \{k,m'\}, g_{m',k} = b, g_{m',k} \in \gcompPrev$.
 
 To take advantage of the above observation, we partition the event $\gcompPrev = b$ into $m-1$ distinct events. Recall that the bricks in
-$\A_{m-1}$ are ordered, and each brick is in $\A_{m-1}$  can be denoted as $a_{m'}, m' \in [1...m-1]$. We define the $m$th event as the event that brick $a_{m}$ takes brick $b$ as a child, and brick $a_{m'}$ does not take $b$ as a child $\forall m' < m$. Formally, the $m$th event is defined as $\{\gcompPrev : \exists k$ s.t. $g^{\Am}_{m,k} = b, \nexists k$ s.t. $g^{\Am}_{m',k} = b, \forall m' < m \}$. We use the notation $e_{m'}$ to denote the $m'$th event.  We can then write the first term in Eqn. \ref{eqn.topdown2} as
+$\A_{m-1}$ are ordered, and each brick is in $\A_{m-1}$  can be denoted as $a_{m'}, m' \in [1...m-1]$. We define the $m$th event as the event that brick $a_{m}$ takes brick $b$ as a child, and brick $a_{m'}$ does not take $b$ as a child $\forall m' < m$. Formally, the $m$th event, which we denote as $e_m$, is is defined as $e_m = \{\gcompPrev : \exists k$ s.t. $g^{\Am}_{m,k} = b, \nexists k$ s.t. $g^{\Am}_{m',k} = b, \forall m' < m \}$. Another way to understand the partitioning of event space is to imagine string of length $m-1$, consisting of $0$'s and $1$'s, where an entry $m'$ is $1$ if brick $m'$ is a parent of brick $b$, and $0$ otherwise. Then, the $m$th event is represented as the set of strings with the prefix $\{ \{0\}^{m-1},1\}$. With this representation, it should be clear that each $m$ event is mutually exclusive since no two strings can have the same prefix, and the set of $M$ events covers all events where brick $b$ has at least one parent (\emph{ie} the string representation contains at least one $1$). Therefore, the set of events we have defined is indeed a partitioning of the event that brick $b$ has at least one parent.
+
+We can then write the first term in Eqn. \ref{eqn.topdown2} as
 
 \begin{eqnarray}
 &=&\sum_{\gcompPrev = b} \sum_{\vec{g}^{\Am}_{b}} \big( \prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({b})}) \big ) \big( \prod_{a \in {\A_{m}}} \big( \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \big) \\
 %
-&=& \sum_{m'=1}^{m-1} \sum_{\gcompPrev \in e_{m'}} \big(  \sum_{\vec{g}^{\Am}_{b}} \big( \prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({b})}) \big ) \big( \prod_{a \in {\A_{m}}} \big( \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \big) \big)  \label{eqn.temp1} \\
+&=& \sum_{n=1}^{m-1} \sum_{\gcompPrev \in e_{n}} \big(  \sum_{\vec{g}^{\Am}_{b}} \big( \prod_{a \in {\Am}} P^{\Am}(s_a \mid \mathbf{g}^{\Am}_{V({b})}) \big ) \big( \prod_{a \in {\A_{m}}} \big( \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big) \big) \big)  \label{eqn.temp1} \\
 %
-&=& \sum_{m'=1}^{m-1} \sum_{\gcompPrev \in e_{m'}}  \big(  \epsilon^{\#(orph(\XrmPrev)) + 1} \times (1-\epsilon)^{\#(off(\A_{m-1}))}  \label{eqn.temp2} \\ 
-& & \times \big( \prod_{a \in {\A_{m}}, a \neq b} \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big)  \\
-& & \times \sum_{r_b} \big(P(r_b \mid s_b = 1) \sum_{\vec{g}^{\Am}_{b}} \big( \epsilon^{-\#(H^{\X_{m-1}})}(\vec{g}^{\Am}_b) \prod_{k=1}^{n(b)} P^{\Am}(g_{b,k} \mid r_b) \big) \big) \big) \nonumber \\
+&=& \sum_{n=1}^{m-1} \sum_{e_{n}} \epsilon^{\#(orph(\XrmPrev))} \times (1-\epsilon)^{\#(off(\A_{m-1}))}  \label{eqn.temp2} \\ 
+& & \times \big( \prod_{t=1}^{m-1} \sum_{r_{a_t}} P(r_{a_t} \mid s_{a_t}) \prod_{k=1}^{n({a_t})} P^{\Am}(g_{{a_t},k} \mid r_{a_t}) \big)  \\
+& & \times \sum_{r_{a_m}} \big(P(r_{a_m} \mid s_{a_m} = 1) \sum_{\vec{g}^{\Am}_{{a_m}}} \big( \epsilon^{-\#(H^{\X_{m-1}})}(\vec{g}^{\Am}_{a_m}) \prod_{k=1}^{n({a_m})} P^{\Am}(g_{{a_m},k} \mid r_{a_m}) \big) \big) \big) \nonumber \\
 %
-&=& \sum_{m'=1}^{m-1} \sum_{\gcompPrev \in e_{m'}}  \big(  \epsilon^{\#(orph(\XrmPrev)) + 1} \times (1-\epsilon)^{\#(off(\A_{m-1}))}  \label{eqn.temp2} \\ 
-& & \times \big( \prod_{a \in {\A_{m}}, a \neq b} \sum_{r_a} P(r_a \mid s_a) \prod_{k=1}^{n(a)} P^{\Am}(g_{a,k} \mid r_a) \big)  \\
-& & \times \sum_{r_b} \big(P(r_b \mid s_b = 1) \sum_{\vec{g}^{\Am}_{b}} \big( \epsilon^{-\#(H^{\X_{m-1}})}(\vec{g}^{\Am}_b) \prod_{k=1}^{n(b)} P^{\Am}(g_{b,k} \mid r_b) \big) \big) \big) \nonumber \\
+&=& \epsilon^{\#(orph(\XrmPrev))} \times (1-\epsilon)^{\#(off(\A_{m-1}))} \\ 
+& & \times \sum_{n=1}^{m-1} \sum_{e_{n}} \big( \prod_{t=1}^{m-1} \sum_{r_{a_t}} P(r_{a_t} \mid s_{a_t}) \prod_{k=1}^{n({a_t})} P^{\Am}(g_{{a_t},k} \mid r_{a_t}) \big)  \\
+& & \times \sum_{r_{a_m}} \big(P(r_{a_m} \mid s_{a_m} = 1) \sum_{\vec{g}^{\Am}_{{a_m}}} \big( \epsilon^{-\#(H^{\X_{m-1}})}(\vec{g}^{\Am}_{a_m}) \prod_{k=1}^{n({a_m})} P^{\Am}(g_{{a_m},k} \mid r_{a_m}) \big) \big) \big) \nonumber \\
+%
+&=& \epsilon^{\#(orph(\XrmPrev))} \times (1-\epsilon)^{\#(off(\A_{m-1}))} \label{topdownfinal} \\ 
+& & \times \sum_{n=1}^{m-1} \big( \nonumber \\
+& & \qquad \prod_{t=1}^{n-1} \big( \sum_{r_{a_t}} P(r_{a_t} \mid s_{a_t}) \big( \prod_{k : \vec{g}^{\Am}_{a_t,k} \neq \emptyset} P^{\Am}(g_{{a_t},k} \mid r_{a_t}) \big) \big( \prod_{k : \vec{g}^{\Am}_{a_t,k} = \emptyset} P^{\Am}(g_{{a_t},k} = \emptyset \mid r_{a_t}) \big) \big) \nonumber \\
+& & \qquad \times \big( \sum_{r_{a_n}} P(r_{a_n} \mid s_{a_n}) \big( \prod_{k : \vec{g}^{\Am}_{a_n,k} \neq \emptyset} P^{\Am}(g_{{a_n},k} \mid r_{a_n}) \big) \big( 1 - \prod_{k : \vec{g}^{\Am}_{a_n,k} = \emptyset} P^{\Am}(g_{{a_n},k} = \emptyset \mid r_{a_n}) \big) \big) \nonumber \\
+& & \qquad \times \big( \prod_{t=n+1}^{m} \sum_{r_{a_t}} P(r_{a_t} \mid s_{a_t}) \big( \prod_{k : \vec{g}^{\Am}_{a_t,k} \neq \emptyset} P^{\Am}(g_{{a_t},k} \mid r_{a_t}) \big) \big) \nonumber \\
+& & \qquad \times \sum_{r_{a_m}} \big(P(r_{a_m} \mid s_{a_m} = 1) \sum_{\vec{g}^{\Am}_{{a_m}}} \big( \epsilon^{-\#(H^{\X_{m-1}})}(\vec{g}^{\Am}_{a_m}) \prod_{k=1}^{n({a_m})} P^{\Am}(g_{{a_m},k} \mid r_{a_m}) \big) \big) \nonumber \\
+& & \big) \nonumber
 \end{eqnarray}
 
-where we have used the result from Eqn. \ref{bottomup} in going from Eqn. \ref{eqn.temp1} to Eqn. \ref{eqn.temp2}.
+where we have equivalently expressed $\prod_{a \in \Am, a \neq b}$ as $\prod_{t=1}^m$, referring to brick as $a_t$ instead of $a$. Also, we have used the result from Eqn. \ref{bottomup} in going from Eqn. \ref{eqn.temp1} to Eqn. \ref{eqn.temp2}, except noting that for this event, brick $b$ does not root itself, hence we have $\epsilon^{\#(orph(\XrmPrev))}$ instead of $\epsilon^{\#(orph(\XrmPrev))+1}$. Lastly, we note that the last line of Eqn. \ref{topdownfinal} is the same as Eqn. \ref{bottomup}, and its approximation is given in Eqn. \ref{eqn.approxBottomUpFinal}.
 
-
+We can compute the terms in the summation $\sum_{n=1}^{m-1}$ using dynamic programming. $\forall m$, we compute the quantities
+%
+\begin{eqnarray}
+& &\sum_{r_{a_m}} P(r_{a_m} \mid s_{a_m}) \big( \prod_{k : \vec{g}^{\Am}_{a_m,k} \neq \emptyset} P^{\Am}(g_{{a_m},k} \mid r_{a_m}) \big) \big( \prod_{k : \vec{g}^{\Am}_{a_m,k} = \emptyset} P^{\Am}(g_{{a_m},k} = \emptyset \mid r_{a_m}) \big) \\
+%
+& & \sum_{r_{a_m}} P(r_{a_m} \mid s_{a_m}) \big( \prod_{k : \vec{g}^{\Am}_{a_m,k} \neq \emptyset} P^{\Am}(g_{{a_m},k} \mid r_{a_m}) \big) \big( 1 - \prod_{k : \vec{g}^{\Am}_{a_m,k} = \emptyset} P^{\Am}(g_{{a_m},k} = \emptyset \mid r_{a_m}) \big) \\
+%
+& & \sum_{r_{a_m}} \big(P(r_{a_m} \mid s_{a_m} = 1) \sum_{\vec{g}^{\Am}_{{a_m}}} \big( \epsilon^{-\#(H^{\X_{m-1}})}(\vec{g}^{\Am}_{a_m}) \prod_{k=1}^{n({a_m})} P^{\Am}(g_{{a_m},k} \mid r_{a_m}) \big) \big)
+\end{eqnarray}
+%
+and piece them together as appropriate when evaluating terms in encapsulated in the summation $\sum_{n=1}^{m-1}$. The computation to compute these quantities takes  $O(m)$ time, and there are $O(m-1)$ combinations to consider for these quantities (the $m-1$ different events outlined above), so computation of Eqn. \ref{topdownfinal} is $O(m)$ overall, which we feel is reasonable.
+%
 
  %, where the $m$th event is the event that $\exists k$ s.t. $g^{\Am}_{c,k} = b$
 

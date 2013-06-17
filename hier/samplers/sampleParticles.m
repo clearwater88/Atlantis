@@ -39,10 +39,22 @@ function [allParticles,allConnPars,allConnChilds,saliencyScores] = sampleParticl
         end
         for (i=1:numel(particles))
            logProbParticle(i) =  evalParticleLogProbPrior(particles{i},connChilds{i}, connPars{i}, ruleStruct, nPosesCell, probMapCells, params);
+           logProbParticle(i) = logProbParticle(i) + sum(log(likes{i}(:)./counts{i}(:)));
         end
         
         [cellType,cellLocIdx,saliencyScores(end+1),ratiosImOldParticle,logLikeCellOldParticle,logProbOptionsAll,logPsumGNoPoint,logPsumG,stop] = ...
-            getNextSaliencyLoc(particles,likes,counts,particleProbs,dirtyRegion,likePxStruct,ratiosIm,logLikeCell,likePxIdxCells,connChilds,connPars,cellParams,ruleStruct,probMapCells,params);
+            getNextSaliencyLoc(particles,likes,counts,particleProbs,dirtyRegion,nPosesCell,likePxStruct,ratiosIm,logLikeCell,likePxIdxCells,connChilds,connPars,cellParams,ruleStruct,probMapCells,params);
+                
+        % reweight
+        logProbOptions = zeros(3,numel(logProbOptionsAll));
+        for (i=1:numel(logProbOptionsAll))
+           logProbOptions(:,i) = logProbOptionsAll{i}{cellType}(cellLocIdx,:)';
+        end
+        localizedProbs = logsum(logProbOptions,1);
+        
+        particleProbs = localizedProbs-logProbParticle;
+        particleProbs = exp(particleProbs-logsum(particleProbs,2));
+        particleProbs
         
         display(['Cell type: ', int2str(cellType)]);
         
@@ -56,25 +68,6 @@ function [allParticles,allConnPars,allConnChilds,saliencyScores] = sampleParticl
         newConnChilds = cell(params.nParticles,1);
         newConnPars = cell(params.nParticles,1);
 
-        % particle reweight- this is wrong
-%          logProbOptions = zeros(3,numel(particles),1);
-        
-%         for(n=1:numel(particles))
-%             particle = particles{n};
-%             
-%             likesParticle = likes{n};
-%             countsParticle = counts{n};
-%             connChild = connChilds{n};
-%             connPar = connPars{n};
-%             
-%             [logProbOptions(:,n)] = getProbsOn(cellType,cellLocIdx,particle,connChild,connPar,ruleStruct,probMapCells,likesParticle,countsParticle,likePxStruct,cellParams,params);
-%         end
-%         
-%         totLogProbOptions=logsum(logProbOptions,1)';
-%         particleProbs = exp(totLogProbOptions - logsum(totLogProbOptions,1));
-%         particleProbs = particleProbs/sum(particleProbs); % matlab lacks precision for mnrnd
-        
-        particleProbs = ones(numel(particles),1)/numel(particles);
         
         for(n=1:params.nParticles)
             particleId = find(mnrnd(1,particleProbs),1,'first');
@@ -95,17 +88,15 @@ function [allParticles,allConnPars,allConnChilds,saliencyScores] = sampleParticl
             % who its parents are
             connPar{end+1} = [];
             
-            logProbOptions = logProbOptionsAll{particleId}{cellType}(cellLocIdx,:)';
+            %logProbOptions = logProbOptionsAll{particleId}{cellType}(cellLocIdx,:)';
             parentSlotProbs = sampleParentSlots(cellType, cellLocIdx, particle,connChild,ruleStruct,probMapCells);
             
             logPsumGNoPointUse = logPsumGNoPoint{particleId}{cellType}(cellLocIdx,:)';
             logPsumGUse = logPsumG{particleId};
             noConnectParent = exp(logPsumGNoPointUse-logPsumGUse);
             
-            probOptions = exp(logProbOptions - logsum(logProbOptions,1));
+            probOptions = exp(logProbOptions(:,i) - logsum(logProbOptions(:,i),1));
             probOptions = probOptions/sum(probOptions); % fucking matlab
-            
-            probOptions
             
             optionId = find(mnrnd(1,probOptions)==1);
 
@@ -151,10 +142,10 @@ function [allParticles,allConnPars,allConnChilds,saliencyScores] = sampleParticl
         brickIdx=brickIdx+1;
         %save('tempRes','allParticles','allParticleProbs','allLikes','allCounts','allConnPars','allConnChilds','templateStruct','saliencyScores','params','data','-v7.3');
         
-        figure(1); subplot(1,2,1); imshow(data);
-        st = viewAllParticles(newParticles,templateStruct,params.imSize);
-        subplot(1,2,2); imshow(st);
-        pause(0.2);
+        %figure(1); subplot(1,2,1); imshow(data);
+        %st = viewAllParticles(newParticles,templateStruct,params.imSize);
+        %subplot(1,2,2); imshow(st);
+        %pause(0.2);
 
     end
 end

@@ -3,6 +3,8 @@ function [res] = evalParticleLogProbPrior(bricks,connChild,connPar,ruleStruct,nP
     nBricks = size(bricks,2);
     nOrphan = sum(isSelfRooted(bricks,connPar));
     
+    nOff = sum(~getOn(bricks));
+    
     % compute pose probs
     logPoseProb = 0;
     for (i=1:nBricks)
@@ -34,6 +36,6 @@ function [res] = evalParticleLogProbPrior(bricks,connChild,connPar,ruleStruct,nP
         end
     end
     logProbPoint = sum(log(probPoint),1);    
-    res = nOrphan*log(params.probRoot) + logPoseProb + logProbPoint;
+    res = nOrphan*log(params.probRoot) + nOff*log(1-params.probRoot) + logPoseProb + logProbPoint;
 end
 

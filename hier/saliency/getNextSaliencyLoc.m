@@ -1,4 +1,4 @@
-function [type,cellLocIdx,val,ratiosIm,logProbCellRatio,logProbOptions,logPsumGNoPoint,logPsumG,stop] = getNextSaliencyLoc(particles,likesIm,countsIm,particleProbs,dirtyRegion,likePxStruct,ratiosImOld,logLikeCellOld,likePxIdxCells,connChilds,connPars,cellParams,ruleStruct,probMapCells,params)
+function [type,cellLocIdx,val,ratiosIm,logProbCellRatio,logProbOptions,logPsumGNoPoint,logPsumG,stop] = getNextSaliencyLoc(particles,likesIm,countsIm,particleProbs,dirtyRegion,nPosesCell,likePxStruct,ratiosImOld,logLikeCellOld,likePxIdxCells,connChilds,connPars,cellParams,ruleStruct,probMapCells,params)
     
     BOUNDARY = -10000;
     
@@ -11,6 +11,7 @@ function [type,cellLocIdx,val,ratiosIm,logProbCellRatio,logProbOptions,logPsumGN
     
     childMessages = cell(numel(particleProbs),1);
     nBricksOnSelfRoot = zeros(numel(particleProbs),1);
+    nBricksOff =  zeros(numel(particleProbs),1);
     
     for (i=1:numel(particleProbs))
 
@@ -19,7 +20,7 @@ function [type,cellLocIdx,val,ratiosIm,logProbCellRatio,logProbOptions,logPsumGN
         temp = evalNewLikeRatio(likesIm{i},countsIm{i},likePxStruct,dirtyRegion,ratiosImOld{i});
         ratiosIm{i} = temp;
         
-        temp = getLogLikeCellRatio(ratiosIm{i},cellParams,likePxIdxCells,dirtyRegion,logLikeCellOld{i});
+        temp = getLogLikeCellRatio(ratiosIm{i},cellParams,likePxIdxCells,dirtyRegion,nPosesCell,logLikeCellOld{i});
         logProbCellRatio{i} = temp;
         
         [logPsumGNoPoint{i},logPsumG{i}] = getTopDownMsgs(particles{i},cellParams,connChilds{i},ruleStruct,probMapCells);
@@ -30,10 +31,10 @@ function [type,cellLocIdx,val,ratiosIm,logProbCellRatio,logProbOptions,logPsumGN
         selfRoot = isSelfRooted(particles{i},connPars{i})==1;
         bricksOnSelfRoot = particles{i}(:,selfRoot);
         nBricksOnSelfRoot(i) = size(bricksOnSelfRoot,2);
-        
+        nBricksOff(i) = sum(~getOn(particles{i}));
     end
 
-    [saliencyMaps,logProbOptions] = computeSaliencyMap(defaultLogLikeIm,logProbCellRatio,logPsumGNoPoint,logPsumG,childMessages,nBricksOnSelfRoot,particleProbs,cellParams,params);
+    [saliencyMaps,logProbOptions] = computeSaliencyMap(defaultLogLikeIm,logProbCellRatio,logPsumGNoPoint,logPsumG,childMessages,nBricksOnSelfRoot,nBricksOff,particleProbs,cellParams,params);
     
     nTry = 0;
     nTotLoc = 0;

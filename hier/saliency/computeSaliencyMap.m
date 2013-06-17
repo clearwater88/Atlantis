@@ -1,4 +1,4 @@
-function [saliencyMaps,logProbOptions] = computeSaliencyMap(defaultLogLikeIm,logProbCellsRatio,logPsumGNoPoints,logPsumGs,childMessages,nBricksOnSelfRoots,particleProbs,cellParams,params)
+function [saliencyMaps,logProbOptions] = computeSaliencyMap(defaultLogLikeIm,logProbCellsRatio,logPsumGNoPoints,logPsumGs,childMessages,nBricksOnSelfRoots,nBricksOff, particleProbs,cellParams,params)
 
     saliencyMaps = cell(cellParams.nTypes,1);
     for(n=1:cellParams.nTypes)
@@ -17,9 +17,9 @@ function [saliencyMaps,logProbOptions] = computeSaliencyMap(defaultLogLikeIm,log
     for (i=1:numel(particleProbs))
         for(n=1:cellParams.nTypes)
             % incorporate image evidence/self rooting stuff
-            logProbOptions{i}{n}(:,1) = logProbOptions{i}{n}(:,1) + defaultLogLikeIm(i) + log(1-params.probRoot);
-            logProbOptions{i}{n}(:,2) = logProbOptions{i}{n}(:,2) + defaultLogLikeIm(i) + logProbCellsRatio{i}{n} + log(params.probRoot);
-            logProbOptions{i}{n}(:,3) = logProbOptions{i}{n}(:,3) + defaultLogLikeIm(i) + logProbCellsRatio{i}{n};
+            logProbOptions{i}{n}(:,1) = logProbOptions{i}{n}(:,1) + defaultLogLikeIm(i) + nBricksOnSelfRoots(i)*log(params.probRoot) + (nBricksOff(i)+1)*log(1-params.probRoot);
+            logProbOptions{i}{n}(:,2) = logProbOptions{i}{n}(:,2) + defaultLogLikeIm(i) + logProbCellsRatio{i}{n} + (1+nBricksOnSelfRoots(i))*log(params.probRoot) + nBricksOff(i)*log(1-params.probRoot) ;
+            logProbOptions{i}{n}(:,3) = logProbOptions{i}{n}(:,3) + defaultLogLikeIm(i) + logProbCellsRatio{i}{n} + nBricksOnSelfRoots(i)*log(params.probRoot) + nBricksOff(i)*log(1-params.probRoot)  ;
             
             logPsumGNoPointsUse = sum(logPsumGNoPoints{i}{n},2);
             logA= sum(logPsumGs{i});
@@ -31,9 +31,9 @@ function [saliencyMaps,logProbOptions] = computeSaliencyMap(defaultLogLikeIm,log
             logProbOptions{i}{n}(:,3) = logProbOptions{i}{n}(:,3) + logDiff;
             
             % incorproate bottom-up messages
-            logProbOptions{i}{n}(:,1) = logProbOptions{i}{n}(:,1) + nBricksOnSelfRoots(i)*log(params.probRoot);
-            logProbOptions{i}{n}(:,2) = logProbOptions{i}{n}(:,2) + nBricksOnSelfRoots(i)*log(params.probRoot) + childMessages{i}{n};
-            logProbOptions{i}{n}(:,3) = logProbOptions{i}{n}(:,3) + nBricksOnSelfRoots(i)*log(params.probRoot) + childMessages{i}{n};
+            %logProbOptions{i}{n}(:,1) = logProbOptions{i}{n}(:,1);
+            logProbOptions{i}{n}(:,2) = logProbOptions{i}{n}(:,2)  + childMessages{i}{n};
+            logProbOptions{i}{n}(:,3) = logProbOptions{i}{n}(:,3) + childMessages{i}{n};
              
             % this is what i was using before. It's wrong.
 %             logProbOptions{i}{n}(:,1) = logProbOptions{i}{n}(:,1) + nBricksOnSelfRoots(i)*log(params.probRoot);

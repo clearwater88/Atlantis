@@ -1,6 +1,6 @@
 startup;
 trainInds = 6:10;
-testInd = 1:5;
+testInd = 1:10;
 nTest = numel(testInd);
 
 params = initParams;
@@ -15,7 +15,7 @@ end
 
 probMapStruct = initProbMaps(ruleStruct,templateStruct.app);
 
-for (i=1:nTest)
+for (i=6:nTest)
     
     [cleanTestData,testData] = readData(params,templateStruct.app{end},testInd(i));
     %testData=cleanTestData;

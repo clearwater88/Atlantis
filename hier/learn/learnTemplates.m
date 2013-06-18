@@ -16,7 +16,7 @@ function [templateStruct] = learnTemplates(trainInds,params,templateStruct)
     count = 1;
     for (i=1:numel(trainData))
        dataUse = trainData{i};
-       [angle,convs,resp] = getOrientation(double(dataUse),templateStruct.SIGMA,templateStruct.angles);
+       angle = getOrientation(double(dataUse),templateStruct.SIGMA);
        
        inkLocs = find(dataUse(:) > 0.5);
        locInd = randi(numel(inkLocs),nLocs,1);
@@ -79,9 +79,9 @@ function [templateStruct] = learnTemplates(trainInds,params,templateStruct)
 
 end
 
-function [res,resConv,resp] = getOrientation(im,sigma,angles)
+function res = getOrientation(im,sigma)
     im = double(im);
-
+    
     cellSize = 10*ceil((3*sigma)/2)+1;
     [filt] = d2Gauss(sigma,cellSize);
     
@@ -89,24 +89,24 @@ function [res,resConv,resp] = getOrientation(im,sigma,angles)
         resConv(:,:,i) = conv2(im,filt(:,:,i),'same');
     end
     
-    resp = zeros([size(resConv,1),size(resConv,2),numel(angles)]);
-    for (i=1:numel(angles))
-        angle = angles(i);
-        resp(:,:,i) = (1/3)*(1+cos(2*angle)*resConv(:,:,1)) + ...
-                      (1/3)*(1+cos(2*(angle-pi/3))*resConv(:,:,2)) + ...
-                      (1/3)*(1+cos(2*(angle-2*pi/3))*resConv(:,:,3));
+    temp = (sqrt(3)*(resConv(:,:,2) - resConv(:,:,3)))./ ...
+           (2*resConv(:,:,1) - resConv(:,:,2) - resConv(:,:,3));
                       
-    end
-    [~,win] = min(resp,[],3);
-    res = angles(win);
+    angleSol = atan(temp)/2;
+    angleSol(isnan(angleSol)) = 0; % redfine 0/0 as 0.
     
-%     temp = (sqrt(3)*(resConv(:,:,2) - resConv(:,:,3)))./ ...
-%            (2*resConv(:,:,1) - resConv(:,:,2) - resConv(:,:,3));
-%                       
-%     res2 = atan(temp)/2+pi;
-%     res2(isnan(res2)) = 0;
-%     res=res2;
+    ag = [0,pi/2];
+    for (i=1:numel(ag))
+        steer(:,:,i) = evalSteerable(angleSol+ag(i), resConv);
+    end
+    [~,win] = min(steer,[],3);
+    res = angleSol+ag(win);
+end
 
+function res = evalSteerable(angle, resConv) 
+    res = (1/3)*bsxfun(@times,1+cos(2*angle),resConv(:,:,1)) + ...
+          (1/3)*bsxfun(@times,1+cos(2*(angle-pi/3)),resConv(:,:,2)) + ...
+          (1/3)*bsxfun(@times,1+cos(2*(angle-2*pi/3)),resConv(:,:,3));
 end
 
 function [res] = d2Gauss(sigma,cellSize)

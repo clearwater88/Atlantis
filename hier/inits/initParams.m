@@ -7,7 +7,7 @@ function [params] = initParams()
     params.angleDisc = [-pi,pi/8,pi];
 
     params.dataFolder = '../BSDSdata/';
-    params.downSampleFactor = 8;
+    params.downSampleFactor = 4;
     
 end
 

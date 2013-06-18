@@ -44,12 +44,12 @@ function [templateStruct] = initTemplates()
                          
     templateStruct.app{end+1} = templateStruct.bg;
                          
-    templateStruct.sizes = [15,1; ...
-                            11,1; ...
-                            7,1];
+    templateStruct.sizes = [15,3; ...
+                            11,3; ...
+                            7,3];
                         
-    templateStruct.doLearning = 0;
-    templateStruct.SIGMA = 0.5;
+    templateStruct.doLearning = 1;
+    templateStruct.SIGMA = 1;
     templateStruct.angles = 0:pi/8:pi;
     templateStruct.toString = @toString;
 end

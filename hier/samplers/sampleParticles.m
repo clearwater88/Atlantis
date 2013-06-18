@@ -142,10 +142,10 @@ function [allParticles,allConnPars,allConnChilds,saliencyScores] = sampleParticl
         brickIdx=brickIdx+1;
         %save('tempRes','allParticles','allParticleProbs','allLikes','allCounts','allConnPars','allConnChilds','templateStruct','saliencyScores','params','data','-v7.3');
         
-        %figure(1); subplot(1,2,1); imshow(data);
-        %st = viewAllParticles(newParticles,templateStruct,params.imSize);
-        %subplot(1,2,2); imshow(st);
-        %pause(0.2);
+        figure(1); subplot(1,2,1); imshow(data);
+        st = viewAllParticles(newParticles,templateStruct,params.imSize);
+        subplot(1,2,2); imshow(st);
+        pause(0.2);
 
     end
 end

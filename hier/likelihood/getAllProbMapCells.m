@@ -29,8 +29,7 @@ function [res,resPixels] = getAllProbMapCells(cellParams,probMapStruct,ruleStruc
         tic
         for (slot=1:nSlots)
             chType = ch(slot);            
-            for (loc=1:size(locsUse,1))
-                
+            for (loc=1:size(locsUse,1))                
                 [res{ruleId,slot,loc}, resPixels{ruleId,slot,loc} ]= ...
                     getProbMapCells(ruleId,slot,locsUse(loc,:), ...
                                     probMapStruct, ...

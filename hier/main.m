@@ -8,14 +8,14 @@ ruleStruct = initRules;
 templateStruct = initTemplates;
 
 if(templateStruct.doLearning == 1)
-    templateStruct = learnTemplates(trainInds,params,templateStruct);
+   templateStruct = learnTemplates(trainInds,params,templateStruct);
 end
 % trainData{1} = zeros([40,60]);
 % trainData{1}(:,1:10:end) = 1;
 
 probMapStruct = initProbMaps(ruleStruct,templateStruct.app);
 
-for (i=6:nTest)
+for (i=1:nTest)
     
     [cleanTestData,testData] = readData(params,templateStruct.app{end},testInd(i));
     %testData=cleanTestData;

@@ -8,13 +8,15 @@ function [templateStruct] = learnTemplates(trainInds,params,templateStruct)
     nLocs = 500;
 
     templateMax = max(templateStruct.sizes,[],1);
-    
     templateStore = zeros([templateMax,numel(trainData)*nLocs]);
     
+    [xP,yP] = meshgrid(-(templateMax(2)-1)/2:(templateMax(2)-1)/2,-(templateMax(1)-1)/2:(templateMax(1)-1)/2);
+    pts = [yP(:),xP(:)];
+            
     count = 1;
     for (i=1:numel(trainData))
        dataUse = trainData{i};
-       angle = getOrientation(double(dataUse),templateStruct.SIGMA,templateStruct.angles);
+       [angle,convs,resp] = getOrientation(double(dataUse),templateStruct.SIGMA,templateStruct.angles);
        
        inkLocs = find(dataUse(:) > 0.5);
        locInd = randi(numel(inkLocs),nLocs,1);
@@ -23,15 +25,11 @@ function [templateStruct] = learnTemplates(trainInds,params,templateStruct)
         for (j=1:numel(locs))
             [y,x]= ind2sub(size(dataUse),locs(j));
             angleUse = angle(y,x);
-            if(isnan(angleUse)) continue; end;
-            %angleUse = pi/2;
+            if(isnan(angleUse)) continue; end;            
             
-            [xP,yP] = meshgrid(-(templateMax(2)-1)/2:(templateMax(2)-1)/2,-(templateMax(1)-1)/2:(templateMax(1)-1)/2);
-            ptsCentred = [yP(:),xP(:)];
-            
-            R = [cos(angleUse),sin(angleUse);-sin(angleUse),cos(angleUse)];
+            R = [cos(angleUse),-sin(angleUse);sin(angleUse),cos(angleUse)];
 
-            ptsRotate = ptsCentred*R';
+            ptsRotate = pts*R';
             ptsCentred = bsxfun(@plus,ptsRotate,[y,x]);
             ptsCentred = round(ptsCentred);
              
@@ -43,42 +41,33 @@ function [templateStruct] = learnTemplates(trainInds,params,templateStruct)
                continue;
             end
            
-            
             ptsInd = sub2ind(size(dataUse),ptsCentred(:,1),ptsCentred(:,2));
+
+            templateStore(:,:,count) = reshape(dataUse(ptsInd),templateMax);
             
-            ptsInd = max(ptsInd,1); ptsInd = min(ptsInd,numel(dataUse));
-            
-            temp = reshape(dataUse(ptsInd),templateMax);
-            
-            templateStore(:,:,count) = temp;
             ag(count) = angleUse;
             count = count+1;
             
-            
-%             [dXtemp,dYtemp] = gradient(double(temp));
-            
-%             [dXtemp((end+1)/2,(end+1)/2),dYtemp((end+1)/2,(end+1)/2)]
-            
-%             figure(1);
-%             % bigger
-%             a=(dataUse(y-(templateMax(1)+1)/2:y+(templateMax(1)+1)/2, ...
-%                                x-(templateMax(1)+1)/2:x+(templateMax(1)+1)/2));
-%             imshowFull(a);
 %             figure(2);
-%             imshowFull(temp);
-%             title(int2str(j));
-            
+%             imagescGray(templateStore(:,:,count-1));
+%             
+%             yStart = y-(templateMax(1)-1)/2;
+%             yEnd = y+(templateMax(1)-1)/2;
+%             xStart = x-(templateMax(2)-1)/2;
+%             xEnd = x+(templateMax(1)-1)/2;
+%             
+%             if (yStart < 1 || yEnd > size(dataUse,1) || ...
+%                 xStart < 1 || xEnd > size(dataUse,2)) continue; end;
+%         
+%             figure(1);
+%             imagescGray(dataUse(yStart:yEnd,xStart:xEnd));
+%             angleUse
+%             pause;
         end
             
     end
     templateStore(:,:,count:end) = [];
     res = mean(templateStore,3);
-    
-%     for (i=1:size(templateStore,3))
-%         imagescGray(templateStore(:,:,i));
-%         ag(i)
-%         pause;
-%     end
 
     centre = (size(res)+1)/2;
     for (i=1:size(templateStruct.sizes,1))
@@ -88,47 +77,50 @@ function [templateStruct] = learnTemplates(trainInds,params,templateStruct)
     end
     templateStruct.app{end+1} = templateStruct.bg;
 
-
-
 end
 
-function angle = getOrientation(im,sigma,angles)
-
+function [res,resConv,resp] = getOrientation(im,sigma,angles)
     im = double(im);
 
-    cellSize = 2*ceil((3*sigma)/2)+1;
-    [resX,resY] = dGauss(sigma,cellSize);
+    cellSize = 10*ceil((3*sigma)/2)+1;
+    [filt] = d2Gauss(sigma,cellSize);
+    
+    for (i=1:3)
+        resConv(:,:,i) = conv2(im,filt(:,:,i),'same');
+    end
+    
+    resp = zeros([size(resConv,1),size(resConv,2),numel(angles)]);
+    for (i=1:numel(angles))
+        angle = angles(i);
+        resp(:,:,i) = (1/3)*(1+cos(2*angle)*resConv(:,:,1)) + ...
+                      (1/3)*(1+cos(2*(angle-pi/3))*resConv(:,:,2)) + ...
+                      (1/3)*(1+cos(2*(angle-2*pi/3))*resConv(:,:,3));
+                      
+    end
+    [~,win] = min(resp,[],3);
+    res = angles(win);
+    
+%     temp = (sqrt(3)*(resConv(:,:,2) - resConv(:,:,3)))./ ...
+%            (2*resConv(:,:,1) - resConv(:,:,2) - resConv(:,:,3));
+%                       
+%     res2 = atan(temp)/2+pi;
+%     res2(isnan(res2)) = 0;
+%     res=res2;
 
-    filtX = cos(0)*resX + sin(0)*resY;
-    filtY = cos(pi/2)*resX + sin(pi/2)*resY; 
-    angle = atan(conv2(im,filtY)./conv2(im,filtX));
-
-%     for (i=1:numel(angles))
-%         filt = cos(angles(i))*resX + sin(angles(i))*resY;
-% 
-%         resp(:,:,i) = conv2(im,filt);
-% % 
-% %         figure(1);
-% %         imagescGray(filt);
-% %         figure(2);
-% %         imagescGray(abs(resp(:,:,i)));
-% %         pause;
-% 
-%     end
-%     [~,ind] = max(resp,[],3);
-%     angle = angles(ind);
 end
 
-function [resX,resY] = dGauss(sigma,cellSize)
+function [res] = d2Gauss(sigma,cellSize)
+    
     x = -(cellSize-1)/2:(cellSize-1)/2;
     y = -(cellSize-1)/2:(cellSize-1)/2;
     
     [xPts,yPts] = meshgrid(x(:),y(:));
     pts = [yPts(:),xPts(:)];
-    resX = reshape(mvnpdf(pts,[0,0],[sigma,sigma]),[cellSize,cellSize]);
-    
-    resX = bsxfun(@times,resX,-x/sigma^2);
-    resY = resX';
-end
 
+    res(:,:,1) = reshape(mvnpdf(pts,[0,0],[sigma,sigma]),[cellSize,cellSize]);
+    res(:,:,1) = bsxfun(@times,res(:,:,1),x.^2/sigma^4-1/sigma^2);
+    
+    res(:,:,2) = imrotate(res(:,:,1),60,'bilinear','crop');
+    res(:,:,3) = imrotate(res(:,:,1),120,'bilinear','crop');
+end
 

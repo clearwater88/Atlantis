@@ -164,6 +164,8 @@ pip-log.txt
 
 # MATLAB
 *.mat
+*.bmp
+res/*
 writeup/*.aux
 writeup/*.log
 writeup/*.gz

@@ -28,7 +28,7 @@ for (i=1:nTest)
              'sz-', int2str(params.imSize(1)), 'x', int2str(params.imSize(2)), '_', ...
              cellParams.toString(cellParams)];
     templateStr = templateStruct.toString(templateStruct);
-    saveStr = ['test', int2str(i), '_', mapStr, '_', templateStr;];
+    saveStr = ['test', int2str(i), '_', probMapStruct.toString(probMapStruct), '_', params.toString(params), '_', cellParams.toString(cellParams), '_', templateStr;];
          
     if(exist([mapStr,'.mat'],'file'))
         display('loading probmap file');
@@ -39,8 +39,8 @@ for (i=1:nTest)
         save(mapStr,'probMapCells','probMapPixels', '-v7.3');
     end
     
-    [allParticles,allConnPars,allConnChilds, saliencyScores] = sampleParticles(testData,probMapCells,cellParams,params,ruleStruct,templateStruct);
-    save(saveStr,'cleanTestData', 'testData', ...
-                 'templateStruct','params', ...
+    [allParticles,allConnPars,allConnChilds, allParticleProbs, saliencyScores] = sampleParticles(testData,probMapCells,cellParams,params,ruleStruct,templateStruct);
+    save(saveStr,'cleanTestData', 'testData', 'allParticleProbs', ...
+                 'templateStruct', 'probMapStruct', 'cellParams', 'params', ...
                  'allParticles','allConnPars','allConnChilds', 'saliencyScores', '-v7.3');
 end

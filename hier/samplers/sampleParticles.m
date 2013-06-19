@@ -1,4 +1,4 @@
-function [allParticles,allConnPars,allConnChilds,saliencyScores] = sampleParticles(data,probMapCells,cellParams,params,ruleStruct,templateStruct)
+function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores] = sampleParticles(data,probMapCells,cellParams,params,ruleStruct,templateStruct)
     [likeTemp,countsTemp] = initLike(data,templateStruct);
     [likePxStruct] = evalLike(data,templateStruct,zeros(size(data)),zeros(size(data)),params);
     
@@ -15,6 +15,8 @@ function [allParticles,allConnPars,allConnChilds,saliencyScores] = sampleParticl
     allParticles = {};
     allConnPars = {};
     allConnChilds = {};
+    allParticleProbs = {};
+    
     saliencyScores = [];
 
     % initialize
@@ -54,7 +56,10 @@ function [allParticles,allConnPars,allConnChilds,saliencyScores] = sampleParticl
         
         particleProbs = localizedProbs-logProbParticle;
         particleProbs = exp(particleProbs-logsum(particleProbs,2));
+        allParticleProbs{end+1} = particleProbs;
+        
         particleProbs
+        
         
         display(['Cell type: ', int2str(cellType)]);
         
@@ -71,6 +76,7 @@ function [allParticles,allConnPars,allConnChilds,saliencyScores] = sampleParticl
         
         for(n=1:params.nParticles)
             particleId = find(mnrnd(1,particleProbs),1,'first');
+            
             particle = particles{particleId};
             
             likesParticle = likes{particleId};

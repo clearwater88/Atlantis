@@ -1,4 +1,4 @@
-function [res,resPixels] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params)
+function [res] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params)
     % resPixels: probMap across pixels. [imSize x nAngles] per each element
     %            of cell array
 
@@ -17,8 +17,7 @@ function [res,resPixels] = getAllProbMapCells(cellParams,probMapStruct,ruleStruc
     end
     
     res = cell(nRules,maxSlots,maxLocs);
-    resPixels = cell(nRules,maxSlots,maxLocs);
-     
+    
     for (ruleId=1:nRules)
         
         type = ruleStruct.parents(ruleId);
@@ -29,16 +28,17 @@ function [res,resPixels] = getAllProbMapCells(cellParams,probMapStruct,ruleStruc
         tic
         for (slot=1:nSlots)
             chType = ch(slot);            
-            for (loc=1:size(locsUse,1))       
-                [res{ruleId,slot,loc}, resPixels{ruleId,slot,loc} ]= ...
+            for (loc=1:size(locsUse,1)) 
+                [res{ruleId,slot,loc}]= ...
                     getProbMapCells(ruleId,slot,locsUse(loc,:), ...
                                     probMapStruct, ...
                                     params.imSize,params.angleDisc, ...
                                     cellCentres{chType}, cellDims(chType,:));
+                                
             end
         end
         toc
-        
     end     
+    
 end
 

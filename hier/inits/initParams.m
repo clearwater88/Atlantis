@@ -4,6 +4,7 @@ function [params] = initParams()
     params.nParticles = 20;
     
     % start,increment,end
+    % angles are -pi:pi
     params.angleDisc = [-pi,pi/8,pi];
 
     params.dataFolder = '../BSDSdata/';

@@ -11,7 +11,9 @@ function [connChild,connPar] = sampleChildren(parentId,allProbMaps,bricks,ruleSt
         chType = ruleStruct.children(ruleId,i);
         % access allProbMaps with probMap{ruleId,slot,loc index}
 
-        probMap = allProbMaps{ruleId,i,bricks(3,parentId)};
+        [~,probMap] = adjustProbMap(allProbMaps,chType,ruleId,i,bricks,getLocIdx(bricks,parentId)); % specific parent
+        % probMap = allProbMaps{ruleId,i,bricks(3,parentId)};
+        
         % modify with rooting probs for children who would no longer have
         % to root themselves
         % child may no longer root itself, if pointed to by previous slot.

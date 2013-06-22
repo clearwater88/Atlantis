@@ -12,10 +12,10 @@ function [logProbCell] = getLogLikeCellRatio(ratios,cellParams,likePxIdxCells,di
         nElem = size(likePxIdxCellsUse,2);
         
         if(~isempty(dirtyRegion))
-            regionIntersect = doesIntersect(dirtyRegion,cellParams.boundaries{n});
+            regionIntersect = doesIntersect(dirtyRegion,cellParams.centreBoundaries{n});
             oldLogCellProbUse = logLikeCellOld{n};
         else
-            regionIntersect = ones(size(cellParams.boundaries{n},3),1);
+            regionIntersect = ones(size(cellParams.centreBoundaries{n},3),1);
         end
         dirty = find(regionIntersect==1);
         

@@ -6,10 +6,10 @@ function [likeStructPx] = evalLike(data,templateStruct,initLikes,initCounts,para
     nTemplates = numel(templateStruct.app)-1;
     
     likeStructPx.likes = cell(nTemplates,1);
-    likeStructPx.boundaries = cell(nTemplates,1);
     likeStructPx.poses = cell(nTemplates,1);
     likeStructPx.counts = cell(nTemplates,1);
     likeStructPx.masks = cell(nTemplates,1);
+    likeStructPx.bounds = cell(nTemplates,1);
     
     for (type=1:nTemplates)
 
@@ -28,7 +28,7 @@ function [likeStructPx] = evalLike(data,templateStruct,initLikes,initCounts,para
             
             for (x=1:size(data,1))
                 for(y=1:size(data,2))
-                    pt = [x,y,ag];
+                    pt = [x,y,ag]
                     boundary(:,1) = [(pt(1:2)-(size(rotTemplate)-1)/2)';ag];
                     boundary(:,2) = [(pt(1:2)+(size(rotTemplate)-1)/2)';ag];
                     
@@ -67,7 +67,7 @@ function [likeStructPx] = evalLike(data,templateStruct,initLikes,initCounts,para
         boundariesTemp(:,:,ct:end) = [];
         masksTemp(:,:,ct:end) = [];
 
-        likeStructPx.boundaries{type} = boundariesTemp;
+        likeStructPx.bounds{type} = boundariesTemp;
         likeStructPx.poses{type} = posesTemp;
         likeStructPx.likes{type} = likesTemp;
         likeStructPx.counts{type} = countsTemp;

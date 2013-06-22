@@ -6,7 +6,7 @@ function [ratios] = evalNewLikeRatio(initLike,initCounts,likePxStruct,dirtyRegio
     for (n=1:nTypes)
         likesUse = likePxStruct.likes{n};
         countsUse = likePxStruct.counts{n};
-        boundariesUse = likePxStruct.boundaries{n};
+        boundariesUse = likePxStruct.bounds{n};
         
         if(~isempty(dirtyRegion))
             regionIntersect = doesIntersect(dirtyRegion,boundariesUse);

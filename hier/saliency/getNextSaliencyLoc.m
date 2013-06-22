@@ -20,12 +20,10 @@ function [type,cellLocIdx,val,ratiosIm,logProbCellRatio,logProbOptions,logPsumGN
         temp = evalNewLikeRatio(likesIm{i},countsIm{i},likePxStruct,dirtyRegion,ratiosImOld{i});
         ratiosIm{i} = temp;
         
-        temp = getLogLikeCellRatio(ratiosIm{i},cellParams,likePxIdxCells,dirtyRegion,nPosesCell,logLikeCellOld{i});
-        logProbCellRatio{i} = temp;
+        logProbCellRatio{i} = getLogLikeCellRatio(ratiosIm{i},cellParams,likePxIdxCells,dirtyRegion,nPosesCell,logLikeCellOld{i});
         
         [logPsumGNoPoint{i},logPsumG{i}] = getTopDownMsgs(particles{i},cellParams,connChilds{i},ruleStruct,probMapCells);
-        %[childMessages{i}] = getBottomUpMsgs(particles{i},cellParams,connPars{i},ruleStruct,probMapCells,params);
-        [childMessages{i}] = getBottomUpMsgs2(particles{i},cellParams,connPars{i},ruleStruct,probMapCells,params);
+        [childMessages{i}] = getBottomUpMsgs(particles{i},cellParams,connPars{i},ruleStruct,probMapCells,params);
         
         % only self-rooted bricks will care if they get a parent
         selfRoot = isSelfRooted(particles{i},connPars{i})==1;

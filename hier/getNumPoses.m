@@ -1,20 +1,10 @@
-function [nPoses] = getNumPoses(cellParams,likePxStruct)
+function [nPoses] = getNumPoses(likePxIdxCells)
 
-    nTypes = numel(cellParams.centres);
+    nTypes = numel(likePxIdxCells);
     nPoses = cell(nTypes,1);
     
     for (n=1:nTypes)
-       centreType = cellParams.centres{n};
-       nLoc = size(centreType,1);
-       
-       tempPoses = ones(nLoc,1);
-       for (i=1:nLoc)
-           ids = find(getLikePxIdx(centreType(i,:), ...
-                                   cellParams.dims(n,:), ...
-                                   likePxStruct.boundaries{n}) == 1);
-           tempPoses(i) = numel(ids);
-       end
-        nPoses{n} = tempPoses;
+        nPoses{n} = sum(likePxIdxCells{n},1)';
     end
 end
 

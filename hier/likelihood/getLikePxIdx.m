@@ -1,5 +1,5 @@
 function res = getLikePxIdx(cellCentre,cellDims,boundaryPx)
-
+    error(blah);
     cellBoundaries = [cellCentre(1:2)-(cellDims(1:2)-1)/2;  cellCentre(1:2)+(cellDims(1:2)-1)/2]';
 
     spatialLow = squeeze(sum(bsxfun(@ge,boundaryPx(1:2,1,:),cellBoundaries(:,1)),1));

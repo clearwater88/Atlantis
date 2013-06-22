@@ -1,6 +1,6 @@
 startup;
 trainInds = 6:10;
-testInd = 1:10;
+testInd = 1:5;
 nTest = numel(testInd);
 
 params = initParams;
@@ -18,7 +18,6 @@ probMapStruct = initProbMaps(ruleStruct,templateStruct.app);
 for (i=1:nTest)
     
     [cleanTestData,testData] = readData(params,templateStruct.app{end},testInd(i));
-    %testData=cleanTestData;
     
     params.imSize = size(testData);
     cellParams = initPoseCellCentres(params.imSize);
@@ -28,16 +27,20 @@ for (i=1:nTest)
              'sz-', int2str(params.imSize(1)), 'x', int2str(params.imSize(2)), '_', ...
              cellParams.toString(cellParams)];
     templateStr = templateStruct.toString(templateStruct);
-    saveStr = ['test', int2str(i), '_', probMapStruct.toString(probMapStruct), '_', params.toString(params), '_', cellParams.toString(cellParams), '_', templateStr;];
+    saveStr = ['testNoContext', int2str(i), '_', probMapStruct.toString(probMapStruct), '_', params.toString(params), '_', cellParams.toString(cellParams), '_', templateStr;];
          
     if(exist([mapStr,'.mat'],'file'))
         display('loading probmap file');
         load(mapStr);
     else
         % probMapCells: size of [ruleId,slot,loc] cell: each is an array
-        [probMapCells,probMapPixels] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
-        save(mapStr,'probMapCells','probMapPixels', '-v7.3');
+        %[probMapCells] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
+        %save(mapStr,'probMapCells','probMapPixels', '-v7.3');
     end
+    
+%     [cellMapStruct] = getAllProbMapCells2(cellParams,probMapStruct,ruleStruct,params);
+%     display('----------');
+    [probMapCells] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);    
     
     [allParticles,allConnPars,allConnChilds, allParticleProbs, saliencyScores] = sampleParticles(testData,probMapCells,cellParams,params,ruleStruct,templateStruct);
     save(saveStr,'cleanTestData', 'testData', 'allParticleProbs', ...

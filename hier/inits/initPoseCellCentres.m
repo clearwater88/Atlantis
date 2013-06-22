@@ -3,14 +3,14 @@ function cellParams = initPoseCellCentres(imSize)
     
     imSize = [imSize,2*pi]; % append range of angles in pose space
     
-    %pose cell size specification. Make odd so centre is unambiguous
-    cellDims(1,:) = [17,17,pi];
-    cellDims(2,:) = [13,13,pi];
-    cellDims(3,:) = [9,9,pi];
+    % Make odd so centre is unambiguous
+    cellDims(1,:) = [11,11,pi];
+    cellDims(2,:) = [9,9,pi];
+    cellDims(3,:) = [7,7,pi];
     
-    strides(1,:) = [9,9,pi/4];
-    strides(2,:) = [7,7,pi/4];
-    strides(3,:) = [5,5,pi/4]; 
+    strides(1,:) = [6,6,pi/4];
+    strides(2,:) = [6,6,pi/4];
+    strides(3,:) = [6,6,pi/4]; 
     
     %cellStrides = cellDims;
     
@@ -21,7 +21,9 @@ function cellParams = initPoseCellCentres(imSize)
     for (i=1:nTypes)
         temp = 1:strides(i,1):(imSize(1)+1)-cellDims(i,1);
         temp2 = 1:strides(i,2):(imSize(2)+1)-cellDims(i,2);
-        temp3 = -pi:strides(i,3):pi-0.0000001; % angle starts from -pi
+        
+        % cellBoundary angles start are -pi:pi
+        temp3 = -pi:strides(i,3):pi-0.0000001; 
         [temp,temp2,temp3] = meshgrid(temp,temp2,temp3);
         cellCentres{i} = [temp(:),temp2(:),temp3(:)]; 
         % re-centre
@@ -47,7 +49,7 @@ function cellParams = initPoseCellCentres(imSize)
     cellParams.dims = cellDims;
     cellParams.strides = strides;
     cellParams.nTypes = nTypes;
-    cellParams.boundaries = cellBoundaries;
+    cellParams.centreBoundaries = cellBoundaries;
     cellParams.toString = @toString;
 end
 

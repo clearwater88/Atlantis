@@ -7,7 +7,7 @@ function [probMapStruct] = initProbMaps(ruleStruct,templates)
 
     covCentresParents(:,:,1) = [2,0,0; ...
                                 0,1,0; ...
-                                0,0,pi/16];
+                                0,0,1];
     
     covCentresParents(:,:,2) = covCentresParents(:,:,1);
     covCentresParents(:,:,3) = covCentresParents(:,:,1);
@@ -39,7 +39,7 @@ function [probMapStruct] = initProbMaps(ruleStruct,templates)
         end
     end
     
-    probMapStruct.version=1;
+    probMapStruct.version=2;
     probMapStruct.strat = 1; %0 no line contig; 1 = line contig
     probMapStruct.offset=offset;
     probMapStruct.cov=covCentres;

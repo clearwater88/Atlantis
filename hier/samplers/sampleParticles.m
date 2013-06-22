@@ -1,9 +1,7 @@
 function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores] = sampleParticles(data,probMapCells,cellParams,params,ruleStruct,templateStruct)
     [likeTemp,countsTemp] = initLike(data,templateStruct);
     [likePxStruct] = evalLike(data,templateStruct,zeros(size(data)),zeros(size(data)),params);
-    
-    nPosesCell = getNumPoses(cellParams,likePxStruct);
-    
+
     particles{1} = [];
     particleProbs  = 1;
     
@@ -28,10 +26,11 @@ function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores
     % precompute
     likePxIdxCells = cell(cellParams.nTypes,1);
     for (n=1:cellParams.nTypes)
-        likePxIdxCells{n}=getLikePxIdxAll(cellParams.centres{n}, ...
-                                          cellParams.dims(n,:), ...
-                                          likePxStruct.boundaries{n});
+        likePxIdxCells{n}= getLikePxIdxAll(cellParams.centres{n}, ...
+                                           cellParams.dims(n,:), ...
+                                           likePxStruct.poses{n});
     end
+    nPosesCell = getNumPoses(likePxIdxCells);
     
     while(1)
         display(['On ind: ', int2str(brickIdx)]);
@@ -121,7 +120,7 @@ function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores
             end
             
             % bricks: on/off, type, cellCentreIndex,[poseX,Y,theta]            
-            [pose,newLike,newCount] = samplePose(likesParticle,countsParticle,likePxStruct,cellType,cellLocIdx,cellParams);
+            [pose,newLike,newCount] = samplePose(likesParticle,countsParticle,likePxStruct,likePxIdxCells{cellType},cellType,cellLocIdx);
             particle(4:6,end) = pose;
 
             newParticles{n} = particle;

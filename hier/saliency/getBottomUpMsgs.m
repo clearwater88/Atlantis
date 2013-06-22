@@ -1,54 +1,44 @@
-function [childMessage] = getBottomUpMsgs(bricks,cellParams,connPar,ruleStruct,probMapCells,params)
-     
-    % only self-rooted bricks will care if they get a parent
+function [totMessage] = getBottomUpMsgs(bricks,cellParams,connPar,ruleStruct,probMapCells,params)
+    
+    nTypes = cellParams.nTypes;
+    
+    % only on and self-rooted bricks will care if they get a parent
     selfRoot = isSelfRooted(bricks,connPar)==1;
     
     bricksOnSelfRoot = bricks(:,selfRoot);
         
     onSelfRootIdx = getLocIdx(bricksOnSelfRoot);
     onSelfRootType = getType(bricksOnSelfRoot);
-    
-    childSum = cell(cellParams.nTypes,cellParams.nTypes);
-    for (n=1:cellParams.nTypes)
-        childSum{n} = zeros(size(cellParams.centres{n},1),1);
-    end
 
+    totMessage = cell(nTypes,1);
+    for (n=1:nTypes)
+        totMessage{n} = zeros(size(cellParams.centres{n},1),1);
+    end
+    
     for (r=1:size(ruleStruct.rules,1))
-        
-        noConnectRule = cell(cellParams.nTypes,cellParams.nTypes);
-        for (n=1:cellParams.nTypes)
-            for (m=1:cellParams.nTypes)
-                nChild = numel(onSelfRootIdx(onSelfRootType == m));
-                %nChild = size(cellParams.centres{m},1);
-                noConnectRule{n,m} = ones(size(cellParams.centres{n},1),nChild);
-            end
-        end
-        
         slots = find(ruleStruct.children(r,:)~=0);
         parentType = ruleStruct.parents(r);
+        
+        probMapProd = ones(size(cellParams.centres{parentType},1),1);
         for (j=1:numel(slots))
             s = slots(j);
             childType = ruleStruct.children(r,s);
-            idxUse = onSelfRootIdx(onSelfRootType == childType);
+            orphansIdx = onSelfRootIdx(onSelfRootType == childType);
             
             [~,probMap] = adjustProbMap(probMapCells,childType,r,s,bricks); % use bricks for adjustment of probMap
-            probMap = probMap(idxUse,:)'; % reshape to number of types at this parent level x numel(idxUse)
-            %probMap = probMap';
+            probMap = probMap(orphansIdx,:); % get a specific set of children for every parent. size: numel(idxUse) x number of types of parents
+            probMap = sum(probMap,1)';
             
-            noConnectRule{parentType,childType} = noConnectRule{parentType,childType}.*(1-probMap);
+            probMapProd = probMapProd.*(params.probRoot^(-1)*probMap + (1-probMap));
         end
-        
-        for (n=1:cellParams.nTypes)
-            temp=1-cell2mat(noConnectRule(n,:));
-            childSum{n} = childSum{n} + ruleStruct.probs(r)*sum(temp,2);
-        end
+        totMessage{parentType} = totMessage{parentType} + ruleStruct.probs(r)*probMapProd;
     end
     
-    childMessage = cell(cellParams.nTypes,1);
-    
-    for (n=1:cellParams.nTypes)
-        childMessage{n} = log(params.probRoot)*childSum{n};
+    for (n=1:nTypes)
+        totMessage{n} = log(totMessage{n});
     end
     
 end
+
+
 

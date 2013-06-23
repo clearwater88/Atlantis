@@ -38,7 +38,7 @@ for (i=1:nTest)
         %save(mapStr,'probMapCells','probMapPixels', '-v7.3');
     end
     
-%     [cellMapStruct] = getAllProbMapCells2(cellParams,probMapStruct,ruleStruct,params);
+    [cellMapStruct] = getAllProbMapCells2(cellParams,probMapStruct,ruleStruct,params);
 %     display('----------');
     [probMapCells] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);    
     

@@ -8,7 +8,7 @@ function [params] = initParams()
     params.angleDisc = [-pi,pi/8,pi];
 
     params.dataFolder = '../BSDSdata/';
-    params.downSampleFactor = 4;
+    params.downSampleFactor = 8;
     
     params.toString = @toString;
 end

@@ -8,18 +8,10 @@ function [cellMapStruct] = getAllProbMapCells2(cellParams,probMapStruct,ruleStru
     maxSlots = max(sum(ruleStruct.children~=0,2));    
    
     angles = params.angleDisc(1):params.angleDisc(2):params.angleDisc(3);
+    nAngles = numel(angles);
     
-
-    
-    maxLocs = 0;
-    temp = sum(ruleStruct.children~=0,2)~=0;    
-    typePars = unique(ruleStruct.parents(temp));
-    for (n=1:numel(typePars))
-       maxLocs  = max(maxLocs, size(cellCentres{typePars(n)},1));
-    end
-    
-    probMap = cell(nRules,maxSlots,maxLocs);
-    locInds = cell(nRules,maxSlots,maxLocs);
+    probMap = cell(nRules,maxSlots,nAngles);
+    locInds = cell(nRules,maxSlots,nAngles);
     %probMap = cell(nRules,maxSlots,numel(angles));
     %locInds = cell(nRules,maxSlots,numel(angles));
     refPoints = zeros(cellParams.nTypes,2);
@@ -42,26 +34,15 @@ function [cellMapStruct] = getAllProbMapCells2(cellParams,probMapStruct,ruleStru
         tic
         for (slot=1:nSlots)
             chType = ch(slot);
-            
-            locsUse = cellCentres{type};
-            tic
-            
-            for (loc=1:size(locsUse,1))
-                [probMap{ruleId,slot,loc},locInds{ruleId,slot,loc}]= ...
-                    getProbMapCells2(ruleId,slot,locsUse(loc,:), ...
-                    probMapStruct, ...
-                    params.imSize,params.angleDisc, ...
-                    cellParams.centreBoundaries{chType});
-            end
                 
-%             for (a=1:numel(angles))
-%                 [probMap{ruleId,slot,a},locInds{ruleId,slot,a}]= ...
-%                     getProbMapCells2(ruleId,slot, ...
-%                                      [refPoints(type,:),angles(a)], ...
-%                                      probMapStruct, ...
-%                                      params.imSize,params.angleDisc, ...
-%                                      cellParams.centreBoundaries{chType});
-%             end
+            for (a=1:nAngles)
+                [probMap{ruleId,slot,a},locInds{ruleId,slot,a}]= ...
+                    getProbMapCells2(ruleId,slot, ...
+                                     [refPoints(type,:),angles(a)], ...
+                                     probMapStruct, ...
+                                     params.imSize,params.angleDisc, ...
+                                     cellParams.centreBoundaries{chType});
+            end
         end
         toc
     end

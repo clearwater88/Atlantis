@@ -8,9 +8,9 @@ function cellParams = initPoseCellCentres(imSize)
     cellDims(2,:) = [9,9,pi];
     cellDims(3,:) = [7,7,pi];
     
-    strides(1,:) = [6,6,pi/4];
-    strides(2,:) = [6,6,pi/4];
-    strides(3,:) = [6,6,pi/4]; 
+    strides(1,:) = [9,9,pi/4];
+    strides(2,:) = [9,9,pi/4];
+    strides(3,:) = [9,9,pi/4]; 
     
     %cellStrides = cellDims;
     
@@ -19,16 +19,9 @@ function cellParams = initPoseCellCentres(imSize)
     cellBoundaries = cell(nTypes,1);
     
     for (i=1:nTypes)
-        temp = 1:strides(i,1):(imSize(1)+1)-cellDims(i,1);
-        temp2 = 1:strides(i,2):(imSize(2)+1)-cellDims(i,2);
         
-        % cellBoundary angles start are -pi:pi
-        temp3 = -pi:strides(i,3):pi-0.0000001; 
-        [temp,temp2,temp3] = meshgrid(temp,temp2,temp3);
-        cellCentres{i} = [temp(:),temp2(:),temp3(:)]; 
-        % re-centre
-        cellCentres{i}(:,1:2) = bsxfun(@plus,cellCentres{i}(:,1:2),((cellDims(i,1:2))-1)/2);
-        cellCentres{i}(:,3) = mod(bsxfun(@plus,cellCentres{i}(:,3),cellDims(i,3)/2),2*pi)-pi;
+        
+        cellCentres{i} = getLocsUse(strides(i,:), cellDims(i,:), imSize);
 
         % # 2 x cells
         lowCell = bsxfun(@minus,cellCentres{i}(:,1:2),(cellDims(i,1:2)-1)/2)';

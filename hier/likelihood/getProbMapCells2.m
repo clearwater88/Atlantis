@@ -12,7 +12,7 @@ function [res,dirtyInds] = getProbMapCells2(ruleId,slot,refPoint,probMapStruct,i
     [~,D] = eig(covar(1:2,1:2));
     maxStd = sqrt(max(D(:))); % find std of spatial direction of max variance
     
-    dirtyBounds(1:2,1) = max(1,centreUse(1:2)-4*maxStd);
+    dirtyBounds(1:2,1) = max(1,centreUse(1:2)-3*maxStd);
     dirtyBounds(1:2,2) = centreUse(1:2)+4*maxStd;
     dirtyBounds(2,1) = min(imSize(1), dirtyBounds(2,1));
     dirtyBounds(2,2) = min(imSize(2), dirtyBounds(2,2));

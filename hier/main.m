@@ -40,7 +40,7 @@ for (i=1:nTest)
     
     [cellMapStruct] = getAllProbMapCells2(cellParams,probMapStruct,ruleStruct,params);
 %     display('----------');
-    [probMapCells] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);    
+    %[probMapCells] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);    
     
     [allParticles,allConnPars,allConnChilds, allParticleProbs, saliencyScores] = sampleParticles(testData,probMapCells,cellParams,params,ruleStruct,templateStruct);
     save(saveStr,'cleanTestData', 'testData', 'allParticleProbs', ...

@@ -5,10 +5,10 @@ function [params] = initParams()
     
     % start,increment,end
     % angles are -pi:pi
-    params.angleDisc = [-pi,pi/8,pi];
+    params.angleDisc = [-pi,pi/8,pi-0.00001];
 
     params.dataFolder = '../BSDSdata/';
-    params.downSampleFactor = 8;
+    params.downSampleFactor = 2;
     
     params.toString = @toString;
 end

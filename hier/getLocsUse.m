@@ -10,7 +10,7 @@ function res = getLocsUse(strides,cellDims,imSize)
     res = [temp(:),temp2(:),temp3(:)];
     % re-centre
     res(:,1:2) = bsxfun(@plus,res(:,1:2),((cellDims(1:2))-1)/2);
-    res(:,3) = mod(bsxfun(@plus,res(:,3),cellDims(3)/2),2*pi)-pi;
+    %res(:,3) = mod(bsxfun(@plus,res(:,3),cellDims(3)/2),2*pi)-pi;
 
 end
 

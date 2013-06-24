@@ -8,21 +8,34 @@ function cellParams = initPoseCellCentres(imSize)
     cellDims(2,:) = [9,9,pi];
     cellDims(3,:) = [7,7,pi];
     
-    strides(1,:) = [9,9,pi/4];
-    strides(2,:) = [9,9,pi/4];
-    strides(3,:) = [9,9,pi/4]; 
+    strides(1,:) = [8,8,pi/4];
+    strides(2,:) = [4,4,pi/4];
+    strides(3,:) = [2,2,pi/4]; 
     
     %cellStrides = cellDims;
     
     nTypes = size(cellDims,1);
     cellCentres = cell(nTypes,1);
     cellBoundaries = cell(nTypes,1);
+    coords = cell(nTypes,1);
+    origins = zeros(nTypes,3);
+    coordsSize = zeros([nTypes,3]);
     
     for (i=1:nTypes)
         
-        
         cellCentres{i} = getLocsUse(strides(i,:), cellDims(i,:), imSize);
-
+        origins(i,:) = cellCentres{i}(1,:);
+        
+        coords{i} = centre2CellFrame(cellCentres{i},strides(i,:),origins(i,:));
+        
+%         coords{i} =  bsxfun(@plus, ...
+%                             bsxfun(@rdivide, ...
+%                                    bsxfun(@minus, ...
+%                                           cellCentres{i}, ...
+%                                           origin), ...
+%                                    strides(i,:)), ...
+%                             [1,1,1]);
+        
         % # 2 x cells
         lowCell = bsxfun(@minus,cellCentres{i}(:,1:2),(cellDims(i,1:2)-1)/2)';
         lowCell=reshape(lowCell,[size(lowCell,1),1,size(lowCell,2)]);
@@ -36,6 +49,9 @@ function cellParams = initPoseCellCentres(imSize)
             
         cellBoundaries{i} = cat(2,lowCell,highCell);
         cellBoundaries{i}(3,:,:) = cat(2,angleLow,angleHigh);
+        
+        coordsSize(i,1:2) = max(coords{i}(:,1:2));
+        coordsSize(i,3) = numel(unique(coords{i}(:,3)));
     end
 
     cellParams.centres = cellCentres;
@@ -43,7 +59,10 @@ function cellParams = initPoseCellCentres(imSize)
     cellParams.strides = strides;
     cellParams.nTypes = nTypes;
     cellParams.centreBoundaries = cellBoundaries;
+    cellParams.coords = coords;
+    cellParams.origins = origins;
     cellParams.toString = @toString;
+    cellParams.coordsSize = coordsSize;
 end
 
 function res = toString(cellParams)

@@ -1,7 +1,10 @@
-function [res,dirtyInds] = getProbMapCells2(ruleId,slot,refPoint,probMapStruct,imSize,angleDisc,centreBoundaries)
+function [res,dirtyCoords] = getProbMapCells2(ruleId,slot,chType,refPoint,probMapStruct,imSize,angleDisc,cellParams)
     % prob map in cells, [imSize x num angles]. Num angles steps in
     % angleDisc.
     % returns prob maps according to order in poseCellLocs
+    
+    centreBoundaries = cellParams.centreBoundaries{chType};
+    coords = cellParams.coords{chType};
     
     resPixels = getProbMapPixels(ruleId,slot,refPoint,probMapStruct,imSize,angleDisc);
 
@@ -12,12 +15,11 @@ function [res,dirtyInds] = getProbMapCells2(ruleId,slot,refPoint,probMapStruct,i
     [~,D] = eig(covar(1:2,1:2));
     maxStd = sqrt(max(D(:))); % find std of spatial direction of max variance
     
-    dirtyBounds(1:2,1) = max(1,centreUse(1:2)-3*maxStd);
-    dirtyBounds(1:2,2) = centreUse(1:2)+4*maxStd;
-    dirtyBounds(2,1) = min(imSize(1), dirtyBounds(2,1));
-    dirtyBounds(2,2) = min(imSize(2), dirtyBounds(2,2));
+    dirtyBounds(1:2,1) = centreUse(1:2)-3*maxStd;
+    dirtyBounds(1:2,2) = centreUse(1:2)+3*maxStd;
     
-    dirtyInds = find(doesIntersect(dirtyBounds,centreBoundaries(1:2,:,:))==1);
+    dirtyInds = find(doesIntersect(dirtyBounds,centreBoundaries(1:2,:,:))==1);    
+    dirtyCoords = coords(dirtyInds,:);
     
     res= zeros(numel(dirtyInds),1);
     for (i=1:numel(dirtyInds))
@@ -33,13 +35,12 @@ function [res,dirtyInds] = getProbMapCells2(ruleId,slot,refPoint,probMapStruct,i
         nAngleBins = (bd(3,2)-bd(3,1))/angleDisc(2);
         
         temp = 0;
-        for (j=0:nAngleBins-1)
-           indUse = mod(indStart-1+j,numel(sumXY))+1;
+        for (j=1:nAngleBins)
+           indUse = mod(indStart-j,numel(sumXY))+1;
            temp=temp+sumXY(indUse);
         end
         res(i) = temp;
     end
-    res = res/sum(res);
-
+    res = res/sum(res); % is this necessary?
 end
 

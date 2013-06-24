@@ -6,8 +6,8 @@ function [probMapStruct] = initProbMaps(ruleStruct,templates)
     vonM = cell(numel(parents),1);
     covCentres = cell(numel(parents),1); % covariances for each slot
 
-    covCentresParents(:,:,1) = [5,0; ...
-                                0,1];
+    covCentresParents(:,:,1) = [3^2,0; ...
+                                0,3^2];
     covCentresParents(:,:,2) = covCentresParents(:,:,1);
     covCentresParents(:,:,3) = covCentresParents(:,:,1);
     

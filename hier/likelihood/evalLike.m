@@ -25,10 +25,9 @@ function [likeStructPx] = evalLike(data,templateStruct,initLikes,initCounts,para
         for (ag=params.angleDisc(1):params.angleDisc(2):params.angleDisc(3))
             rotTemplate = imrotate(template,-180*(ag)/pi,'nearest','loose');
             templateMask = imrotate(ones(size(template)),-180*(ag)/pi,'nearest','loose');
-            
             for (x=1:size(data,1))
                 for(y=1:size(data,2))
-                    pt = [x,y,ag]
+                    pt = [x,y,ag];
                     boundary(:,1) = [(pt(1:2)-(size(rotTemplate)-1)/2)';ag];
                     boundary(:,2) = [(pt(1:2)+(size(rotTemplate)-1)/2)';ag];
                     

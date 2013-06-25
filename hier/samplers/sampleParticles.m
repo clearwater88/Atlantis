@@ -1,4 +1,4 @@
-function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores] = sampleParticles(data,probMapCells,cellParams,params,ruleStruct,templateStruct)
+function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores] = sampleParticles(data,cellMapStruct,cellParams,params,ruleStruct,templateStruct)
     [likeTemp,countsTemp] = initLike(data,templateStruct);
     [likePxStruct] = evalLike(data,templateStruct,zeros(size(data)),zeros(size(data)),params);
 
@@ -39,12 +39,12 @@ function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores
             break;
         end
         for (i=1:numel(particles))
-           logProbParticle(i) =  evalParticleLogProbPrior(particles{i},connChilds{i}, connPars{i}, ruleStruct, nPosesCell, probMapCells, params);
+           logProbParticle(i) =  evalParticleLogProbPrior(particles{i},connChilds{i}, connPars{i}, ruleStruct, nPosesCell, cellMapStruct, cellParams, params);
            logProbParticle(i) = logProbParticle(i) + sum(log(likes{i}(:)./counts{i}(:)));
         end
         
         [cellType,cellLocIdx,saliencyScores(end+1),ratiosImOldParticle,logLikeCellOldParticle,logProbOptionsAll,logPsumGNoPoint,logPsumG,stop] = ...
-            getNextSaliencyLoc(particles,likes,counts,particleProbs,dirtyRegion,nPosesCell,likePxStruct,ratiosIm,logLikeCell,likePxIdxCells,connChilds,connPars,cellParams,ruleStruct,probMapCells,params);
+            getNextSaliencyLoc(particles,likes,counts,particleProbs,dirtyRegion,nPosesCell,likePxStruct,ratiosIm,logLikeCell,likePxIdxCells,connChilds,connPars,cellParams,ruleStruct,cellMapStruct,params);
                 
         % reweight
         logProbOptions = zeros(3,numel(logProbOptionsAll));
@@ -94,7 +94,7 @@ function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores
             connPar{end+1} = [];
             
             %logProbOptions = logProbOptionsAll{particleId}{cellType}(cellLocIdx,:)';
-            parentSlotProbs = sampleParentSlots(cellType, cellLocIdx, particle,connChild,ruleStruct,probMapCells);
+            parentSlotProbs = sampleParentSlots(cellType, cellLocIdx, particle,connChild,ruleStruct,cellMapStruct,cellParams);
             
             logPsumGNoPointUse = logPsumGNoPoint{particleId}{cellType}(cellLocIdx,:)';
             logPsumGUse = logPsumG{particleId};
@@ -111,10 +111,10 @@ function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores
                 case 1
                     a=1; %pass
                 case 2
-                    [connChild,connPar] = sampleChildren(brickIdx,probMapCells,particle,ruleStruct,connChild,connPar,params);
+                    [connChild,connPar] = sampleChildren(brickIdx,cellMapStruct,particle,ruleStruct,connChild,connPar,cellParams,params);
                 case 3
                     [connChild,connPar] = sampleParents(brickIdx,connChild,connPar,noConnectParent,parentSlotProbs);
-                    [connChild,connPar] = sampleChildren(brickIdx,probMapCells,particle,ruleStruct,connChild,connPar,params);
+                    [connChild,connPar] = sampleChildren(brickIdx,cellMapStruct,particle,ruleStruct,connChild,connPar,cellParams,params);
                 otherwise
                     error('Bad optionId');
             end

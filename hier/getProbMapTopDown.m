@@ -6,8 +6,8 @@ function [res,resInds] = getProbMapTopDown(cellMapStruct,cellParams,ruleInd,slot
     strides = cellParams.strides(chType,:);
     origin = cellParams.origins(chType,:);
     coordsSize = cellParams.coordsSize(chType,:);
-
-    [~,angleInd] = min(abs(cellMapStruct.angles - centre(3)));
+    
+    [~,angleInd] = min(abs(cellMapStruct.angles{chType} - centre(3)));
     
     probMap = cellMapStruct.probMap{ruleInd,slot,angleInd};
     locs = cellMapStruct.locs{ruleInd,slot,angleInd};

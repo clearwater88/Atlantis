@@ -1,4 +1,4 @@
-function [totMessage] = getBottomUpMsgs(bricks,cellParams,connPar,ruleStruct,probMapCells,params)
+function [totMessage] = getBottomUpMsgs(bricks,cellParams,connPar,ruleStruct,cellMapStruct,params)
     
     nTypes = cellParams.nTypes;
     
@@ -21,12 +21,23 @@ function [totMessage] = getBottomUpMsgs(bricks,cellParams,connPar,ruleStruct,pro
         
         probMapProd = ones(size(cellParams.centres{parentType},1),1);
         for (j=1:numel(slots))
+            probMap = [];
+            
             s = slots(j);
             childType = ruleStruct.children(r,s);
             orphansIdx = onSelfRootIdx(onSelfRootType == childType);
             
-            [~,probMap] = adjustProbMap(probMapCells,childType,r,s,bricks); % use bricks for adjustment of probMap
-            probMap = probMap(orphansIdx,:); % get a specific set of children for every parent. size: numel(idxUse) x number of types of parents
+            if (isempty(orphansIdx))
+                probMap = zeros(0,numel(probMapProd)); % default, in case no orphans
+            end
+            for (k=1:numel(orphansIdx))
+                centre = cellParams.centres{childType}(orphansIdx(k),:);
+                [temp,massInds] = getProbMapBottomUp(cellMapStruct,cellParams,r,s,centre);
+                probMap(k,:) = temp;
+            end
+            
+            %[~,probMap] = adjustProbMap(probMapCells,childType,r,s,bricks); % use bricks for adjustment of probMap
+            %probMap = probMap(orphansIdx,:); % get a specific set of children for every parent. size: numel(idxUse) x number of types of parents
             probMap = sum(probMap,1)';
             
             probMapProd = probMapProd.*(params.probRoot^(-1)*probMap + (1-probMap));

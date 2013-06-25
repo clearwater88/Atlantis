@@ -1,4 +1,4 @@
-function [connChild,connPar] = sampleChildren(parentId,allProbMaps,bricks,ruleStruct,connChild,connPar,params)
+function [connChild,connPar] = sampleChildren(parentId,cellMapStruct,bricks,ruleStruct,connChild,connPar,cellParams,params)
    
     parentType = bricks(2,parentId);
     ruleMask = getCompatibleRules(parentType,connChild{parentId},bricks,ruleStruct)==1;
@@ -9,10 +9,13 @@ function [connChild,connPar] = sampleChildren(parentId,allProbMaps,bricks,ruleSt
     
     for (i=1:nSlots)
         chType = ruleStruct.children(ruleId,i);
-        % access allProbMaps with probMap{ruleId,slot,loc index}
-
-        [~,probMap] = adjustProbMap(allProbMaps,chType,ruleId,i,bricks,getLocIdx(bricks,parentId)); % specific parent
-        % probMap = allProbMaps{ruleId,i,bricks(3,parentId)};
+        
+        parentLocIdx = getLocIdx(bricks,parentId);
+        %[~,probMap] = adjustProbMap(allProbMaps,chType,ruleId,i,bricks,parentLocIdx); % specific parent
+        
+        centre = cellParams.centres{parentType}(parentLocIdx,:);
+        [temp,massInds] = getProbMapTopDown(cellMapStruct,cellParams,ruleId,i,centre);
+        probMap = adjustProbMap2(temp,massInds,chType,bricks);        
         
         % modify with rooting probs for children who would no longer have
         % to root themselves

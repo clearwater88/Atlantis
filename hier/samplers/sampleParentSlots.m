@@ -1,4 +1,4 @@
-function [slotProbs] = sampleParentSlots(childType, childLoc, bricks,connChild,ruleStruct,allProbMapCells)
+function [slotProbs] = sampleParentSlots(childType, childLoc, bricks,connChild,ruleStruct,cellMapStruct,cellParams)
     nParents = size(bricks,2)-1; %last elem is the brick itself
     
     slotProbs = zeros(numel(ruleStruct.parents),ruleStruct.maxChildren,nParents);
@@ -13,6 +13,8 @@ function [slotProbs] = sampleParentSlots(childType, childLoc, bricks,connChild,r
         parentType = getType(bricks,parentId);
         slotsAvailable = (connChild{parentId} == 0);
 
+        centre = cellParams.centres{parentType}(parentLocIdx,:);
+        
         % get rules compatible with current children config
         ruleInds = find(getCompatibleRules(parentType,connChild{parentId},bricks,ruleStruct)==1);
 
@@ -24,7 +26,10 @@ function [slotProbs] = sampleParentSlots(childType, childLoc, bricks,connChild,r
             validSlots = find(slotsAvailable & (ruleChildren == childType));
 
             for (s=1:numel(validSlots))
-                probMap = adjustProbMap(allProbMapCells,childType,ruleInd,validSlots(s),bricks,parentLocIdx); % specific parent
+                %probMap = adjustProbMap(allProbMapCells,childType,ruleInd,validSlots(s),bricks,parentLocIdx); % specific parent
+                [temp,massInds] = getProbMapTopDown(cellMapStruct,cellParams,ruleInd,validSlots(s),centre);
+                probMap = adjustProbMap2(temp,massInds,childType,bricks);
+                
                 slotProbs(ruleInd,validSlots(s),parentId) = ruleStruct.probs(ruleInd)*probMap(childLoc);
             end
         end

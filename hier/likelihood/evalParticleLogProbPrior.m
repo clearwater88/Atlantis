@@ -1,4 +1,4 @@
-function [res] = evalParticleLogProbPrior(bricks,connChild,connPar,ruleStruct,nPosesCell, probMapCells, params)
+function [res] = evalParticleLogProbPrior(bricks,connChild,connPar,ruleStruct,nPosesCell,cellMapStruct, cellParams, params)
 
     nBricks = size(bricks,2);
     nOrphan = sum(isSelfRooted(bricks,connPar));
@@ -17,7 +17,8 @@ function [res] = evalParticleLogProbPrior(bricks,connChild,connPar,ruleStruct,nP
     for (i=1:size(bricks,2))
         type = getType(bricks,i);
         idx = getLocIdx(bricks,i);
-
+        centre = cellParams.centres{type}(idx,:);
+        
         slots = connChild{i};
         
         ruleInds = find(getCompatibleRules(type,slots,bricks,ruleStruct)==1);
@@ -27,10 +28,12 @@ function [res] = evalParticleLogProbPrior(bricks,connChild,connPar,ruleStruct,nP
            for (s=1:numel(slots))
               if(slots(s) == 0) continue; end;
               childBrickId = slots(s);
-              childType = getType(bricks,childBrickId);
               childLocIdx = getLocIdx(bricks,childBrickId);
-              [~,probMap] = adjustProbMap(probMapCells,childType,ruleInds(r),s,bricks);
-              probTempSlot = probTempSlot*probMap(childLocIdx,idx);
+              %[~,probMap] = adjustProbMap(probMapCells,childType,ruleInds(r),s,bricks);
+              
+              probMap = getProbMapTopDown(cellMapStruct,cellParams,ruleInds(r),s,centre);
+              
+              probTempSlot = probTempSlot*probMap(childLocIdx);
            end
            probPoint(i) = probPoint(i)+ruleStruct.probs(ruleInds(r))*probTempSlot;
         end

@@ -1,4 +1,4 @@
-function [logPsumGNoPoint,logPsumG] = getTopDownMsgs(bricks,cellParams,connChild,ruleStruct,probMapCells)
+function [logPsumGNoPoint,logPsumG] = getTopDownMsgs(bricks,cellParams,connChild,ruleStruct,cellMapStruct)
     
     % only on bricks can be parents
     nBricks = size(bricks,2);
@@ -18,6 +18,7 @@ function [logPsumGNoPoint,logPsumG] = getTopDownMsgs(bricks,cellParams,connChild
         
         typeUse = getType(bricks,k);
         locIdxUse = getLocIdx(bricks,k);
+        centre = cellParams.centres{typeUse}(locIdxUse,:);
         
         slotsAvailable = connChild{k} == 0;
         slotsFilled = find(connChild{k} ~= 0);
@@ -36,14 +37,15 @@ function [logPsumGNoPoint,logPsumG] = getTopDownMsgs(bricks,cellParams,connChild
             
             probFilled = 1; %p(r_i)*(prod_{k. s.t g_{i,k} != empty}  p(g_{i,k} | r))
             for (s=1:numel(slotsFilled))
-                slotType = ruleStruct.children(ruleInd,slotsFilled(s));
-                % use  bricks, not bricksOn, so can adjust for active bricks having 0 prob of being pointed to now
-                [~,probMapNoAdjust] = adjustProbMap(probMapCells,slotType,ruleInd,slotsFilled(s),bricks,locIdxUse); % specific parent brick brick
 
+                % use  bricks, not bricksOn, so can adjust for active bricks having 0 prob of being pointed to now
+                %[~,probMapNoAdjust] = adjustProbMap(probMapCells,slotType,ruleInd,slotsFilled(s),bricks,locIdxUse); % specific parent brick
+                probMap = getProbMapTopDown(cellMapStruct,cellParams,ruleInd,slotsFilled(s),centre);
+                
                 brickFilledId = connChild{k}(slotsFilled(s));
                 brickFilledIdx = getLocIdx(bricks,brickFilledId);
                 
-                probFilled = probFilled*probMapNoAdjust(brickFilledIdx); % careful with probMap modifying
+                probFilled = probFilled*probMap(brickFilledIdx);
             end
             pSumG(k) = pSumG(k) + ruleStruct.probs(ruleInd)*probFilled;
             
@@ -55,9 +57,13 @@ function [logPsumGNoPoint,logPsumG] = getTopDownMsgs(bricks,cellParams,connChild
             slotsUse = find(((ruleStruct.children(ruleInd,:) ~= 0) & slotsAvailable) == 1);
             for (s=1:numel(slotsUse))
                 % use  bricks, not bricksOn, so can adjust for active bricks having 0 prob of being pointed to now
-                slotType = ruleStruct.children(ruleInd,slotsUse(s));
-                probMap = adjustProbMap(probMapCells,slotType,ruleInd,slotsUse(s),bricks,locIdxUse);
-                brickNoPointTemp{slotType} = brickNoPointTemp{slotType}.*(1-probMap);
+                chType = ruleStruct.children(ruleInd,slotsUse(s));
+                
+                %probMap = adjustProbMap(probMapCells,slotType,ruleInd,slotsUse(s),bricks,locIdxUse);
+                [temp,massInds] = getProbMapTopDown(cellMapStruct,cellParams,ruleInd,slotsUse(s),centre);
+                probMap = adjustProbMap2(temp,massInds,chType,bricks);    
+                
+                brickNoPointTemp{chType} = brickNoPointTemp{chType}.*(1-probMap);
             end
             
             for (n=1:cellParams.nTypes)

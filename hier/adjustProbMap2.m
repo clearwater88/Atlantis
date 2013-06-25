@@ -1,7 +1,7 @@
-function [ output_args ] = adjustProbMap2( input_args )
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
-
-
+function [probMap] = adjustProbMap2(probMap,inds,type,bricks)
+    % cut off very end; active brick we're considering
+    idx = find(getType(bricks(:,1:end-1))==type);
+    locIdx = getLocIdx(bricks,idx);
+    probMap(locIdx) = 0;
+    probMap(inds) = probMap(inds)/sum(probMap(inds));
 end
-

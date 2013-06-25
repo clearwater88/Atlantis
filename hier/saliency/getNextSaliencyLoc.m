@@ -1,4 +1,4 @@
-function [type,cellLocIdx,val,ratiosIm,logProbCellRatio,logProbOptions,logPsumGNoPoint,logPsumG,stop] = getNextSaliencyLoc(particles,likesIm,countsIm,particleProbs,dirtyRegion,nPosesCell,likePxStruct,ratiosImOld,logLikeCellOld,likePxIdxCells,connChilds,connPars,cellParams,ruleStruct,probMapCells,params)
+function [type,cellLocIdx,val,ratiosIm,logProbCellRatio,logProbOptions,logPsumGNoPoint,logPsumG,stop] = getNextSaliencyLoc(particles,likesIm,countsIm,particleProbs,dirtyRegion,nPosesCell,likePxStruct,ratiosImOld,logLikeCellOld,likePxIdxCells,connChilds,connPars,cellParams,ruleStruct,cellMapStruct,params)
     
     BOUNDARY = -10000;
     
@@ -22,8 +22,8 @@ function [type,cellLocIdx,val,ratiosIm,logProbCellRatio,logProbOptions,logPsumGN
         
         logProbCellRatio{i} = getLogLikeCellRatio(ratiosIm{i},cellParams,likePxIdxCells,dirtyRegion,nPosesCell,logLikeCellOld{i});
         
-        [logPsumGNoPoint{i},logPsumG{i}] = getTopDownMsgs(particles{i},cellParams,connChilds{i},ruleStruct,probMapCells);
-        [childMessages{i}] = getBottomUpMsgs(particles{i},cellParams,connPars{i},ruleStruct,probMapCells,params);
+        [logPsumGNoPoint{i},logPsumG{i}] = getTopDownMsgs(particles{i},cellParams,connChilds{i},ruleStruct,cellMapStruct);
+        [childMessages{i}] = getBottomUpMsgs(particles{i},cellParams,connPars{i},ruleStruct,cellMapStruct,params);
         
         % only self-rooted bricks will care if they get a parent
         selfRoot = isSelfRooted(particles{i},connPars{i})==1;

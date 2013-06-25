@@ -1,4 +1,4 @@
-function [res,resInds] = getProbMapTopDown(cellMapStruct,cellParams,ruleInd,slot,centre)
+function [res] = getProbMap(cellMapStruct,cellParams,ruleInd,slot,centre)
 
     % remember, we're talking about child coordinates, not parents
     chType = cellMapStruct.childType(ruleInd,slot);
@@ -7,8 +7,8 @@ function [res,resInds] = getProbMapTopDown(cellMapStruct,cellParams,ruleInd,slot
     origin = cellParams.origins(chType,:);
     coordsSize = cellParams.coordsSize(chType,:);
 
-    [~,angleInd] = min(abs(cellMapStruct.angles - centre(3)));
-    
+    angleInd = cellMapStruct.angles == centre(3);
+
     probMap = cellMapStruct.probMap{ruleInd,slot,angleInd};
     locs = cellMapStruct.locs{ruleInd,slot,angleInd};
     
@@ -25,18 +25,18 @@ function [res,resInds] = getProbMapTopDown(cellMapStruct,cellParams,ruleInd,slot
     idx(badInds,:) = [];
     probMap(badInds) = [];
           
-    resInds = sub2ind(coordsSize,idx(:,1),idx(:,2),idx(:,3));
+    inds = sub2ind(coordsSize,idx(:,1),idx(:,2),idx(:,3));
     
     res = zeros(size(cellParams.centres{chType},1),1);
-    res(resInds) = probMap;
+    res(inds) = probMap;
 
-%     a = reshape(res,coordsSize);
-%     figure(1); imagescGray(sum(a,3));
-% 
-%     inds2 =  sub2ind(coordsSize,locs(:,1),locs(:,2),locs(:,3));
-%     res2= zeros(size(cellParams.centres{chType},1),1);
-%     res2(inds2) =cellMapStruct.probMap{ruleInd,slot,angleInd};
-%     res2 = reshape(res2,coordsSize);
-%     figure(2); imagescGray(sum(res2,3));
+    a = reshape(res,coordsSize);
+    figure(1); imagescGray(sum(a,3));
+
+    inds2 =  sub2ind(coordsSize,locs(:,1),locs(:,2),locs(:,3));
+    res2= zeros(size(cellParams.centres{chType},1),1);
+    res2(inds2) =cellMapStruct.probMap{ruleInd,slot,angleInd};
+    res2 = reshape(res2,coordsSize);
+    figure(2); imagescGray(sum(res2,3));
 end
 

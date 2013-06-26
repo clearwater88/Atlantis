@@ -1,8 +1,9 @@
 function [templateStruct] = learnTemplates(trainInds,params,templateStruct)
 
     trainData = cell(numel(trainInds),1);
+    noisyTrainData = cell(numel(trainInds),1);
     for (i=1:numel(trainInds))
-        trainData{i} = readData(params,templateStruct.bg,trainInds(i));
+        [trainData{i},noisyTrainData{i}] = readData(params,templateStruct.bg,trainInds(i));
     end
 
     nLocs = 500;
@@ -15,10 +16,14 @@ function [templateStruct] = learnTemplates(trainInds,params,templateStruct)
             
     count = 1;
     for (i=1:numel(trainData))
-       dataUse = trainData{i};
-       angle = getOrientation(double(dataUse),templateStruct.SIGMA);
+        % use clean data to detect orientation, and to select inked points
+       dataUseLocs = trainData{i};
+       angle = getOrientation(double(dataUseLocs),templateStruct.SIGMA);
+       inkLocs = find(dataUseLocs(:) > 0.5);
        
-       inkLocs = find(dataUse(:) > 0.5);
+       % use noisy data to actually learn templates
+       dataUse = noisyTrainData{i};
+       
        locInd = randi(numel(inkLocs),nLocs,1);
        locs = inkLocs(locInd);
        

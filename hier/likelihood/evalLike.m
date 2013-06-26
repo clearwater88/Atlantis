@@ -25,22 +25,35 @@ function [likeStructPx] = evalLike(data,templateStruct,initLikes,initCounts,para
         for (ag=params.angleDisc(1):params.angleDisc(2):params.angleDisc(3))
             rotTemplate = imrotate(template,-180*(ag)/pi,'nearest','loose');
             templateMask = imrotate(ones(size(template)),-180*(ag)/pi,'nearest','loose');
-            for (x=1:size(data,1))
-                for(y=1:size(data,2))
-                    pt = [x,y,ag];
-                    boundary(:,1) = [(pt(1:2)-(size(rotTemplate)-1)/2)';ag];
-                    boundary(:,2) = [(pt(1:2)+(size(rotTemplate)-1)/2)';ag];
+            
+            x=1:size(data,2);
+            y=1:size(data,1);
+            [x,y] = meshgrid(x(:),y(:));
+            pts = [y(:),x(:)];
+            pts = reshape(pts',[1,2,numel(pts)/2]);
+            
+            clear boundary;
+            boundary(:,1,:) = bsxfun(@minus,pts,(size(rotTemplate)-1)/2);
+            boundary(:,2,:) = bsxfun(@plus,pts,(size(rotTemplate)-1)/2);
+            boundary(3,:,:) = ag;
+            
+            outOfBounds = any(boundary(1:2,1,:) < 1) | ...
+                          any(bsxfun(@gt,boundary(1:2,2,:),size(data)'));
+            for(y=1:size(data,2))
+                for (x=1:size(data,1))
+                    
+                    ct2 = (y-1)*size(data,1)+x;
+                    bdUse = boundary(:,:,ct2);
                     
                     % rotated patch falls outside? Then forget it
-                    if(any(boundary(1:2,1) < 1)) continue; end;
-                    if(any(boundary(1:2,2) > size(data)')) continue; end;
-
-                    dataUse = data(boundary(1,1):boundary(1,2), ...
-                                   boundary(2,1):boundary(2,2));
-                    likeUse = initLikes(boundary(1,1):boundary(1,2), ...
-                                        boundary(2,1):boundary(2,2));
-                    countsUse = initCounts(boundary(1,1):boundary(1,2), ...
-                                           boundary(2,1):boundary(2,2));
+                    if(outOfBounds(ct2)) continue; end;
+                    
+                    dataUse = data(bdUse(1,1):bdUse(1,2), ...
+                                   bdUse(2,1):bdUse(2,2));
+                    likeUse = initLikes(bdUse(1,1):bdUse(1,2), ...
+                                        bdUse(2,1):bdUse(2,2));
+                    countsUse = initCounts(bdUse(1,1):bdUse(1,2), ...
+                                           bdUse(2,1):bdUse(2,2));
 
                     likePatch = templateStruct.mix(type)*((rotTemplate.^dataUse).*((1-rotTemplate).^(1-dataUse)));
                     likePatch = likePatch.*templateMask;
@@ -53,7 +66,7 @@ function [likeStructPx] = evalLike(data,templateStruct,initLikes,initCounts,para
                     likesTemp{ct,1} = likePatch;
                     masksTemp{ct,1} = templateMask;
                     countsTemp{ct,1} = counts;
-                    boundariesTemp(:,:,ct) = boundary;
+                    boundariesTemp(:,:,ct) = bdUse;
                     ct = ct+1;
                 end
             end

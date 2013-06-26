@@ -39,8 +39,6 @@ function [cellMapStruct] = getAllProbMapCells2(cellParams,probMapStruct,ruleStru
     % easier to work with if we just replicate the refpoints
     refPoints = zeros(2,nRules,maxSlots);
 
-    
-    
     for (ruleId=1:nRules)
 
         type = ruleStruct.parents(ruleId);

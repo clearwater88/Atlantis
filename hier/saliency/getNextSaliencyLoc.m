@@ -17,7 +17,9 @@ function [type,cellLocIdx,val,ratiosIm,logProbCellRatio,logProbOptions,logPsumGN
 
         defaultLogLikeIm(i) = sum(log(likesIm{i}(:)./countsIm{i}(:)));
         %ratio ONLY
+        tic
         temp = evalNewLikeRatio(likesIm{i},countsIm{i},likePxStruct,dirtyRegion,ratiosImOld{i});
+        toc
         ratiosIm{i} = temp;
         
         logProbCellRatio{i} = getLogLikeCellRatio(ratiosIm{i},cellParams,likePxIdxCells,dirtyRegion,nPosesCell,logLikeCellOld{i});

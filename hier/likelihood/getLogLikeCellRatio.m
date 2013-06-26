@@ -35,10 +35,12 @@ function [logProbCell] = getLogLikeCellRatio(ratios,cellParams,likePxIdxCells,di
 %                %logProbCellTemp2(i) = oldLogCellProbUse(i);
 %             end
             
-            b=ratiosType(id);
-            c=cellfun(@log,b,'UniformOutput',0);
-            c=cellfun(@sum,c,'UniformOutput',0);
-            c=cellfun(@sum,c,'UniformOutput',0);
+%             b=ratiosType(id);
+%             c=cellfun(@log,b,'UniformOutput',0);
+%             c=cellfun(@sum,c,'UniformOutput',0);
+%             c=cellfun(@sum,c,'UniformOutput',0);
+
+            c=ratiosType(id);
 
             logProbCellTemp(i) = logsum(cell2mat(c),1) - log(nPosesCell{n}(i));  % add in prior over poses
         end

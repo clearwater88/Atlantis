@@ -28,7 +28,7 @@ function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores
     while(1)
         display(['On ind: ', int2str(brickIdx)]);
     
-        if(brickIdx > 75)
+        if(brickIdx > 100)
             break;
         end
         for (i=1:numel(particles))
@@ -137,12 +137,12 @@ function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores
         brickIdx=brickIdx+1;
         %save('tempRes','allParticles','allParticleProbs','allLikes','allCounts','allConnPars','allConnChilds','templateStruct','saliencyScores','params','data','-v7.3');
         
-        figure(1); subplot(1,3,1); imshow(data);
-        st = viewAllParticles(newParticles,templateStruct,params.imSize);
-        subplot(1,3,2); imshow(st);
-        st2 = viewOverlayTest(data,newParticles,templateStruct,params.imSize);
-        subplot(1,3,3); imshow(st2);
-        pause(0.2);
+%         figure(1); subplot(1,3,1); imshow(data);
+%         st = viewAllParticles(newParticles,templateStruct,params.imSize);
+%         subplot(1,3,2); imshow(st);
+%         st2 = viewOverlayTest(data,newParticles,templateStruct,params.imSize);
+%         subplot(1,3,3); imshow(st2);
+%         pause(0.2);
 
     end
 end

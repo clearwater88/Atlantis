@@ -1,9 +1,12 @@
+function main(ds)
 startup;
 trainInds = 6:10;
 testInd = 1:5;
 nTest = numel(testInd);
 
 params = initParams;
+params.downSampleFactor = ds;
+
 ruleStruct = initRules;
 templateStruct = initTemplates;
 
@@ -27,7 +30,7 @@ for (i=1:nTest)
              'sz-', int2str(params.imSize(1)), 'x', int2str(params.imSize(2)), '_', ...
              cellParams.toString(cellParams)];
     templateStr = templateStruct.toString(templateStruct);
-    saveStr = ['testNoContext', int2str(i), '_', probMapStruct.toString(probMapStruct), '_', params.toString(params), '_', cellParams.toString(cellParams), '_', templateStr];
+    saveStr = ['test', int2str(i), '_', probMapStruct.toString(probMapStruct), '_', params.toString(params), '_', cellParams.toString(cellParams), '_', templateStr];
          
     if(exist([mapStr,'.mat'],'file'))
         display('loading probmap file');
@@ -68,4 +71,5 @@ for (i=1:nTest)
     save(saveStr,'cleanTestData', 'testData', 'allParticleProbs', ...
                  'templateStruct', 'probMapStruct', 'cellParams', 'params', ...
                  'allParticles','allConnPars','allConnChilds', 'saliencyScores', '-v7.3');
+end
 end

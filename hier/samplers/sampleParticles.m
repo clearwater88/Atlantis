@@ -1,11 +1,5 @@
-function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores] = sampleParticles(data,cellMapStruct,cellParams,params,ruleStruct,templateStruct)
+function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores] = sampleParticles(data,likePxIdxCells,likePxStruct,cellMapStruct,cellParams,params,ruleStruct,templateStruct)
     [likeTemp,countsTemp] = initLike(data,templateStruct);
-    
-    tic
-    display('Starting evalLike');
-    [likePxStruct] = evalLike(data,templateStruct,zeros(size(data)),zeros(size(data)),params);
-    display('Done evalLike');
-    toc
     
     particles{1} = [];
     particleProbs  = 1;
@@ -28,18 +22,8 @@ function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores
     ratiosIm = cell(params.nParticles,1);
     logLikeCell = cell(params.nParticles,1);
     
-    % precompute
-    tic
-    display('Starting likePxIdxCells computation');
-    likePxIdxCells = cell(cellParams.nTypes,1);
-    for (n=1:cellParams.nTypes)
-        likePxIdxCells{n}= getLikePxIdxAll(cellParams.centres{n}, ...
-                                           cellParams.dims(n,:), ...
-                                           likePxStruct.poses{n});
-    end
+
     nPosesCell = getNumPoses(likePxIdxCells);
-    display('Done likePxIdxCells computation');
-    toc
     
     while(1)
         display(['On ind: ', int2str(brickIdx)]);
@@ -52,7 +36,7 @@ function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores
            logProbParticle(i) = logProbParticle(i) + sum(log(likes{i}(:)./counts{i}(:)));
         end
         
-        [cellType,cellLocIdx,saliencyScores(end+1),ratiosImOldParticle,logLikeCellOldParticle,logProbOptionsAll,logPsumGNoPoint,logPsumG,stop] = ...
+        [cellType,cellLocIdx,saliencyScores(end+1),ratiosImOldParticle,logLikeCellOldParticle,logProbOptionsAll,logPsumGNoPoint,logPsumG] = ...
             getNextSaliencyLoc(particles,likes,counts,particleProbs,dirtyRegion,nPosesCell,likePxStruct,ratiosIm,logLikeCell,likePxIdxCells,connChilds,connPars,cellParams,ruleStruct,cellMapStruct,params);
                 
         % reweight
@@ -72,8 +56,6 @@ function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores
         display(['Cell type: ', int2str(cellType)]);
         
         dirtyRegion = findCellBounds(cellType,cellLocIdx,cellParams);
-        
-        if (stop) break; end;
     
         newParticles = cell(params.nParticles,1);
         newLikes = cell(params.nParticles,1);
@@ -81,7 +63,6 @@ function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores
         newConnChilds = cell(params.nParticles,1);
         newConnPars = cell(params.nParticles,1);
 
-        
         for(n=1:params.nParticles)
             particleId = find(mnrnd(1,particleProbs),1,'first');
             

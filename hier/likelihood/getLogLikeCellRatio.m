@@ -9,7 +9,7 @@ function [logProbCell] = getLogLikeCellRatio(ratios,cellParams,likePxIdxCells,di
         likePxIdxCellsUse = likePxIdxCells{n};
         
         ratiosType = ratios{n};
-        nElem = size(likePxIdxCellsUse,2);
+        nElem = size(likePxIdxCellsUse,1);
         
         if(~isempty(dirtyRegion))
             regionIntersect = doesIntersect(dirtyRegion,cellParams.centreBoundaries{n});
@@ -27,22 +27,9 @@ function [logProbCell] = getLogLikeCellRatio(ratios,cellParams,likePxIdxCells,di
         
         for (j=1:numel(dirty))
             i= dirty(j);
-            id = likePxIdxCellsUse(:,i) == 1;
-            
-%             if(regionIntersect(i) == 0)
-%                logProbCellTemp(i) = oldLogCellProbUse(i); 
-%                continue;
-%                %logProbCellTemp2(i) = oldLogCellProbUse(i);
-%             end
-            
-%             b=ratiosType(id);
-%             c=cellfun(@log,b,'UniformOutput',0);
-%             c=cellfun(@sum,c,'UniformOutput',0);
-%             c=cellfun(@sum,c,'UniformOutput',0);
+            id = likePxIdxCellsUse{i};
 
-            c=ratiosType(id);
-
-            logProbCellTemp(i) = logsum(cell2mat(c),1) - log(nPosesCell{n}(i));  % add in prior over poses
+            logProbCellTemp(i) = logsum(ratiosType(id),1) - log(nPosesCell{n}(i));  % add in prior over poses
         end
         logProbCell{n} = logProbCellTemp;        
     end

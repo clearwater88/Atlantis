@@ -5,20 +5,23 @@ function [pose,likeNew,countNew] = samplePose(likeIm,countsIm,likePxStruct,likeP
 
     poses = likePxStruct.poses{cellType};
     
-    ids = find(likePxIdxCell(:,centreIdx) == 1);
+    ids = likePxIdxCell{centreIdx};
     
-    [logProbs,likesNew,countsNew] = ...
-        cellLogProbs(ids,likeIm,countsIm, ...
-                     likePxStruct.likes{cellType}, ...
-                     likePxStruct.counts{cellType}, ...
-                     likePxStruct.bounds{cellType});
+    likes = likePxStruct.likes{cellType};
+    counts = likePxStruct.counts{cellType};
+    bounds = likePxStruct.bounds{cellType};
+    
+    logProbs = cellLogProbs(ids,likeIm,countsIm, likes, counts, bounds);
      
     probs = exp(logProbs-logsum(logProbs));
     probs = probs/sum(probs); %MATLAB lacks precision, apparently.
     sampleId = mnrnd(1,probs')==1;
     pose = poses(ids(sampleId),:)';
-    likeNew = likesNew{sampleId};
-    countNew = countsNew{sampleId};
     
+    likeUse = likes{ids(sampleId)};
+    countsUse = counts{ids(sampleId)};
+    boundUse = bounds(1:2,:,ids(sampleId)); % for projecting into image
+        
+    [likeNew,countNew] = projectIntoIm(likeIm,countsIm,likeUse,countsUse,boundUse);
 end
 

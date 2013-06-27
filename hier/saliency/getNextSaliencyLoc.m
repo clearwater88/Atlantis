@@ -1,6 +1,4 @@
-function [type,cellLocIdx,val,ratiosIm,logProbCellRatio,logProbOptions,logPsumGNoPoint,logPsumG,stop] = getNextSaliencyLoc(particles,likesIm,countsIm,particleProbs,dirtyRegion,nPosesCell,likePxStruct,ratiosImOld,logLikeCellOld,likePxIdxCells,connChilds,connPars,cellParams,ruleStruct,cellMapStruct,params)
-    
-    BOUNDARY = -10000;
+function [type,cellLocIdx,val,ratiosIm,logProbCellRatio,logProbOptions,logPsumGNoPoint,logPsumG] = getNextSaliencyLoc(particles,likesIm,countsIm,particleProbs,dirtyRegion,nPosesCell,likePxStruct,ratiosImOld,logLikeCellOld,likePxIdxCells,connChilds,connPars,cellParams,ruleStruct,cellMapStruct,params)
     
     ratiosIm = cell(numel(particleProbs),1);
     defaultLogLikeIm = zeros(numel(particleProbs),1);
@@ -47,7 +45,7 @@ function [type,cellLocIdx,val,ratiosIm,logProbCellRatio,logProbOptions,logPsumGN
     while(1)
         
         if (nTry >= nTotLoc)
-            type = 0; cellLocIdx = 0; val = -inf; stop = 1;
+            type = 0; cellLocIdx = 0; val = -inf;
             break;            
         end
         
@@ -59,11 +57,6 @@ function [type,cellLocIdx,val,ratiosIm,logProbCellRatio,logProbOptions,logPsumGN
         [val,type] = max(winners(:,1));
         cellLocIdx = winners(type,2);
     
-        if(val < BOUNDARY)
-            stop = 1;
-        else
-            stop = 0;
-        end
         if (any((getType(particleUse) == type) & (getLocIdx(particleUse) == cellLocIdx)))
             saliencyMaps{type}(cellLocIdx) = -Inf;
             display(['Ignoring already-found salient brick']);

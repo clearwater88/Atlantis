@@ -27,22 +27,44 @@ for (i=1:nTest)
              'sz-', int2str(params.imSize(1)), 'x', int2str(params.imSize(2)), '_', ...
              cellParams.toString(cellParams)];
     templateStr = templateStruct.toString(templateStruct);
-    saveStr = ['testNoContext', int2str(i), '_', probMapStruct.toString(probMapStruct), '_', params.toString(params), '_', cellParams.toString(cellParams), '_', templateStr;];
+    saveStr = ['testNoContext', int2str(i), '_', probMapStruct.toString(probMapStruct), '_', params.toString(params), '_', cellParams.toString(cellParams), '_', templateStr];
          
     if(exist([mapStr,'.mat'],'file'))
         display('loading probmap file');
-        load(mapStr);
+        load(mapStr,'cellMapStruct');
     else
         % probMapCells: size of [ruleId,slot,loc] cell: each is an array
-        %[probMapCells] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
-        %save(mapStr,'probMapCells','probMapPixels', '-v7.3');
+        [cellMapStruct] = getAllProbMapCells2(cellParams,probMapStruct,ruleStruct,params);
+        save(mapStr,'cellMapStruct', '-v7.3');
     end
     
-    [cellMapStruct] = getAllProbMapCells2(cellParams,probMapStruct,ruleStruct,params);
-%     display('----------');
-    %[probMapCells] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);    
+    tic
+    display('Starting evalLike');
+    [likePxStruct] = evalLike(testData,templateStruct,zeros(size(testData)),zeros(size(testData)),params);
+    display('Done evalLike');
+    toc
     
-    [allParticles,allConnPars,allConnChilds, allParticleProbs, saliencyScores] = sampleParticles(testData,cellMapStruct,cellParams,params,ruleStruct,templateStruct);
+    % precompute
+    pxStr = ['pxInds_', 'sz-', int2str(params.imSize(1)), 'x', int2str(params.imSize(2)), '_', ...
+             cellParams.toString(cellParams), '_', templateStr];
+    if(exist([pxStr,'.mat'],'file'))
+        display('loading pxIdxCell file');
+        load(pxStr,'likePxIdxCells');
+    else
+        tic
+        display('Starting likePxIdxCells computation');
+        likePxIdxCells = cell(cellParams.nTypes,1);
+        for (n=1:cellParams.nTypes)
+            likePxIdxCells{n}= getLikePxIdxAll(cellParams.centres{n}, ...
+                                               cellParams.dims(n,:), ...
+                                               likePxStruct.poses{n});
+        end
+        display('Done likePxIdxCells computation');
+        save(pxStr,'likePxIdxCells', '-v7.3');
+        toc
+    end 
+    
+    [allParticles,allConnPars,allConnChilds, allParticleProbs, saliencyScores] = sampleParticles(testData,likePxIdxCells,likePxStruct,cellMapStruct,cellParams,params,ruleStruct,templateStruct);
     save(saveStr,'cleanTestData', 'testData', 'allParticleProbs', ...
                  'templateStruct', 'probMapStruct', 'cellParams', 'params', ...
                  'allParticles','allConnPars','allConnChilds', 'saliencyScores', '-v7.3');

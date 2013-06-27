@@ -19,18 +19,20 @@ function [likeStructPx] = evalLike(data,templateStruct,initLikes,initCounts,para
         countsTemp = cell(maxElem,1);
         masksTemp = cell(maxElem,1);
         boundariesTemp = zeros(3,2,maxElem);
-                
+        
         template = templateStruct.app{type};
+        
+        x=1:size(data,2);
+        y=1:size(data,1);
+        [x,y] = meshgrid(x(:),y(:));
+        pts = [y(:),x(:)];
+        pts = reshape(pts',[1,2,numel(pts)/2]);
+            
         ct = 1;
         for (ag=params.angleDisc(1):params.angleDisc(2):params.angleDisc(3))
+
             rotTemplate = imrotate(template,-180*(ag)/pi,'nearest','loose');
             templateMask = imrotate(ones(size(template)),-180*(ag)/pi,'nearest','loose');
-            
-            x=1:size(data,2);
-            y=1:size(data,1);
-            [x,y] = meshgrid(x(:),y(:));
-            pts = [y(:),x(:)];
-            pts = reshape(pts',[1,2,numel(pts)/2]);
             
             clear boundary;
             boundary(:,1,:) = bsxfun(@minus,pts,(size(rotTemplate)-1)/2);
@@ -39,37 +41,43 @@ function [likeStructPx] = evalLike(data,templateStruct,initLikes,initCounts,para
             
             outOfBounds = any(boundary(1:2,1,:) < 1) | ...
                           any(bsxfun(@gt,boundary(1:2,2,:),size(data)'));
-            for(y=1:size(data,2))
-                for (x=1:size(data,1))
-                    
-                    ct2 = (y-1)*size(data,1)+x;
-                    bdUse = boundary(:,:,ct2);
-                    
-                    % rotated patch falls outside? Then forget it
-                    if(outOfBounds(ct2)) continue; end;
-                    
-                    dataUse = data(bdUse(1,1):bdUse(1,2), ...
-                                   bdUse(2,1):bdUse(2,2));
-                    likeUse = initLikes(bdUse(1,1):bdUse(1,2), ...
-                                        bdUse(2,1):bdUse(2,2));
-                    countsUse = initCounts(bdUse(1,1):bdUse(1,2), ...
-                                           bdUse(2,1):bdUse(2,2));
+            
+            b1 = boundary(:,:,~outOfBounds);      
+            b2 = reshape(b1(1:2,1:2,:),[4,numel(b1(1:2,1:2,:))/4]);            
+            rg = reshape([1:size(b2,2)],[1,1,size(b2,2)]);
+            
+            dataUse2 = arrayfun(@(x)(data(b2(1,x):b2(3,x),b2(2,x):b2(4,x))),rg,'UniformOutput',0);
+            dataUse2 = cell2mat(dataUse2);
+            
+            likeUse2 = arrayfun(@(x)(initLikes(b2(1,x):b2(3,x),b2(2,x):b2(4,x))),rg,'UniformOutput',0);
+            likeUse2 = cell2mat(likeUse2);
+            
+            countsUse2 = arrayfun(@(x)(initCounts(b2(1,x):b2(3,x),b2(2,x):b2(4,x))),rg,'UniformOutput',0);
+            countsUse2 = cell2mat(countsUse2);
+            
+            likePatch = templateStruct.mix(type)* ...
+                         bsxfun(@power,rotTemplate,dataUse2) .* ...
+                         bsxfun(@power,1-rotTemplate,1-dataUse2);
+            likePatch = bsxfun(@times,likePatch,templateMask);
+            likePatch = likePatch+likeUse2;
 
-                    likePatch = templateStruct.mix(type)*((rotTemplate.^dataUse).*((1-rotTemplate).^(1-dataUse)));
-                    likePatch = likePatch.*templateMask;
-                    likePatch = likePatch + likeUse;
-                    
-                    counts = templateStruct.mix(type)*ones(size(likePatch));
-                    counts = counts.*templateMask + countsUse;
-
-                    posesTemp(ct,:) = [x,y,ag];                    
-                    likesTemp{ct,1} = likePatch;
-                    masksTemp{ct,1} = templateMask;
-                    countsTemp{ct,1} = counts;
-                    boundariesTemp(:,:,ct) = bdUse;
-                    ct = ct+1;
-                end
+            counts = templateStruct.mix(type)*ones(size(likePatch));
+            counts = bsxfun(@times,counts,templateMask) + countsUse2;
+                        
+            nFill = sum(~outOfBounds);
+            
+            [y,x,z] = meshgrid(1:size(data,2),1:size(data,1),ag);
+            poses = [x(:),y(:),z(:)];
+            posesTemp(ct:ct-1+nFill,:) = poses(~outOfBounds,:);
+            
+            boundariesTemp(:,:,ct:ct-1+nFill) = b1;
+            
+            for (i=1:nFill)
+                likesTemp{ct-1+i,1} = likePatch(:,:,i);
+                masksTemp{ct-1+i,1} = templateMask;
+                countsTemp{ct-1+i,1} = counts(:,:,i);
             end
+            ct = ct+nFill;
         end
         
         %clean up

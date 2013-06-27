@@ -47,6 +47,7 @@ function [res,resInds] = getProbMapBottomUp(cellMapStruct,cellParams,ruleInd,slo
     sz = size(probMapsSpatial{:,:,1});
     temp = bsxfun(@plus,shiftAlignChild,sz(1:2));
     probMapInds = sz(1)*(temp(:,2)-1)+temp(:,1);                  
+    probMapInds(probMapInds<1) = [];
     
     parentLocs = bsxfun(@plus,bottomRightFrameParent,pts);
     resLocs = zeros(size(parentLocs,1)*nParentAngles,3);

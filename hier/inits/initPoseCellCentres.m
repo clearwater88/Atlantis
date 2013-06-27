@@ -4,13 +4,13 @@ function cellParams = initPoseCellCentres(imSize)
     imSize = [imSize,2*pi]; % append range of angles in pose space
     
     % Make odd so centre is unambiguous
-    cellDims(1,:) = [32,32,pi];
-    cellDims(2,:) = [24,24,pi];
-    cellDims(3,:) = [16,16,pi];
+    cellDims(1,:) = [16,16,pi];
+    cellDims(2,:) = [12,12,pi];
+    cellDims(3,:) = [8,8,pi];
     
-    strides(1,:) = [8,8,pi/2];
+    strides(1,:) = [16,16,pi/2];
     strides(2,:) = [8,8,pi/2];
-    strides(3,:) = [8,8,pi/2]; 
+    strides(3,:) = [4,4,pi/2]; 
     
     %cellStrides = cellDims;
     

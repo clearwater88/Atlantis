@@ -6,13 +6,13 @@ function [probMapStruct] = initProbMaps(ruleStruct,templates)
     vonM = cell(numel(parents),1);
     covCentres = cell(numel(parents),1); % covariances for each slot
 
-    covCentresParents(:,:,1) = [5^2,0; ...
-                                0,5^2];
+    covCentresParents(:,:,1) = [2^2,0; ...
+                                0,2^2];
     covCentresParents(:,:,2) = covCentresParents(:,:,1);
     covCentresParents(:,:,3) = covCentresParents(:,:,1);
     covCentresParents(:,:,4) = covCentresParents(:,:,1);
     
-    vonMisesConcParents = [1,1,1,1];
+    vonMisesConcParents = [0.2,0.2,0.2,0.2];
     
     
 %     covCentresParents(:,:,2) = [2,0,0; ...
@@ -42,8 +42,7 @@ function [probMapStruct] = initProbMaps(ruleStruct,templates)
             vonM{i} = vonMisesConcParents(parents(i));
         end
     end
-    
-    probMapStruct.version=2;
+
     probMapStruct.strat = 1; %0 no line contig; 1 = line contig
     probMapStruct.offset=offset;
     probMapStruct.cov=covCentres;
@@ -52,6 +51,6 @@ function [probMapStruct] = initProbMaps(ruleStruct,templates)
 end
 
 function [ res ] = toString(probMapStruct)
-    res = ['probMap-','strat', int2str(probMapStruct.strat), '_v',int2str(probMapStruct.version)];
+    res = ['probMap-','strat', int2str(probMapStruct.strat)];
 end
 

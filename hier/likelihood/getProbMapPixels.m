@@ -1,4 +1,4 @@
-function [res] = getProbMapPixels(ruleId,slot,cellCentre,probMapStruct,imSize,angleDisc)
+function [res] = getProbMapPixels(ruleId,slot,cellCentre,probMapStruct,imSize,angleRange)
     offset = probMapStruct.offset{ruleId}(slot,:);
     covar = probMapStruct.cov{ruleId}(:,:,slot);
     vonM = probMapStruct.vonM{ruleId}(1);
@@ -25,7 +25,6 @@ function [res] = getProbMapPixels(ruleId,slot,cellCentre,probMapStruct,imSize,an
     
     tempProb(inds) = mvnpdf([x2(:),y2(:)],centreUse(1:2),covar(1:2,1:2));
     
-    angleRange = angleDisc(1):angleDisc(2):angleDisc(3)-0.0001;
     probVon = exp(vonM*cos(angleRange-centreUse(3)));
     probVon = reshape(probVon,[1,1,numel(probVon)]);
     

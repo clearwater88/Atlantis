@@ -1,4 +1,4 @@
-function [res,dirtyCoords] = getProbMapCells2(ruleId,slot,chType,refPoint,probMapStruct,imSize,angleDisc,cellParams)
+function [res,dirtyCoords] = getProbMapCells2(ruleId,slot,chType,refPoint,probMapStruct,imSize,angles,cellParams)
     % prob map in cells, [imSize x num angles]. Num angles steps in
     % angleDisc.
     % returns prob maps according to order in poseCellLocs
@@ -6,7 +6,7 @@ function [res,dirtyCoords] = getProbMapCells2(ruleId,slot,chType,refPoint,probMa
     centreBoundaries = cellParams.centreBoundaries{chType};
     coords = cellParams.coords{chType};
     
-    resPixels = getProbMapPixels(ruleId,slot,refPoint,probMapStruct,imSize,angleDisc);
+    resPixels = getProbMapPixels(ruleId,slot,refPoint,probMapStruct,imSize,angles);
 
     offset = probMapStruct.offset{ruleId}(slot,:);
     covar = probMapStruct.cov{ruleId}(:,:,slot);
@@ -31,8 +31,8 @@ function [res,dirtyCoords] = getProbMapCells2(ruleId,slot,chType,refPoint,probMa
         sumXY = sum(sum(mapXY,1),2);
         sumXY = sumXY(:);
 
-        indStart = find(angleDisc(1):angleDisc(2):angleDisc(3) >= bd(3,1),1,'first');
-        nAngleBins = (bd(3,2)-bd(3,1))/angleDisc(2);
+        indStart = find(angles >= bd(3,1),1,'first');
+        nAngleBins = (bd(3,2)-bd(3,1))/(angles(2)-angles(1));
         
         temp = 0;
         for (j=1:nAngleBins)

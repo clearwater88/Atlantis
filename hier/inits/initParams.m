@@ -1,11 +1,11 @@
 function [params] = initParams()
     
     params.probRoot = 0.0001; %epsilon
-    params.nParticles = 30;
+    params.nParticles = 20;
     
     % start,increment,end
     % angles are -pi:pi
-    params.angleDisc = [-pi,pi/8,pi-0.00001];
+    params.angles = -pi:pi/8:pi-0.00001;
 
     params.dataFolder = '../BSDSdata/';
 %     params.downSampleFactor = 4;

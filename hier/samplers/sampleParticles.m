@@ -21,16 +21,16 @@ function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores
     dirtyRegion = [];
     ratiosIm = cell(params.nParticles,1);
     logLikeCell = cell(params.nParticles,1);
-    
 
     nPosesCell = getNumPoses(likePxIdxCells);
     
     while(1)
         display(['On ind: ', int2str(brickIdx)]);
     
-        if(brickIdx > 100)
+        if(brickIdx > 75)
             break;
         end
+        logProbParticle = ones(1,numel(particles));
         for (i=1:numel(particles))
            logProbParticle(i) =  evalParticleLogProbPrior(particles{i},connChilds{i}, connPars{i}, ruleStruct, nPosesCell, cellMapStruct, cellParams, params);
            logProbParticle(i) = logProbParticle(i) + sum(log(likes{i}(:)./counts{i}(:)));
@@ -49,9 +49,6 @@ function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores
         particleProbs = localizedProbs-logProbParticle;
         particleProbs = exp(particleProbs-logsum(particleProbs,2));
         allParticleProbs{end+1} = particleProbs;
-        
-        particleProbs
-        
         
         display(['Cell type: ', int2str(cellType)]);
         
@@ -136,11 +133,11 @@ function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores
 
         brickIdx=brickIdx+1;
         %save('tempRes','allParticles','allParticleProbs','allLikes','allCounts','allConnPars','allConnChilds','templateStruct','saliencyScores','params','data','-v7.3');
-        
-%         figure(1); subplot(1,3,1); imshow(data);
-%         st = viewAllParticles(newParticles,templateStruct,params.imSize);
-%         subplot(1,3,2); imshow(st);
-%         st2 = viewOverlayTest(data,newParticles,templateStruct,params.imSize);
+
+        figure(1); subplot(1,3,1); imshow(data);
+        st = viewAllParticles(newParticles,templateStruct,params);
+        subplot(1,3,2); imshow(st);
+%         st2 = viewOverlayTest(data,newParticles,templateStruct,params);
 %         subplot(1,3,3); imshow(st2);
 %         pause(0.2);
 

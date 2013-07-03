@@ -13,7 +13,7 @@ function [likeStructPx] = evalLike(data,templateStruct,initLikes,initCounts,para
     
     for (type=1:nTemplates)
 
-        maxElem = size(data,1)*size(data,2)*numel(params.angleDisc(1):params.angleDisc(2):params.angleDisc(3));
+        maxElem = size(data,1)*size(data,2)*numel(params.angles);
         posesTemp = zeros(maxElem,3);
         likesTemp = cell(maxElem,1);
         countsTemp = cell(maxElem,1);
@@ -29,10 +29,10 @@ function [likeStructPx] = evalLike(data,templateStruct,initLikes,initCounts,para
         pts = reshape(pts',[1,2,numel(pts)/2]);
             
         ct = 1;
-        for (ag=params.angleDisc(1):params.angleDisc(2):params.angleDisc(3))
-
-            rotTemplate = imrotate(template,-180*(ag)/pi,'nearest','loose');
-            templateMask = imrotate(ones(size(template)),-180*(ag)/pi,'nearest','loose');
+        for (j=1:numel(params.angles))
+            ag=params.angles(j);
+            rotTemplate = trimIm(imrotate(template,-180*(ag)/pi,'nearest','loose'));
+            templateMask = trimIm(imrotate(ones(size(template)),-180*(ag)/pi,'nearest','loose'));
             
             clear boundary;
             boundary(:,1,:) = bsxfun(@minus,pts,(size(rotTemplate)-1)/2);
@@ -69,6 +69,12 @@ function [likeStructPx] = evalLike(data,templateStruct,initLikes,initCounts,para
             [y,x,z] = meshgrid(1:size(data,2),1:size(data,1),ag);
             poses = [x(:),y(:),z(:)];
             posesTemp(ct:ct-1+nFill,:) = poses(~outOfBounds,:);
+            
+            a=poses(~outOfBounds,1:2);
+            b=bsxfun(@minus,a,(size(rotTemplate)-1)/2);
+            c = any(b(:,1) < 1) | any(b(:,2) < 1);
+            assert(c == 0);
+            
             
             boundariesTemp(:,:,ct:ct-1+nFill) = b1;
             

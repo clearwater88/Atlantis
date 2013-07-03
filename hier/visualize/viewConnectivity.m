@@ -43,8 +43,9 @@ function [res] = viewConnectivity(particle,connPar,imSize, particleView)
            
            % pick a channel: r or g
            ind = randi(2,1,1);
-           for (k=1:2)
+           for (k=1:3)
                temp = res(:,:,k);
+               
                if (k==ind)
                    temp(inds) = val;
                else

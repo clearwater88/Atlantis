@@ -1,14 +1,17 @@
-function main(ds)
+function main(ds,noiseParam,useContext)
+
 startup;
 trainInds = 6:10;
-testInd = 1:5;
+testInd = 1:3;
 nTest = numel(testInd);
 
 params = initParams;
 params.downSampleFactor = ds;
 
-ruleStruct = initRules;
 templateStruct = initTemplates;
+templateStruct.bg=noiseParam;
+
+ruleStruct = initRules(useContext);
 
 if(templateStruct.doLearning == 1)
    templateStruct = learnTemplates(trainInds,params,templateStruct);
@@ -30,7 +33,11 @@ for (i=1:nTest)
              'sz-', int2str(params.imSize(1)), 'x', int2str(params.imSize(2)), '_', ...
              cellParams.toString(cellParams)];
     templateStr = templateStruct.toString(templateStruct);
-    saveStr = ['test', int2str(i), '_', probMapStruct.toString(probMapStruct), '_', params.toString(params), '_', cellParams.toString(cellParams), '_', templateStr];
+    saveStr = ['test', int2str(i), '_', ruleStruct.toString(ruleStruct), '_', ...
+               probMapStruct.toString(probMapStruct), '_', ...
+               params.toString(params), '_', ...
+               cellParams.toString(cellParams), '_', ...
+               templateStr];
          
     if(exist([mapStr,'.mat'],'file'))
         display('loading probmap file');
@@ -69,7 +76,7 @@ for (i=1:nTest)
     
     [allParticles,allConnPars,allConnChilds, allParticleProbs, saliencyScores] = sampleParticles(testData,likePxIdxCells,likePxStruct,cellMapStruct,cellParams,params,ruleStruct,templateStruct);
     save(saveStr,'cleanTestData', 'testData', 'allParticleProbs', ...
-                 'templateStruct', 'probMapStruct', 'cellParams', 'params', ...
+                 'templateStruct', 'probMapStruct', 'ruleStruct', 'cellParams', 'params', ...
                  'allParticles','allConnPars','allConnChilds', 'saliencyScores', '-v7.3');
 end
 end

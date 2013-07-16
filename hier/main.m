@@ -44,7 +44,7 @@ for (i=1:nTest)
         load(mapStr,'cellMapStruct');
     else
         % probMapCells: size of [ruleId,slot,loc] cell: each is an array
-        [cellMapStruct] = getAllProbMapCells2(cellParams,probMapStruct,ruleStruct,params);
+        [cellMapStruct] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
         save(mapStr,'cellMapStruct', '-v7.3');
     end
     

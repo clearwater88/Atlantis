@@ -15,7 +15,7 @@ function [connChild,connPar] = sampleChildren(parentId,cellMapStruct,bricks,rule
         
         centre = cellParams.centres{parentType}(parentLocIdx,:);
         [temp,massInds] = getProbMapTopDown(cellMapStruct,cellParams,ruleId,i,centre);
-        probMap = adjustProbMap2(temp,massInds,chType,bricks);        
+        probMap = adjustProbMap(temp,massInds,chType,bricks);        
         
         % modify with rooting probs for children who would no longer have
         % to root themselves

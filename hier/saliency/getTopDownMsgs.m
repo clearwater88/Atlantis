@@ -61,7 +61,7 @@ function [logPsumGNoPoint,logPsumG] = getTopDownMsgs(bricks,cellParams,connChild
                 
                 %probMap = adjustProbMap(probMapCells,slotType,ruleInd,slotsUse(s),bricks,locIdxUse);
                 [temp,massInds] = getProbMapTopDown(cellMapStruct,cellParams,ruleInd,slotsUse(s),centre);
-                probMap = adjustProbMap2(temp,massInds,chType,bricks);    
+                probMap = adjustProbMap(temp,massInds,chType,bricks);    
                 
                 brickNoPointTemp{chType} = brickNoPointTemp{chType}.*(1-probMap);
             end

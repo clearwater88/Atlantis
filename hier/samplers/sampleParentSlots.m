@@ -28,7 +28,7 @@ function [slotProbs] = sampleParentSlots(childType, childLoc, bricks,connChild,r
             for (s=1:numel(validSlots))
                 %probMap = adjustProbMap(allProbMapCells,childType,ruleInd,validSlots(s),bricks,parentLocIdx); % specific parent
                 [temp,massInds] = getProbMapTopDown(cellMapStruct,cellParams,ruleInd,validSlots(s),centre);
-                probMap = adjustProbMap2(temp,massInds,childType,bricks);
+                probMap = adjustProbMap(temp,massInds,childType,bricks);
                 
                 slotProbs(ruleInd,validSlots(s),parentId) = ruleStruct.probs(ruleInd)*probMap(childLoc);
             end

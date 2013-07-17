@@ -43,16 +43,22 @@ for (i=1:nTest)
         display('loading probmap file');
         load(mapStr,'cellMapStruct');
     else
-        % probMapCells: size of [ruleId,slot,loc] cell: each is an array
+        % probMapCells: size of [ruleId,slot,loc] cell: each is an array.
+        % These are the p(r|s) and p(g|r)
         [cellMapStruct] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params);
         save(mapStr,'cellMapStruct', '-v7.3');
     end
     
-    tic
-    display('Starting evalLike');
-    [likePxStruct] = evalLike(testData,templateStruct,zeros(size(testData)),zeros(size(testData)),params);
-    display('Done evalLike');
-    toc
+    % centre of poses, bounds, angles used, rotated templates, etc.
+    posesStruct = getPoses(params,templateStruct);
+    
+    cellPoses = getCellPoses(posesStruct, cellParams);
+    
+%     tic
+%     display('Starting evalLike');
+%     [likePxStruct] = evalLike(testData,templateStruct,zeros(size(testData)),zeros(size(testData)),params);
+%     display('Done evalLike');
+%     toc
     
     % precompute
     pxStr = ['pxInds_', 'sz-', int2str(params.imSize(1)), 'x', int2str(params.imSize(2)), '_', ...

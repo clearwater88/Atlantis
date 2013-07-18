@@ -54,6 +54,13 @@ function likes = evalLikePartition(dirty,partition,agInd,type,posesStruct,data,p
     template = posesStruct.rotTemplate{type}{agInd};
     mask = posesStruct.mask{type}{agInd};
     counts = posesStruct.counts{type}{agInd};
+    bd = posesStruct.bounds{type}(:,:,partition);
+    
+    b2 = reshape(bd(1:2,1:2,:),[4,numel(bd(1:2,1:2,:))/4]);            
+    rg = reshape([1:size(b2,2)],[1,1,size(b2,2)]);
+    
+    dataUse = arrayfun(@(x)(data(b2(1,x):b2(3,x),b2(2,x):b2(4,x))),rg,'UniformOutput',0);
+    dataUse = cell2mat(dataUse);
 end
 
 function [dirtyPartitions,ags] = splitDirty(type,dirty,evalLikeDims,posesStruct)
@@ -61,15 +68,14 @@ function [dirtyPartitions,ags] = splitDirty(type,dirty,evalLikeDims,posesStruct)
     % evaluation of likelihoods. Each partition is guaranteed to have all
     % the same angle
 
-    dirtyPartitions = [];
+    dirtyPartitions = logical([]);
     ags = [];
     
-    boundsDirty = posesStruct.bounds{type}(:,:,dirty);
     posesDirty = posesStruct.poses{type}(dirty,:);
     posesDirtyStart = min(posesDirty(:,1:2),[],1);
     posesDirtyEnd = max(posesDirty(:,1:2),[],1);
     
-    boundsAngle =squeeze(boundsDirty(3,1,:));
+    posesAngle = posesDirty(:,3);
     
     xStart = [posesDirtyStart(1):evalLikeDims(1):posesDirtyEnd(1)];
     yStart = [posesDirtyStart(2):evalLikeDims(2):posesDirtyEnd(2)];
@@ -81,12 +87,16 @@ function [dirtyPartitions,ags] = splitDirty(type,dirty,evalLikeDims,posesStruct)
     
     for (i=1:numel(posesStruct.angles))
         ag = posesStruct.angles(i);
-        inds = abs(boundsAngle-ag) < 0.001;
-        boundsUse = boundsDirty(:,:,inds);
+        inds = abs(posesAngle-ag) < 0.001;
+        posesUse = posesDirty(inds,:);
         for (j=1:size(startLocs,1))
             endLoc = startLocs(j,:) + evalLikeDims - [1,1];
-            inPartition = doesIntersect([startLocs(j,:)',endLoc'],boundsUse);
-            temp = zeros(size(inds,1),1);
+            
+            inPartition = bsxfun(@le,startLocs(j,:),posesUse(:,1:2)) .* ...
+                          bsxfun(@ge,endLoc,posesUse(:,1:2));
+            inPartition = (sum(inPartition,2) == 2);
+            
+            temp = logical(zeros(size(inds,1),1));
             temp(inds) = inPartition;
             dirtyPartitions = cat(2,dirtyPartitions,temp);
             ags = cat(2,ags,ag);

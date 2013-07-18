@@ -12,7 +12,7 @@ function [params] = initParams()
     
 
     % for computing image likelihoods. In pixels. All angles used
-    params.evalLikeDims = [9,19];
+    params.evalLikeDims = [50,50];
 
     params.toString = @toString;
 end

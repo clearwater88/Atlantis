@@ -109,7 +109,7 @@ function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores
             end
             
             % bricks: on/off, type, cellCentreIndex,[poseX,Y,theta]            
-            [pose,newLike,newCount] = samplePose(likesParticle,countsParticle,likePxStruct,likePxIdxCells{cellType},cellType,cellLocIdx);
+            [pose,newLike,newCount] = samplePose(data,likesParticle,countsParticle,ratiosImOldParticle{particleId},likePxIdxCells,posesStruct,cellType,cellLocIdx);
             particle(4:6,end) = pose;
 
             newParticles{n} = particle;
@@ -136,9 +136,9 @@ function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores
         brickIdx=brickIdx+1;
         %save('tempRes','allParticles','allParticleProbs','allLikes','allCounts','allConnPars','allConnChilds','templateStruct','saliencyScores','params','data','-v7.3');
 
-        figure(1); subplot(1,3,1); imshow(data);
-        st = viewAllParticles(newParticles,templateStruct,params);
-        subplot(1,3,2); imshow(st);
+%         figure(1); subplot(1,3,1); imshow(data);
+%         st = viewAllParticles(newParticles,templateStruct,params);
+%         subplot(1,3,2); imshow(st);
 %         st2 = viewOverlayTest(data,newParticles,templateStruct,params);
 %         subplot(1,3,3); imshow(st2);
 %         pause(0.2);

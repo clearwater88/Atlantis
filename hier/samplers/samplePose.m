@@ -1,26 +1,35 @@
-function [pose,likeNew,countNew] = samplePose(likeIm,countsIm,likePxStruct,likePxIdxCell,cellType,centreIdx)
+function [pose,likeNew,countNew] = samplePose(data,likeIm,countsIm,ratiosIm,likePxIdxCell,posesStruct,cellType,centreIdx)
 
     % need to provide particle
     % also updates likelihood maps
 
-    poses = likePxStruct.poses{cellType};
+    poses = posesStruct.poses{cellType};
+    ratiosIm = ratiosIm{cellType};
     
-    ids = likePxIdxCell{centreIdx};
+    ids = likePxIdxCell{cellType}{centreIdx};
     
-    likes = likePxStruct.likes{cellType};
-    counts = likePxStruct.counts{cellType};
-    bounds = likePxStruct.bounds{cellType};
+%     likes = likePxStruct.likes{cellType};
+%     counts = likePxStruct.counts{cellType};
+%     bounds = likePxStruct.bounds{cellType};
     
-    logProbs = cellLogProbs(ids,likeIm,countsIm, likes, counts, bounds);
+%     logProbs = cellLogProbs(ids,likeIm,countsIm, likes, counts, bounds);
      
+    logProbs = ratiosIm(ids);
+
     probs = exp(logProbs-logsum(logProbs));
     probs = probs/sum(probs); %MATLAB lacks precision, apparently.
     sampleId = mnrnd(1,probs')==1;
-    pose = poses(ids(sampleId),:)';
+    poseId = ids(sampleId);
+    pose = poses(poseId,:)';
     
-    likeUse = likes{ids(sampleId)};
-    countsUse = counts{ids(sampleId)};
-    boundUse = bounds(1:2,:,ids(sampleId)); % for projecting into image
+    [~,agInd] = min(abs(posesStruct.angles-pose(3)));
+    
+    template = posesStruct.rotTemplate{cellType}{agInd};
+    countsUse = posesStruct.counts{cellType}{agInd};
+    boundUse = posesStruct.bounds{cellType}(:,:,poseId);
+    
+    dataUse = data(boundUse(1,1):boundUse(1,2),boundUse(2,1):boundUse(2,2));
+    likeUse =  template.^dataUse .* (1-template).^(1-dataUse);
         
     [likeNew,countNew] = projectIntoIm(likeIm,countsIm,likeUse,countsUse,boundUse);
 end

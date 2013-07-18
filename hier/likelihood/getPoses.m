@@ -5,18 +5,23 @@ function [posesStruct] = getPoses(params,templateStruct)
 
     posesStruct.rotTemplate = cell(nTemplates,1);
     posesStruct.mask = cell(nTemplates,1);
+    posesStruct.counts = cell(nTemplates,1);
+    
     for (type=1:nTemplates)
         template = templateStruct.app{type};
         
         rotTemplate = cell(numel(posesStruct.angles),1);
         mask = cell(numel(posesStruct.angles),1);
+        counts = cell(numel(posesStruct.angles),1);
         for (j=1:numel(params.angles))
             ag = posesStruct.angles(j);
             rotTemplate{j} = trimIm(imrotate(template,-180*(ag)/pi,'nearest','loose'));
             mask{j} = trimIm(imrotate(ones(size(template)),-180*(ag)/pi,'nearest','loose'));
+            counts{j} = mask{j}.*(templateStruct.mix(type)*ones(size(mask{j})));
         end
         posesStruct.rotTemplate{type} = rotTemplate;
         posesStruct.mask{type} = mask;
+        posesStruct.counts{type} = counts;
     end
     
     % poses can at most be centred at all pixels, all orientations

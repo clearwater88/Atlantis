@@ -52,7 +52,7 @@ for (i=1:nTest)
     % centre of poses, bounds, angles used, rotated templates, etc.
     posesStruct = getPoses(params,templateStruct);
     
-    cellPoses = getCellPoses(posesStruct, cellParams);
+    %cellPoses = getCellPoses(posesStruct, cellParams);
     
 %     tic
 %     display('Starting evalLike');
@@ -73,14 +73,16 @@ for (i=1:nTest)
         for (n=1:cellParams.nTypes)
             likePxIdxCells{n}= getLikePxIdxAll(cellParams.centres{n}, ...
                                                cellParams.dims(n,:), ...
-                                               likePxStruct.poses{n});
+                                               posesStruct.poses{n});
         end
         display('Done likePxIdxCells computation');
         save(pxStr,'likePxIdxCells', '-v7.3');
         toc
     end 
     
-    [allParticles,allConnPars,allConnChilds, allParticleProbs, saliencyScores] = sampleParticles(testData,likePxIdxCells,likePxStruct,cellMapStruct,cellParams,params,ruleStruct,templateStruct);
+
+    %[allParticles,allConnPars,allConnChilds, allParticleProbs, saliencyScores] = sampleParticles(testData,likePxIdxCells,likePxStruct,cellMapStruct,cellParams,params,ruleStruct,templateStruct);
+    [allParticles,allConnPars,allConnChilds, allParticleProbs, saliencyScores] = sampleParticles(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct);
     save(saveStr,'cleanTestData', 'testData', 'allParticleProbs', ...
                  'templateStruct', 'probMapStruct', 'ruleStruct', 'cellParams', 'params', ...
                  'allParticles','allConnPars','allConnChilds', 'saliencyScores', '-v7.3');

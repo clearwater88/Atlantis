@@ -1,9 +1,12 @@
 function [cellPoses] = getCellPoses(posesStruct, cellParams)
+    error('too slow');
     tic
     nTemplates = numel(posesStruct.rotTemplate);
     cellPoses = cell(nTemplates,1);
     
     for (i=1:nTemplates)
+        i
+        tic
         centreBoundaries = cellParams.centreBoundaries{i};
         cellPosesTemp = cell(size(centreBoundaries,3),1);
         for (j=1:nTemplates)
@@ -14,6 +17,7 @@ function [cellPoses] = getCellPoses(posesStruct, cellParams)
             end
         end
         cellPoses{i} = cellPosesTemp;
+        toc
     end
     toc
 end

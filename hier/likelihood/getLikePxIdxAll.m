@@ -1,4 +1,8 @@
 function res = getLikePxIdxAll(cellCentre,cellDims,poseCentres)
+    % generates indices that indicate which poses this cell can take on.
+    % This is different than the poses that OVERLAP with this cell; such
+    % poses may not be a value this call can take.
+
     NBATCH = 200;
 
     lowCell = bsxfun(@minus,cellCentre(:,1:2),(cellDims(1:2)-1)/2)';
@@ -36,7 +40,7 @@ function res = getLikePxIdxAll(cellCentre,cellDims,poseCentres)
     end
 
     
-    
+%     
 %     for (n=1:NBATCH)
 %         display(['On batch ', int2str(n) '/', int2str(NBATCH)]);
 %         nStart = (n-1)*batchSize+1;
@@ -56,7 +60,7 @@ function res = getLikePxIdxAll(cellCentre,cellDims,poseCentres)
 %         ags = squeeze(poseCentres(3,1,nStart:nEnd)); % only 1 angle anyway
 %         resAngle = checkAngle(ags',angleLow,angleHigh);
 % 
-%         res2(nStart:nEnd,:) = bsxfun(@and,resSpatial,resAngle)';
+%         res(nStart:nEnd,:) = bsxfun(@and,resSpatial,resAngle)';
 %         temp = bsxfun(@and,resSpatial,resAngle)';
 %         for (i=1:size(temp,1))
 %             res{ct} = find(temp(i,:) == 1);

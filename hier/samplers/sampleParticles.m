@@ -1,5 +1,7 @@
-function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores] = sampleParticles(data,likePxIdxCells,likePxStruct,cellMapStruct,cellParams,params,ruleStruct,templateStruct)
+function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores] = sampleParticles(data,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct)
     [likeTemp,countsTemp] = initLike(data,templateStruct);
+    
+    
     
     particles{1} = [];
     particleProbs  = 1;
@@ -37,7 +39,7 @@ function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores
         end
         
         [cellType,cellLocIdx,saliencyScores(end+1),ratiosImOldParticle,logLikeCellOldParticle,logProbOptionsAll,logPsumGNoPoint,logPsumG] = ...
-            getNextSaliencyLoc(particles,likes,counts,particleProbs,dirtyRegion,nPosesCell,likePxStruct,ratiosIm,logLikeCell,likePxIdxCells,connChilds,connPars,cellParams,ruleStruct,cellMapStruct,params);
+            getNextSaliencyLoc(data,particles,likes,counts,particleProbs,dirtyRegion,nPosesCell,posesStruct,ratiosIm,logLikeCell,likePxIdxCells,connChilds,connPars,cellParams,ruleStruct,cellMapStruct,params,templateStruct);
                 
         % reweight
         logProbOptions = zeros(3,numel(logProbOptionsAll));

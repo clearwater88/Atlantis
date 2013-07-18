@@ -10,6 +10,10 @@ function [params] = initParams()
     params.dataFolder = '../BSDSdata/';
 %     params.downSampleFactor = 4;
     
+
+    % for computing image likelihoods. In pixels. All angles used
+    params.evalLikeDims = [9,19];
+
     params.toString = @toString;
 end
 

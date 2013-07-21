@@ -10,3 +10,5 @@ addpath(genpath('brickGetters'));
 addpath(genpath('readData'));
 addpath(genpath('saliency'));
 addpath(genpath('learn'));
+
+javaaddpath(fullfile('.','bp.jar'));

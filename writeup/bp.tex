@@ -61,9 +61,12 @@ We divide the cases into  $s_b=0$, and  $s_b=1$.
 \begin{eqnarray}
 \mFbSb1(s_b=1) &=& \sum_{\vec{g}} \fb1(s_b=1, \vec{g}) \prod_{g_{b',k}} \mu_{g_{b',k} \rightarrow \fb1}(g_{b',k}) \\
 &=&  \epsilon \times \prod_{g_{b',k}} \mu_{g_{b',k} \rightarrow \fb1}(g_{b',k}=0)  \\
-& & + \sum_{\vec{g}}  \prod_{g_{b',k}} \mu_{g_{b',k} \rightarrow \fb1}(g_{b',k})- \sum_{\vec{g}}  \prod_{g_{b',k}} \mu_{g_{b',k} \rightarrow \fb1}(g_{b',k}=0) \nonumber \\
+& & + \sum_{\vec{g}}  \prod_{g_{b',k}} \mu_{g_{b',k} \rightarrow \fb1}(g_{b',k}) - \prod_{g_{b',k}} \mu_{g_{b',k} \rightarrow \fb1}(g_{b',k}=0) \nonumber \\
 &=& \epsilon \times \prod_{g_{b',k}} \mu_{g_{b',k} \rightarrow \fb1}(g_{b',k}=0)  \\
-& & +1 - \prod_{g_{b',k}} \sum_{g_{b',k}}  \mu_{g_{b',k} \rightarrow \fb1}(g_{b',k}=0) \nonumber
+& & +1 - \prod_{g_{b',k}}  \mu_{g_{b',k} \rightarrow \fb1}(g_{b',k}=0) \nonumber \\
+&=&  \prod_{g_{b',k}} \mu_{g_{b',k} \rightarrow \fb1}(g_{b',k}=0) (\epsilon -1 ) +1 \\
+&=&  1- (1-\epsilon) \prod_{g_{b',k}} \mu_{g_{b',k} \rightarrow \fb1}(g_{b',k}=0) \\
+&=&  1- \mFbSb1(s_b=0)
 \end{eqnarray}
 
 where we have made use of the property that messages from a node/factor sum to $1$
@@ -150,10 +153,10 @@ where  $\mu^0_{g_{b',k} \rightarrow \fb1}$ means the old message sent by $g_{b',
 \subsection{$\mGbkFb3$}
 
 \begin{eqnarray}
-\mGbkFb3(g_{b,k}) = \prod_{b' \neq b} \mu_{f_{b'}^3 \rightarrow g_{b,k}}(g_{b,k})
+\mGbkFb3(g_{b,k}) = \prod_{b' \in V(b)} \mu_{f_{b'}^3 \rightarrow g_{b,k}}(g_{b,k})
 \end{eqnarray}
 
-Note that $ \mu_{f_{b'}^3 \rightarrow g_{b,k}}(g_{b,k})$ might need to be ``re-expanded'' to the proper domain of $g_{b,k}$.
+wher $V(b)$ is the after set of brick $b$. Note that $ \mu_{f_{b'}^3 \rightarrow g_{b,k}}(g_{b,k})$ needs to be ``expanded'' to the proper domain of $g_{b,k}$
 
 \subsection{$\mFbRb3$}
 

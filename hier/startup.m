@@ -10,5 +10,6 @@ addpath(genpath('brickGetters'));
 addpath(genpath('readData'));
 addpath(genpath('saliency'));
 addpath(genpath('learn'));
+addpath(genpath('bpmatlab'));
 
 javaaddpath(fullfile('.','bp.jar'));

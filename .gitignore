@@ -166,6 +166,7 @@ pip-log.txt
 *.mat
 *.bmp
 *.tif
+*.mexa64
 res/*
 writeup/*.aux
 writeup/*.log

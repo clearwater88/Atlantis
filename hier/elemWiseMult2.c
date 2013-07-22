@@ -19,6 +19,7 @@ static void compute(double res[], double *a, double	*b, size_t len) {
     mxArray* temp2 = mxCreateDoubleMatrix( (mwSize)len, 1, mxREAL);
     
     memcpy(mxGetPr(temp2),a, sizeof(double)*len);
+    /**mxGetPr(temp2) = *a;*/ /*doesnt work; probably need to get at temp2 directly*/
     
     /*for (i=0; i < len; i++) mxGetPr(temp2)[i] = a[i];*/
     

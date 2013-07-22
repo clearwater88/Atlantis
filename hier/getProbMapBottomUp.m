@@ -4,9 +4,10 @@ function [res,resInds] = getProbMapBottomUp(cellMapStruct,cellParams,ruleInd,slo
     % we need to talk about parent coords here
     parType = cellMapStruct.parentType(ruleInd);
     parStrides = cellParams.strides(parType,:);
-    parOrigin = cellParams.origins(parType,:);
-    parRefPoint = cellMapStruct.refPoints(:,ruleInd,slot);
-    parLocFramePar = centre2CellFrame(parRefPoint',parStrides(1:2),parOrigin(1:2));
+    %parOrigin = cellParams.origins(parType,:);
+    parLocFramePar = cellMapStruct.refPoints(:,ruleInd,slot);
+    %parRefPoint = cellMapStruct.refPoints(:,ruleInd,slot);
+    %parLocFramePar = centre2CellFrame(parRefPoint',parStrides(1:2),parOrigin(1:2));
     
     parCoordsSize = cellParams.coordsSize(parType,:);
     

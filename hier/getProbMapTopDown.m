@@ -14,7 +14,8 @@ function [res,resInds] = getProbMapTopDown(cellMapStruct,cellParams,ruleInd,slot
     
     % Ok if these are decimals. Their difference must be integer though
     centreLoc = centre2CellFrame(centre(1:2),strides(1:2),origin(1:2));
-    refLoc = centre2CellFrame(cellMapStruct.refPoints(:,ruleInd,slot)',strides(1:2),origin(1:2));
+    %refLoc = centre2CellFrame(cellMapStruct.refPoints(:,ruleInd,slot)',strides(1:2),origin(1:2));
+    refLoc = cellMapStruct.refPoints(:,ruleInd,slot)';
     
     idx = int32(bsxfun(@plus,locs,[centreLoc-refLoc,0]));
     

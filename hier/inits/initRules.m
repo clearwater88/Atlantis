@@ -15,7 +15,7 @@ function [ruleStruct] = initRules(useContext)
                  2,0,0,0; ...
                  3,0,0,0];
     end
-
+    
 %     rules = [1,0,0,0; ...
 %              2,0,0,0; ...
 %              3,0,0,0];
@@ -39,6 +39,20 @@ function [ruleStruct] = initRules(useContext)
     ruleStruct.maxChildren = size(ruleStruct.children,2);
     
     ruleStruct.toString = @toString;
+    
+    % perform checks
+    
+    % check that rule types in slots are grouped together
+    types = unique(ruleStruct.parents);
+    for (n=1:numel(types))
+       rulesInd = ruleStruct.parents==n;
+       rules = ruleStruct.rules(rulesInd,2:end);
+       for (k=1:size(rules,3))
+          slice = diff(rules(:,k)); 
+          assert(~any(slice < 0));
+       end
+    end
+    
 end
 
 function [res] = toString(ruleStruct)

@@ -11,6 +11,7 @@
 
 #define	RES plhs[0]
 
+
 static void compute(double	res[], double	a[], double	b[], size_t len) {
     size_t i;
     for (i = 0; i < len; i++) {
@@ -34,7 +35,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
     mA = mxGetM(A_IN); 
     mB = mxGetM(B_IN);
     if (mA != mB) {
-	    error("not same size"); 
+	     mexErrMsgTxt("not same size"); 
     } 
     
     /* Create a matrix for the return argument */ 
@@ -47,7 +48,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
     b = mxGetPr(B_IN);
         
     /* Do the actual computations in a subroutine */
-    compute(resp,a,b,mA); 
+    compute(resp,a,b,mA);
     return;
     
 }

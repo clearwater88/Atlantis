@@ -23,9 +23,28 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
     uFb2ToSb = zeros(sum(nBricksType),1);
     %uSbFb1 = uFb2ToSb;
     
+    [gBkLookUp,refPoints,typeInds] = getGbkLookUp(nTypes,maxSlots,ruleStruct,cellMapStruct);
+    conversions = getConversions(nTypes, cellParams);
+
+    
+    shiftGbkInds(gBkLookUp,size(gBkLookUp),[1,2]);
+    
+end
+function conversions = getConversions(nTypes, cellParams)
+    conversions = zeros(2,nTypes,nTypes);
+    for n=1:nTypes
+        for n2=1:nTypes
+            conversions(:,n,n2) = cellParams.strides(n,1:2) ./ cellParams.strides(n2,1:2);
+        end
+    end
+end
+
+function [gBkLookUp,refPoints,typeInds] = getGbkLookUp(nTypes,maxSlots,ruleStruct,cellMapStruct)
+    nRules = size(ruleStruct.rules,1);
+
     gBkLookUp = cell(nTypes,maxSlots);
     %tells where to look up inds of each type
-    % typeInds(1,n2,n,k) means "tell me where do the entries in gBkLookUp{n,k} 
+    % typeInds(1,n2,n,k) means "tell me where the entries in gBkLookUp{n,k} 
     % for children of type n2 start"?
     typeInds = -1*ones(2,nTypes,nTypes,maxSlots);
     refPoints = zeros(2,nTypes); % in parent coords
@@ -65,14 +84,4 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
             end
         end
     end
-    
-    conversions = zeros(2,nTypes,nTypes);
-    for n=1:nTypes
-        for n2=1:nTypes
-            conversions(:,n,n2) = cellParams.strides(n,1:2) ./ cellParams.strides(n2,1:2);
-        end
-    end
-    
-    shiftGbkInds(gBkLookUp{1,2});
-    
 end

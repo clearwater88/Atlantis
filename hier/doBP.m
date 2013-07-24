@@ -26,15 +26,17 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
     [gBkLookUp,refPoints,typeInds] = getGbkLookUp(nTypes,maxSlots,ruleStruct,cellMapStruct);
     conversions = getConversions(nTypes, cellParams);
 
+    type = 2;
+    slot = 2;
     
-    shiftGbkInds(gBkLookUp,size(gBkLookUp),[1,2]);
-    
+    %r = shiftGbkInds(gBkLookUp,size(gBkLookUp),[type,slot],conversions,size(conversions),refPoints,size(refPoints));
+    %a=gBkLookUp{type,slot};
 end
 function conversions = getConversions(nTypes, cellParams)
     conversions = zeros(2,nTypes,nTypes);
     for n=1:nTypes
         for n2=1:nTypes
-            conversions(:,n,n2) = cellParams.strides(n,1:2) ./ cellParams.strides(n2,1:2);
+            conversions(:,n,n2) = cellParams.strides(n,1:2)./cellParams.strides(n2,1:2) ;
         end
     end
 end
@@ -69,7 +71,7 @@ function [gBkLookUp,refPoints,typeInds] = getGbkLookUp(nTypes,maxSlots,ruleStruc
                     locs = cellMapStruct.locs{r,k,agInd};
                     tempLookUp = cat(1, ...
                                      tempLookUp, ...
-                                     uint32([chType*ones([size(locs,1),1]), locs]));
+                                     [chType*ones([size(locs,1),1]), locs]);
                 end
                 
             end

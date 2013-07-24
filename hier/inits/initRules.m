@@ -41,9 +41,15 @@ function [ruleStruct] = initRules(useContext)
     ruleStruct.toString = @toString;
     
     % perform checks
+    types = unique(ruleStruct.parents);
+    % check first rule for given type is null rule
+    for (n=1:numel(types))
+        id = find(ruleStruct.parents==n,1,'first');
+        children = ruleStruct.children(id,:);
+        assert(~any(children~=0));
+    end
     
     % check that rule types in slots are grouped together
-    types = unique(ruleStruct.parents);
     for (n=1:numel(types))
        rulesInd = ruleStruct.parents==n;
        rules = ruleStruct.rules(rulesInd,2:end);
@@ -52,6 +58,8 @@ function [ruleStruct] = initRules(useContext)
           assert(~any(slice < 0));
        end
     end
+    
+    
     
 end
 

@@ -5,29 +5,91 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
     for (n=1:nTypes)
        nBricksType(n) = size(cellParams.coords{n},1);
     end
-    nRules = size(ruleStruct.rules,1);
     maxSlots = size(ruleStruct.children,2);
 
+    [gBkLookUp,refPoints] = getGbkLookUp(nTypes,maxSlots,ruleStruct,cellMapStruct);
+    conversions = getConversions(nTypes, cellParams);
+    
     % allocate space for top-down messages
-    uFb1ToSb = zeros(sum(nBricksType),1); %store sb = 0
+    uFb1ToSb_0 = cell(nTypes,1); % only stores uFb1ToSb=0
+    uFb2ToRb = cell(nTypes,1); % stores all values
+    uFb3ToGbk = cell(nTypes,maxSlots);
+    for (i=1:nTypes)
+        uFb1ToSb_0{i} = 0.01 + 0.005*rand(nBricksType(i),1);
+           
+        uFb2ToRb{i} = 0.01 + 0.005*rand(nBricksType(i),sum(ruleStruct.parents== i));
+        uFb2ToRb{i} = bsxfun(@rdivide, uFb2ToRb{i}, sum(uFb2ToRb{i},2));
+        
+        for (k=1:maxSlots)
+             %who messages are intended for given by gBkLookUp.
+             % 1+ is for null (no point)
+            uFb3ToGbk{i,k} = 0.01 + 0.005*rand(nBricksType(i),1+size(gBkLookUp{i,k},2));
+            uFb3ToGbk{i,k} = bsxfun(@rdivide, uFb3ToGbk{i,k}, sum(uFb3ToGbk{i,k},2));
+        end
+    end
     % uSbToFb2 = uFb1ToSb
-    uFb2ToRb = zeros(sum(nBricksType),nRules); % inefficient space. Storing ALL rules for each brick. This should not be memory bottlebeck.
     % uRbToFb3 = uFb2ToRb
-    uFb3ToGbk = zeros(sum(nBricksType),maxSlots);
+
     
     % allocate space for bottom-up messages
-    uGbkFb3 = zeros(sum(nBricksType),maxSlots);
-    
-    uFb3Rb3 = zeros(sum(nBricksType),nRules);
-    %uRbToFb2 = uFb3Rb3;
-    uFb2ToSb = zeros(sum(nBricksType),1);
-    %uSbFb1 = uFb2ToSb;
-    
-    [gBkLookUp,refPoints,typeInds] = getGbkLookUp(nTypes,maxSlots,ruleStruct,cellMapStruct);
-    conversions = getConversions(nTypes, cellParams);
+    uGbkFb3 = cell(nTypes,maxSlots);
+    uRbToFb2 = cell(nTypes,1); % stores all values
+    uSbToFb1_0 = cell(nTypes,1); % only stores uFb1ToSb=0
+    for (i=1:nTypes)
+        for (k=1:maxSlots)
+            uGbkFb3{i,k} = 0.01 + 0.005*rand(nBricksType(i),1+size(gBkLookUp{i,k},2));
+        end
+        
+        uRbToFb2{i} = 0.01 + 0.005*rand(nBricksType(i),sum(ruleStruct.parents== i));
+        uRbToFb2{i} = bsxfun(@rdivide, uRbToFb2{i}, sum(uRbToFb2{i},2));
+        
+        uSbToFb1_0{i} = 0.01 + 0.005*rand(nBricksType(i),1);
+    end
+    %uFb3Rb3 = uRbToFb2;
+    %uFb2ToSb = uSbFb1_0;
 
-    type = 2;
-    slot = 2;
+    while(1)
+        %% down pass
+        % compute uFb2ToRb
+        tic
+        for (i=1:nTypes)
+            ruleIds = ruleStruct.parents==i;
+            probs = ruleStruct.probs(ruleIds)';
+            
+            temp = zeros(nBricksType(i), numel(probs));
+            temp(:,1) = uFb1ToSb_0{i}; % stores P(rb|sb=0)m_{sb->fb2}(sb)
+            temp = bsxfun(@times, (1-uFb1ToSb_0{i}), probs) + temp;
+            uFb2ToRb{i} = bsxfun(@rdivide,temp,sum(temp,2));
+        end
+        toc
+        %% down pass
+        
+        %% up pass
+        % compute uFb2ToSb = uSbFb1_0
+        tic
+        uSbToFb1_0Old = uSbToFb1_0;
+        for (i=1:nTypes)
+            ruleIds = ruleStruct.parents==i;
+            probs = ruleStruct.probs(ruleIds)';
+            
+            temp = sum(bsxfun(@times,uRbToFb2{i},probs),2); % sb=1
+            uSbToFb1_0{i} = bsxfun(@rdivide, uRbToFb2{i}(:,1), temp + uRbToFb2{i}(:,1));
+        end
+        toc
+        %% up pass
+        
+        type = 2;
+        slot = 2;
+        
+        gbkType = gBkLookUp{type,slot};
+        conversionsType = squeeze(conversions(:,type,:));
+        refPointType = refPoints(:,type);
+        
+        r= shiftGbkIndsSimple(gbkType,conversionsType,refPointType);
+    
+        break;
+    end
+
     
     %r = shiftGbkInds(gBkLookUp,size(gBkLookUp),[type,slot],conversions,size(conversions),refPoints,size(refPoints));
     %a=gBkLookUp{type,slot};

@@ -1,135 +1,60 @@
 #include <math.h>
 #include "mex.h"
 
-
-int* getIndex(const mxArray* szDataMx, const mxArray* indexMx, int* idxSz) {
-    /*
-     * idxSz: how many (sub2ind) indices have been computed (size(indexMx,1))
-     * szDataMx: how big the thing being indexed into is
-     * indexMx: M x N matrix of indices. Each row is another index.
-     */
-    int i,j,id;
-    double* szData;
-    double* indexs;
-    int* res;
-    
-    size_t szIndex[2] = {mxGetM(indexMx),mxGetN(indexMx)};
-    
-    szData = mxGetPr(szDataMx);
-    indexs = mxGetPr(indexMx);
-    
-    res = malloc(szIndex[0]*sizeof(int));
-    
-    for (j=0; j < szIndex[0]; j++) {
-        id=0;
-        for (i=szIndex[1]-1; i >= 0; i--) id = id*szData[i] + (indexs[j+i*szIndex[0]]-1);
-        res[j] = id;
-    }
-    idxSz[0] = szIndex[0];
-    return res;
-}
-
-double* getRefPoint(double parType, double* refPointsTable, mxArray* szRefPoints) {
-    int idxSz;
-    mxArray* mxRefPoints;
-    double* refTableInd;
-    double* res = malloc(2*sizeof(double));    
-    int* refPointInds;
+mxArray* shiftGbkInds(const mxArray *gBkIndsMx, const mxArray *conversionMx, const mxArray *refPointMx, double point[]) {
         
-    /*1-indexed*/
-    mxRefPoints = mxCreateDoubleMatrix( (mwSize)2, (mwSize)2, mxREAL); /*x,type;y,type*/    
-    refTableInd = mxGetPr(mxRefPoints);
-    refTableInd[0] = 1; refTableInd[1] = 2;
-    refTableInd[2] = parType; refTableInd[3] = parType; /* parent type*/
+    size_t szGbkTable[2], szConversionTable[2];
+    int i, chType;
+    int convToChild[2];
+    double *gBkInds, *conversionTable, *res, *refPoint;
+    mxArray *resMx;
     
-    refPointInds = getIndex(szRefPoints,mxRefPoints,&idxSz);
-    res[0] = refPointsTable[refPointInds[0]];
-    res[1] = refPointsTable[refPointInds[1]];
-    free(refPointInds);
-    return res;
+    gBkInds = mxGetPr(gBkIndsMx);
+    conversionTable = mxGetPr(conversionMx);
+    refPoint = mxGetPr(refPointMx);
+    
+    szConversionTable[0] = mxGetM(conversionMx);
+    szConversionTable[1] = mxGetN(conversionMx);
+    
+    /* initialize output to default gbk table. We will twiddle the locations in this. */
+    resMx = mxDuplicateArray(gBkIndsMx);
+    res = mxGetPr(resMx);
+    
+    szGbkTable[0] = mxGetM(gBkIndsMx);
+    szGbkTable[1] = mxGetN(gBkIndsMx);
+    
+    for (i = 0; i < szGbkTable[1]; i++) {
+        
+        chType = gBkInds[i*szGbkTable[0]]-1;
+        convToChild[0] = conversionTable[szConversionTable[0]*chType];
+        convToChild[1] = conversionTable[1+szConversionTable[0]*chType];
+        
+        res[szGbkTable[0]*i+1] += convToChild[0]*(point[0]-refPoint[0]);
+        res[szGbkTable[0]*i+2] += convToChild[1]*(point[1]-refPoint[1]);
+    }
+    return resMx;
 }
 
 void mexFunction( int nlhs, mxArray *plhs[], 
 		  int nrhs, const mxArray*prhs[] )
      
 { 
-    
-    size_t szGbkTable[2];
-    int i,x,y, idxSz;
-    double parType,chType,convToChildX,convToChildY,refPointX,refPointY;
-    mxArray* szConversionTable;
-    mxArray* mxTypes;
-
-    mxArray* szGBkLookUp;
-    mxArray* gbLookUpInds;
-    mxArray* gBkIndsMxArray;
-    mxArray* szRefPoints;
-
-    double* gBkInds;
-    double* conversionTable;
-    double* types;
-    double* refPointsTable;
-    double* res;
-    int* convFactorId;
-    int* idx;
-    double* refPoint;
-
+    int x,y;
     double pointTest[2] = {18,28};
-    double point[2];
+    double point[2], convToChild[2];
     
-    szGBkLookUp = prhs[1];
-    gbLookUpInds = prhs[2];  
-    conversionTable = mxGetPr(prhs[3]);
-    szConversionTable = prhs[4];
-    refPointsTable = mxGetPr(prhs[5]);
-    szRefPoints = prhs[6];
+    const mxArray *gBkIndsMx, *conversionMx, *refPointMx;
     
-    parType = mxGetPr(gbLookUpInds)[0];
-    
-    /*1-indexed*/
-    mxTypes = mxCreateDoubleMatrix( (mwSize)2, (mwSize)3, mxREAL); /*x,parentType,childType;y,parentType,childType*/    
-    types = mxGetPr(mxTypes);
-    types[0] = 1; types[1] = 2;
-    types[2] = parType; types[3] = parType;
-    
-    refPoint = getRefPoint(parType, refPointsTable, szRefPoints);
-         
-    /* get index into cell to tell us which Gbk indices to get*/
-    idx = getIndex(szGBkLookUp,gbLookUpInds,&idxSz);
-    if (idxSz != 1) mexErrMsgTxt("too many inds" );
-    
-    /* get appropriate cell entry*/
-    gBkIndsMxArray = mxGetCell(prhs[0], idx[0]);
-    gBkInds = mxGetPr(gBkIndsMxArray);
-    
-    /* initialize output to default gbk table. We will twiddle the locations in this. */
-    plhs[0] = mxDuplicateArray(gBkIndsMxArray);
-    res = mxGetPr(plhs[0]);
-    
-    szGbkTable[0] = mxGetM(gBkIndsMxArray);
-    szGbkTable[1] = mxGetN(gBkIndsMxArray);
+    gBkIndsMx = prhs[0]; conversionMx = prhs[1]; refPointMx = prhs[2];
     
     for (x = 1; x <= pointTest[0]; x++) {
         point[0] = x;
-        for (y = 1; y <= pointTest[1]; y++) {
-            point[1] = y;
-            
-            for (i = 0; i < szGbkTable[1]; i++) {
-                chType = gBkInds[i*szGbkTable[0]];
-                types[4] = chType; types[5] = chType;
-
-                convFactorId = getIndex(szConversionTable,mxTypes,&idxSz);
-                convToChildX = conversionTable[convFactorId[0]];
-                convToChildY = conversionTable[convFactorId[1]];
-                free(convFactorId);
-
-                res[szGbkTable[0]*i+1] += convToChildX*(point[0]-refPoint[0]);
-                res[szGbkTable[0]*i+2] += convToChildY*(point[1]-refPoint[1]);        
+            for (y = 1; y <= pointTest[1]; y++) {
+                point[1] = y;
+                plhs[0] = shiftGbkInds(gBkIndsMx, conversionMx, refPointMx,point);
             }
-        }
     }
-    free(refPoint);
-    free(idx);
-
+            
+    
     return;
 }

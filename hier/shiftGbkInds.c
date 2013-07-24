@@ -29,7 +29,7 @@ int* getIndex(const mxArray* szDataMx, const mxArray* indexMx, int* idxSz) {
     return res;
 }
 
-double* getRefPoint(double parType, double* refPointsTable, mxArray* szRefPoints) {
+double* getRefPoint(double parType, double* refPointsTable, const mxArray* szRefPoints) {
     int idxSz;
     mxArray* mxRefPoints;
     double* refTableInd;
@@ -53,27 +53,13 @@ void mexFunction( int nlhs, mxArray *plhs[],
 		  int nrhs, const mxArray*prhs[] )
      
 { 
-    
+    const mxArray *szConversionTable, *szGBkLookUp, *gbLookUpInds, *szRefPoints;
+    mxArray *mxTypes, *gBkIndsMxArray;
     size_t szGbkTable[2];
     int i,x,y, idxSz;
     double parType,chType,convToChildX,convToChildY,refPointX,refPointY;
-    mxArray* szConversionTable;
-    mxArray* mxTypes;
-
-    mxArray* szGBkLookUp;
-    mxArray* gbLookUpInds;
-    mxArray* gBkIndsMxArray;
-    mxArray* szRefPoints;
-
-    double* gBkInds;
-    double* conversionTable;
-    double* types;
-    double* refPointsTable;
-    double* res;
-    int* convFactorId;
-    int* idx;
-    double* refPoint;
-
+    int* convFactorId, *idx;
+    double *gBkInds, *conversionTable, *types, *refPointsTable, *res, *refPoint;
     double pointTest[2] = {18,28};
     double point[2];
     

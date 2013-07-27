@@ -2,25 +2,23 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
     % things stored in raster order:x,y,angleInd
     
     nTypes = numel(unique(ruleStruct.parents));
-    nRules = numel(ruleStruct.parents);
     nBricksType = zeros(nTypes,1);
     for (n=1:nTypes)
        nBricksType(n) = size(cellParams.coords{n},1);
     end
     maxSlots = size(ruleStruct.children,2);
 
-
     [gBkLookUp,refPoints] = getGbkLookUp(nTypes,maxSlots,ruleStruct,cellMapStruct);
     conversions = getConversions(nTypes, cellParams);
     
-    pGbkRStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct,cellParams);
-    
+    pGbkRbStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct);
+
     % allocate space for top-down messages
     uFb1ToSb_0 = cell(nTypes,1); % only stores uFb1ToSb=0
     uFb2ToRb = cell(nTypes,1); % stores all values
     uFb3ToGbk = cell(nTypes,maxSlots);
     for (i=1:nTypes)
-        uFb1ToSb_0{i} = 0.01 + 0.005*rand(nBricksType(i),1);
+        uFb1ToSb_0{i} = 0.994 + 0.005*rand(nBricksType(i),1);
            
         uFb2ToRb{i} = 0.01 + 0.005*rand(nBricksType(i),sum(ruleStruct.parents== i));
         uFb2ToRb{i} = bsxfun(@rdivide, uFb2ToRb{i}, sum(uFb2ToRb{i},2));
@@ -35,8 +33,8 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
     % uSbToFb2 = uFb1ToSb
     % uRbToFb3 = uFb2ToRb
 
-    
     % allocate space for bottom-up messages
+    uFb1Gbk_0 = cell(nTypes,maxSlots); % for a TOTAL no point.
     uGbkFb3 = cell(nTypes,maxSlots);
     uRbToFb2 = cell(nTypes,1); % stores all values
     uSbToFb1_0 = cell(nTypes,1); % only stores uFb1ToSb=0
@@ -44,6 +42,8 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
         for (k=1:maxSlots)
             % 1+ is for null (no point)
             uGbkFb3{i,k} = 0.01 + 0.005*rand(nBricksType(i),1+size(gBkLookUp{i,k},2));
+            uGbkFb3{i,k} = bsxfun(@rdivide, uGbkFb3{i,k}, sum(uGbkFb3{i,k},2));
+            uFb1Gbk_0{i,k} = 0.5 + 0.005*rand(nBricksType(i),size(gBkLookUp{i,k},2));
         end
         
         uRbToFb2{i} = 0.01 + 0.005*rand(nBricksType(i),sum(ruleStruct.parents== i));
@@ -57,6 +57,7 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
     while(1)
         %% down pass
         % compute uFb2ToRb
+        display('---uFb2ToRb---');
         tic
         for (i=1:nTypes)
             ruleIds = ruleStruct.parents==i;
@@ -71,22 +72,50 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
         % compute uFb2ToRb
         
         % compute uFb3Gbk
-        logPgbkRbMuFb3 = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,cellParams,pGbkRStruct,uGbkFb3);
+        display('---uFb3Gbk---');
+        tic
+        logPgbkRbMuFb3 = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,cellParams,pGbkRbStruct,uGbkFb3);
         for (n=1:nTypes)
-            mUse = logPgbkRbMuFb3{n};
+            ags = cellParams.coords{n}(:,3);
+            nAngles = numel(unique(ags));
+
             allSumG = sum(logPgbkRbMuFb3{n},2); %[#bricks, #rulesInvolved]
             leaveOneSlotOut = bsxfun(@minus,logPgbkRbMuFb3{n},allSumG);
-            temp = logsum(bsxfun(@plus, log(uRbToFb2{n}), leaveOneSlotOut),3); % have message for all bricks of this type, and all slots
+            % have message for all bricks of this type, and all slots.
+            % just need to include P(gbk|rb) now
+            tempLogMess = logsum(bsxfun(@plus, log(uRbToFb2{n}), leaveOneSlotOut),3); %[#bricks, #rulesInvolved]
+            ruleIds = find(ruleStruct.parents==n);
+            for(k=1:maxSlots) % sweep over angles, so we can index into pGbkRb
+                logMessageTemp = zeros(nBricksType(n),1+size(gBkLookUp{n,k},2),numel(ruleIds));
+                for (r=1:numel(ruleIds))
+                    
+                    pGbkRb = pGbkRbStruct{ruleIds(r),k};
+                    if(isempty(pGbkRb))
+                        logMessageTemp(:,2:end,r) = -Inf;
+                        continue;
+                    end;
+                    for (ag=1:nAngles)
+                        agId = ags==ag;
+                        pGbkRbTemp = [0,pGbkRb(:,ag)'];
+                        logMessageTemp(agId,:,r) = bsxfun(@plus,tempLogMess(agId,r),log(pGbkRbTemp));
+                    end
+                    
+                end
+                finalLogMess = logsum(logMessageTemp,3);
+                finalLogMess(isnan(finalLogMess)) = -Inf;
+                uFb3ToGbk{n,k} = exp(bsxfun(@minus,finalLogMess,logsum(finalLogMess,2)));
+                temp =  uFb3ToGbk{n,k}(:);
+                assert(~any(isnan(temp)));
+            end
         end
-        
+        toc
         % compute uFb3Gbk
-        
-       
         
         %% down pass
         
         %% up pass
         % compute uFb2ToSb = uSbFb1_0
+        display('---uFb2ToSb---');
         tic
         for (i=1:nTypes)
             ruleIds = ruleStruct.parents==i;
@@ -99,18 +128,26 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
         % compute uFb2ToSb = uSbFb1_0
         
         % compute uFb3ToRb = uRbToFb2
-        'xxxx'
-        logPgbkRbMuFb3 = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,cellParams,pGbkRStruct,uGbkFb3);
+        display('---uFb3ToRb---');
+        tic
+        logPgbkRbMuFb3 = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,cellParams,pGbkRbStruct,uGbkFb3);
         for (n=1:nTypes)
             % normalize messages for each type
             temp = squeeze(sum(logPgbkRbMuFb3{n},2));
             denom = logsum(temp,2);
             uRbToFb2{n} = exp(bsxfun(@minus,temp,denom));
-%     end
         end
+        toc
         % compute uFb3ToRb
-        %% up pass
         
+        %compute uGbkFb3
+        display('---uGbkFb3---');
+        tic
+        uGbkFb3 = compute_uGbkFb3(nTypes,maxSlots,uFb1Gbk_0);
+        toc
+        
+        %compute uGbkFb3
+        %% up pass
         type = 2;
         slot = 2;
         
@@ -119,8 +156,6 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
         refPointType = refPoints(:,type);
         
         r= shiftGbkIndsSimple(gbkType,conversionsType,refPointType);
-    
-        break;
     end
 
     
@@ -128,9 +163,25 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
     %a=gBkLookUp{type,slot};
 end
 
-function res = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,cellParams,pGbkRStruct,uGbkFb3)
+function res = compute_uGbkFb3(nTypes,maxSlots,uFb1Gbk_0)
+    %uFb1Gbk_0: cell(#types,maxSlots)
+    %uFb1Gbk_0{n,k}: [#types,#potential children]);
+    res = cell(nTypes,maxSlots);
+    
+    for (n=1:nTypes)
+        for(k=1:maxSlots)
+            logMUse_0 = log(uFb1Gbk_0{n,k});
+            allLogSum = sum(logMUse_0,2);
+            temp = bsxfun(@plus, log(1-uFb1Gbk_0{n,k}) - logMUse_0,allLogSum);
+            temp = [allLogSum,temp]; % first slot is point to no one
+            denom = logsum(temp,2);
+            res{n,k} = exp(bsxfun(@minus,temp,denom));
+        end
+    end  
+end
+
+function res = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,cellParams,pGbkRbStruct,uGbkFb3)
     %res{n} = [nBricksType(n),maxSlots,#rules involved];
-    tic
     res = cell(nTypes,1);
     for (n=1:nTypes)
        res{n} = zeros(nBricksType(n),maxSlots,sum(ruleStruct.parents== n));
@@ -141,36 +192,29 @@ function res = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,
         rules = find(ruleStruct.parents==parType);
         thisRuleIndex = rules==r;
         % container for \prod_k \sum_{g_k} P(gbk|rb) m(gbk->fb3)
-        tempFill2=zeros(size(cellParams.coords{parType},1),maxSlots);
-        %tempFill=zeros(size(cellParams.coords{parType},1),1); % do all bricks of this type at once
+        tempFill=zeros(size(cellParams.coords{parType},1),maxSlots);
         for (k=1:maxSlots)
-            pGbkRb = pGbkRStruct{r,k};
+            pGbkRb = pGbkRbStruct{r,k};
             mUse = uGbkFb3{parType,k};
             % that means all mass from pGbkRb on off
             if(isempty(pGbkRb))
                 %tempFill = tempFill + log(mUse(:,1)); %mUse(:,1) is 'point to nothing'
-                tempFill2(:,k) = log(mUse(:,1)); %mUse(:,1) is 'point to nothing', and there's only 1 of them
+                tempFill(:,k) = log(mUse(:,1)); %mUse(:,1) is 'point to nothing', and there's only 1 of them
             else
                 ags = cellParams.coords{parType}(:,3);
                 nAngles = numel(unique(ags));
                 for (ag=1:nAngles)
                     agId = ags==ag;
                     temp = log(sum(bsxfun(@times,[0,pGbkRb(:,ag)'],mUse(agId,:)),2));
-                    %tempFill(agId) = tempFill(agId) + temp;
-                    tempFill2(agId,k) = tempFill2(agId,k) + temp;
+                    tempFill(agId,k) = tempFill(agId,k) + temp;
                 end
             end
 
         end
-        res{parType}(:,:,thisRuleIndex) = tempFill2;
+        res{parType}(:,:,thisRuleIndex) = tempFill;
     end
-    toc
-%     % normalize messages for each type
-%     for (n=1:nTypes)
-%         temp = logsum(res{n},2);
-%         res{n} = exp(bsxfun(@minus,res{n},temp));
-%     end
 end
+
 
 function conversions = getConversions(nTypes, cellParams)
     conversions = zeros(2,nTypes,nTypes);
@@ -181,7 +225,7 @@ function conversions = getConversions(nTypes, cellParams)
     end
 end
 
-function pGbkRStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct,cellParams)
+function pGbkRStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct)
     % in raster order!
 
     nTypes = numel(unique(ruleStruct.parents));
@@ -220,30 +264,14 @@ function pGbkRStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct,cellParam
                    idGuess = min(id+1,size(gbkInds,2));
                end
                tempAll = [tempAll, temp];
-               
             end
              pGbkRStruct{r,k} = tempAll;
         end
     end
-    
-%     for (r=1:size(ruleStruct.rules))
-%         parType = ruleStruct.parents(r);
-%         agCoords = cellParams.coords{parType}(:,3);
-%         for (k=1:maxSlots)
-%             pGbk = pGbkRStruct{r,k};
-%             if(isempty(pGbk)) continue; end;
-%             
-%             temp = zeros(numel(agCoords),size(pGbk,1));
-%             for (ag=1:numel(unique(agCoords)))
-%                 inds = agCoords == ag;
-%                 temp(inds,:) = repmat(pGbk(:,ag)',[sum(inds),1]);
-%             end
-%              pGbkRStruct{r,k} = temp;
-%         end
-%     end
 end
 
 function [gBkLookUp,refPoints,typeInds] = getGbkLookUp(nTypes,maxSlots,ruleStruct,cellMapStruct)
+    %gBkLookUp = [nTypes,maxSlots]
     nRules = size(ruleStruct.rules,1);
 
     gBkLookUp = cell(nTypes,maxSlots);

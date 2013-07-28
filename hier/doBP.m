@@ -3,11 +3,14 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
     
     nTypes = numel(unique(ruleStruct.parents));
     nBricksType = zeros(nTypes,1);
+    nCoordsInds = zeros(nTypes,3);
     for (n=1:nTypes)
        nBricksType(n) = size(cellParams.coords{n},1);
+       nCoordsInds(n,:) = max(cellParams.coords{n},[],1); % 1-indexing
     end
     maxSlots = size(ruleStruct.children,2);
 
+    
     [gBkLookUp,refPoints] = getGbkLookUp(nTypes,maxSlots,ruleStruct,cellMapStruct);
     conversions = getConversions(nTypes, cellParams);
     
@@ -16,46 +19,76 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
     % allocate space for top-down messages
     uFb1ToSb_0 = cell(nTypes,1); % only stores uFb1ToSb=0
     uFb2ToRb = cell(nTypes,1); % stores all values
-    uFb3ToGbk = cell(nTypes,maxSlots);
-    for (i=1:nTypes)
-        uFb1ToSb_0{i} = 0.994 + 0.005*rand(nBricksType(i),1);
+    uFb3ToGbk_1 = cell(nTypes,maxSlots);
+    uGbkToFb1_0 = cell(nTypes,maxSlots); % only stores gbk->fb1= no point
+    for (n=1:nTypes)
+        uFb1ToSb_0{n} = 0.994 + 0.005*rand(nCoordsInds(n,:));
            
-        uFb2ToRb{i} = 0.01 + 0.005*rand(nBricksType(i),sum(ruleStruct.parents== i));
-        uFb2ToRb{i} = bsxfun(@rdivide, uFb2ToRb{i}, sum(uFb2ToRb{i},2));
+        uFb2ToRb{n} = 0.01 + 0.005*rand(nBricksType(n),sum(ruleStruct.parents== n));
+        uFb2ToRb{n} = bsxfun(@rdivide, uFb2ToRb{n}, sum(uFb2ToRb{n},2));
         
         for (k=1:maxSlots)
              %who messages are intended for given by gBkLookUp.
              % 1+ is for null (no point)
-            uFb3ToGbk{i,k} = 0.01 + 0.005*rand(nBricksType(i),1+size(gBkLookUp{i,k},2));
-            uFb3ToGbk{i,k} = bsxfun(@rdivide, uFb3ToGbk{i,k}, sum(uFb3ToGbk{i,k},2));
+            uFb3ToGbk_1{n,k} = 0.01 + 0.005*rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
+            uFb3ToGbk_1{n,k} = bsxfun(@rdivide, uFb3ToGbk_1{n,k}, sum(uFb3ToGbk_1{n,k},2));
+            uGbkToFb1_0{n,k} = 0.9998 + 0.0001*rand(nBricksType(n),size(gBkLookUp{n,k},2)); %[#bricks, #potential children]
         end
     end
     % uSbToFb2 = uFb1ToSb
     % uRbToFb3 = uFb2ToRb
 
     % allocate space for bottom-up messages
-    uFb1Gbk_0 = cell(nTypes,maxSlots); % for a TOTAL no point.
-    uGbkFb3 = cell(nTypes,maxSlots);
+    uFb1ToGbk_total_0 = cell(nTypes,maxSlots); % for a TOTAL no point. What child says to parent
+    uGbkToFb3 = cell(nTypes,maxSlots);
     uRbToFb2 = cell(nTypes,1); % stores all values
     uSbToFb1_0 = cell(nTypes,1); % only stores uFb1ToSb=0
-    for (i=1:nTypes)
+    for (n=1:nTypes)
         for (k=1:maxSlots)
             % 1+ is for null (no point)
-            uGbkFb3{i,k} = 0.01 + 0.005*rand(nBricksType(i),1+size(gBkLookUp{i,k},2));
-            uGbkFb3{i,k} = bsxfun(@rdivide, uGbkFb3{i,k}, sum(uGbkFb3{i,k},2));
-            uFb1Gbk_0{i,k} = 0.5 + 0.005*rand(nBricksType(i),size(gBkLookUp{i,k},2));
+            uGbkToFb3{n,k} = 0.01 + 0.005*rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
+            uGbkToFb3{n,k} = bsxfun(@rdivide, uGbkToFb3{n,k}, sum(uGbkToFb3{n,k},2));
+            uFb1ToGbk_total_0{n,k} = 1- (0.00001 + 0.000001*rand(nBricksType(n),size(gBkLookUp{n,k},2)));
         end
         
-        uRbToFb2{i} = 0.01 + 0.005*rand(nBricksType(i),sum(ruleStruct.parents== i));
-        uRbToFb2{i} = bsxfun(@rdivide, uRbToFb2{i}, sum(uRbToFb2{i},2));
+        uRbToFb2{n} = 0.01 + 0.005*rand(nBricksType(n),sum(ruleStruct.parents== n));
+        uRbToFb2{n} = bsxfun(@rdivide, uRbToFb2{n}, sum(uRbToFb2{n},2));
         
-        uSbToFb1_0{i} = 0.01 + 0.005*rand(nBricksType(i),1);
+        uSbToFb1_0{n} = 0.01 + 0.005*rand(nBricksType(n),1);
     end
     %uFb3Rb3 = uRbToFb2;
     %uFb2ToSb = uSbFb1_0;
 
     while(1)
         %% down pass
+        % compute uFb1ToSb_0
+        tic
+        display('---uFb1ToSb_0---');
+        prodGbk_holder_0 = computeAllProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uGbkToFb1_0);
+        for (n=1:nTypes)
+            uFb1ToSb_0{n} = (1-params.probRoot)*prodGbk_holder_0{n};
+        end
+        toc
+        % compute uFb1ToSb_0
+         
+        % compute uGbkToFb1_0
+        display('---uGbkToFb1_0---');
+        tic
+        for (n=1:nTypes) % loop over parents
+            for(k=1:maxSlots)
+                singleLogMess_0 = log(uFb1ToGbk_total_0{n,k}/(size(uFb1ToGbk_total_0{n,k},2)-1));
+                leaveOneOut_0 = bsxfun(@minus,sum(singleLogMess_0,2),singleLogMess_0);
+                leaveOneOut_0 = [sum(singleLogMess_0,2),leaveOneOut_0]; % add in prob of dont point to anyone no point
+                
+                temp = log(uFb3ToGbk_1{n,k}) + leaveOneOut_0; % product of all others being 0, and this guy being 1. ie, this is the guy to be pointed to (including null brick)
+                normProbs_1 = exp(bsxfun(@minus,temp,logsum(temp,2)));
+                uGbkToFb1_0{n,k} = 1 - normProbs_1(:,2:end);
+            end
+        end
+        toc
+        
+        % compute uGbkToFb1_0
+        
         % compute uFb2ToRb
         display('---uFb2ToRb---');
         tic
@@ -64,8 +97,8 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
             probs = ruleStruct.probs(ruleIds)';
             
             temp = zeros(nBricksType(i), numel(probs));
-            temp(:,1) = uFb1ToSb_0{i}; % stores P(rb|sb=0)m_{sb->fb2}(sb)
-            temp = bsxfun(@times, (1-uFb1ToSb_0{i}), probs) + temp;
+            temp(:,1) = uFb1ToSb_0{i}(:); % stores P(rb|sb=0)m_{sb->fb2}(sb)
+            temp = bsxfun(@times, (1-uFb1ToSb_0{i}(:)), probs) + temp;
             uFb2ToRb{i} = bsxfun(@rdivide,temp,sum(temp,2));
         end
         toc
@@ -74,7 +107,7 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
         % compute uFb3Gbk
         display('---uFb3Gbk---');
         tic
-        logPgbkRbMuFb3 = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,cellParams,pGbkRbStruct,uGbkFb3);
+        logPgbkRbMuFb3 = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,cellParams,pGbkRbStruct,uGbkToFb3);
         for (n=1:nTypes)
             ags = cellParams.coords{n}(:,3);
             nAngles = numel(unique(ags));
@@ -103,8 +136,8 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
                 end
                 finalLogMess = logsum(logMessageTemp,3);
                 finalLogMess(isnan(finalLogMess)) = -Inf;
-                uFb3ToGbk{n,k} = exp(bsxfun(@minus,finalLogMess,logsum(finalLogMess,2)));
-                temp =  uFb3ToGbk{n,k}(:);
+                uFb3ToGbk_1{n,k} = exp(bsxfun(@minus,finalLogMess,logsum(finalLogMess,2)));
+                temp =  uFb3ToGbk_1{n,k}(:);
                 assert(~any(isnan(temp)));
             end
         end
@@ -130,7 +163,7 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
         % compute uFb3ToRb = uRbToFb2
         display('---uFb3ToRb---');
         tic
-        logPgbkRbMuFb3 = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,cellParams,pGbkRbStruct,uGbkFb3);
+        logPgbkRbMuFb3 = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,cellParams,pGbkRbStruct,uGbkToFb3);
         for (n=1:nTypes)
             % normalize messages for each type
             temp = squeeze(sum(logPgbkRbMuFb3{n},2));
@@ -143,7 +176,7 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
         %compute uGbkFb3
         display('---uGbkFb3---');
         tic
-        uGbkFb3 = compute_uGbkFb3(nTypes,maxSlots,uFb1Gbk_0);
+        uGbkToFb3 = compute_uGbkFb3(nTypes,maxSlots,uFb1ToGbk_total_0);
         toc
         
         %compute uGbkFb3
@@ -163,16 +196,34 @@ function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,param
     %a=gBkLookUp{type,slot};
 end
 
-function res = compute_uGbkFb3(nTypes,maxSlots,uFb1Gbk_0)
+function prodGbk_holder_0 = computeAllProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uGbkToFb1_0)
+    prodGbk_holder_0 = cell(nTypes,1);
+    for (n=1:nTypes)
+        prodGbk_holder_0{n} = ones(nCoordsInds(n,:));
+    end
+
+    for (n=1:nTypes) % loop over parents
+        for(k=1:maxSlots)
+            gbkType = gBkLookUp{n,k};
+            if(isempty(gbkType)) continue; end; % no children
+            conversionsType = squeeze(conversions(:,n,:));
+            refPointType = refPoints(:,n);
+            
+            prodGbk_holder_0 = computeProdGbk(gbkType,  conversionsType,  refPointType, nCoordsInds(n,:)', uGbkToFb1_0{n,k}, prodGbk_holder_0);
+        end
+    end
+end
+
+function res = compute_uGbkFb3(nTypes,maxSlots,uFb1ToGbk_total_0)
     %uFb1Gbk_0: cell(#types,maxSlots)
     %uFb1Gbk_0{n,k}: [#types,#potential children]);
     res = cell(nTypes,maxSlots);
     
     for (n=1:nTypes)
         for(k=1:maxSlots)
-            logMUse_0 = log(uFb1Gbk_0{n,k});
+            logMUse_0 = log(uFb1ToGbk_total_0{n,k});
             allLogSum = sum(logMUse_0,2);
-            temp = bsxfun(@plus, log(1-uFb1Gbk_0{n,k}) - logMUse_0,allLogSum);
+            temp = bsxfun(@plus, log(1-uFb1ToGbk_total_0{n,k}) - logMUse_0,allLogSum);
             temp = [allLogSum,temp]; % first slot is point to no one
             denom = logsum(temp,2);
             res{n,k} = exp(bsxfun(@minus,temp,denom));

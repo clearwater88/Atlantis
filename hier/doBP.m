@@ -39,7 +39,7 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
              % 1+ is for null (no point)
             uFb3ToGbk_1{n,k} = 0.0001 + 0.00005*rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
             uFb3ToGbk_1{n,k} = bsxfun(@rdivide, uFb3ToGbk_1{n,k}, sum(uFb3ToGbk_1{n,k},2));
-            uGbkToFb1_0{n,k} = 1-((0.004*params.probRoot) + 0.001*rand(nBricksType(n),size(gBkLookUp{n,k},2))); %[#bricks, #potential children]
+            uGbkToFb1_0{n,k} = 1-((0.004*params.probRoot) + 0.1*(0.004*params.probRoot)*rand(nBricksType(n),size(gBkLookUp{n,k},2))); %[#bricks, #potential children]
         end
     end
     % uSbToFb2 = uFb1ToSb
@@ -240,10 +240,6 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
         end
         
     end
-
-    
-    %r = shiftGbkInds(gBkLookUp,size(gBkLookUp),[type,slot],conversions,size(conversions),refPoints,size(refPoints));
-    %a=gBkLookUp{type,slot};
 end
 
 function res = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uSbToFb1_0)

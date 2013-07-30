@@ -42,6 +42,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
 { 
     int ind=0,i,x,y,agInd,childType,childX,childY,childAgInd;
     double point[2], convToChild[2], message;
+    double *pointsBoundary, *allMessages, *uFb1ToSb_0_holder, *shiftedInds;
     size_t m_uGbkToFb1_0, n_uGbkToFb1_0, m_gbkInds, n_gbkInds;
     
     const mwSize* dims;
@@ -50,10 +51,8 @@ void mexFunction( int nlhs, mxArray *plhs[],
     mxArray * shiftedIndsMx, *uFb1ToSb_0_TypeMx;
     
     gBkIndsMx = prhs[0]; conversionMx = prhs[1]; refPointMx = prhs[2]; pointsBoundaryMx = prhs[3]; uGbkToFb1_0 = prhs[4], uFb1ToSb_0_holderMx = prhs[5];
-    double* pointsBoundary = mxGetPr(pointsBoundaryMx);
-    double* allMessages = mxGetPr(uGbkToFb1_0);
-    double* uFb1ToSb_0_holder;
-    double* shiftedInds;
+    pointsBoundary = mxGetPr(pointsBoundaryMx);
+    allMessages = mxGetPr(uGbkToFb1_0);
     
     /*plhs[0] = mxDuplicateArray(uFb1ToSb_0_holderMx);*/
     plhs[0] = mxDuplicateArray(uFb1ToSb_0_holderMx);

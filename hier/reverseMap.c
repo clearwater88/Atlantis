@@ -6,7 +6,7 @@ mxArray* shiftGbkInds(const mxArray *gBkIndsMx, const mxArray *conversionMx, con
     
     size_t szGbkTable[2], szConversionTable[2];
     int i, chType;
-    int convToChild[2];
+    double convToChild[2];
     double *gBkInds, *conversionTable, *res, *refPoint;
     mxArray *resMx;
     
@@ -37,10 +37,10 @@ mxArray* shiftGbkInds(const mxArray *gBkIndsMx, const mxArray *conversionMx, con
 }
 
 void mexFunction( int nlhs, mxArray *plhs[], 
-		  int nrhs, const mxArray*prhs[] )
+		  int nrhs, const mxArray *prhs[] )
      
 { 
-    
+    double* pointsBoundary, *shiftedInds, *res, *map_0;
     int ind=0,i,x,y,agInd,childType,childX,childY,childAgInd;
     double point[2], convToChild[2], message;
     size_t m_gbkInds,n_gbkInds,nChildren,m_res,n_res;
@@ -48,11 +48,15 @@ void mexFunction( int nlhs, mxArray *plhs[],
     const mwSize* dims;
     
     const mxArray *gBkIndsMx, *conversionMx, *refPointMx, *pointsBoundaryMx, *mapMx;
-    mxArray * shiftedIndsMx, *map_TypeMx;
+    mxArray *shiftedIndsMx, *map_TypeMx;
     
-    gBkIndsMx = prhs[0]; conversionMx = prhs[1]; refPointMx = prhs[2]; pointsBoundaryMx = prhs[3]; mapMx = prhs[4]; 
-    double* pointsBoundary = mxGetPr(pointsBoundaryMx);
-    double *shiftedInds, *res, *map_0;
+    gBkIndsMx = prhs[0];
+    conversionMx = prhs[1];
+    refPointMx = prhs[2];
+    pointsBoundaryMx = prhs[3];
+    mapMx = prhs[4]; 
+    
+    pointsBoundary = mxGetPr(pointsBoundaryMx);
     
     nChildren = mxGetN(gBkIndsMx);
     m_gbkInds = mxGetM(gBkIndsMx);

@@ -6,14 +6,12 @@ function [probMapStruct] = initProbMaps(ruleStruct,templates)
     vonM = cell(numel(parents),1);
     covCentres = cell(numel(parents),1); % covariances for each slot
 
-    covCentresParents(:,:,1) = [2^2,0; ...
-                                0,2^2];
+    covCentresParents(:,:,1) = [4^2,0; ...
+                                0,4^2];
     covCentresParents(:,:,2) = [4^2,0; ...
                                 0,4^2];
-    covCentresParents(:,:,3) = [6^2,0; ...
-                                0,6^2];
     
-    vonMisesConcParents = [0.2,0.2,0.2];
+    vonMisesConcParents = [0.2,0.2];
     
     for (i=1:size(parents,1))
         tp = templates{parents(i)};

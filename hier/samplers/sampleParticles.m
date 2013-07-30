@@ -1,8 +1,6 @@
 function [allParticles,allConnPars,allConnChilds,allParticleProbs,saliencyScores] = sampleParticles(data,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct)
     [likeTemp,countsTemp] = initLike(data,templateStruct);
-    
-    
-    
+
     particles{1} = [];
     particleProbs  = 1;
     

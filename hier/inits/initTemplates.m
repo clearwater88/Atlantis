@@ -1,12 +1,11 @@
 function [templateStruct] = initTemplates()
     
-    templateStruct.mix = [0.1,0.5,1]';
+    templateStruct.mix = [0.1,0.5]';
     templateStruct.mix(end+1) = 0.001;
     %templateStruct.bg = 0.1;
                          
     templateStruct.sizes = [11,1; ...
-                            7,1; ...
-                            3,1];
+                            7,1];
                         
     templateStruct.doLearning = 1;
     templateStruct.SIGMA = 1;

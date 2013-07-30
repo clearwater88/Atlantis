@@ -1,4 +1,4 @@
-function doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct)
+function probOn = doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct)
 
     % cell returned in raster order for each cell
     probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct);
@@ -29,7 +29,7 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
     uFb3ToGbk_1 = cell(nTypes,maxSlots);
     uGbkToFb1_0 = cell(nTypes,maxSlots); % only stores gbk->fb1= no point. All mass of 0.
     for (n=1:nTypes)
-        uFb1ToSb_0{n} = 0.994 + 0.005*rand(nCoordsInds(n,:));
+        uFb1ToSb_0{n} = 0.9994 + 0.0005*rand(nCoordsInds(n,:));
            
         uFb2ToRb{n} = 0.01 + 0.005*rand(nBricksType(n),sum(ruleStruct.parents== n));
         uFb2ToRb{n} = bsxfun(@rdivide, uFb2ToRb{n}, sum(uFb2ToRb{n},2));
@@ -37,9 +37,9 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
         for (k=1:maxSlots)
              %who messages are intended for given by gBkLookUp.
              % 1+ is for null (no point)
-            uFb3ToGbk_1{n,k} = 0.01 + 0.005*rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
+            uFb3ToGbk_1{n,k} = 0.0001 + 0.00005*rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
             uFb3ToGbk_1{n,k} = bsxfun(@rdivide, uFb3ToGbk_1{n,k}, sum(uFb3ToGbk_1{n,k},2));
-            uGbkToFb1_0{n,k} = 0.9998 + 0.0001*rand(nBricksType(n),size(gBkLookUp{n,k},2)); %[#bricks, #potential children]
+            uGbkToFb1_0{n,k} = 1-((0.004*params.probRoot) + 0.001*rand(nBricksType(n),size(gBkLookUp{n,k},2))); %[#bricks, #potential children]
         end
     end
     % uSbToFb2 = uFb1ToSb
@@ -53,7 +53,8 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
     for (n=1:nTypes)
         for (k=1:maxSlots)
             % 1+ is for null (no point)
-            uGbkToFb3{n,k} = 0.01 + 0.005*rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
+            uGbkToFb3{n,k} = 0.001+rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
+            uGbkToFb3{n,k}(:,1) = 0.999; % likely point to nothing
             uGbkToFb3{n,k} = bsxfun(@rdivide, uGbkToFb3{n,k}, sum(uGbkToFb3{n,k},2));
             uFb1ToGbk_total_0{n,k} = 1- (0.00001 + 0.000001*rand(nBricksType(n),size(gBkLookUp{n,k},2)));
         end
@@ -63,22 +64,30 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
         
         uSbToFb1_0{n} = 0.994 + 0.005*rand(nCoordsInds(n,:));
     end
-    %uFb3ToRb3 = uRbToFb2;
+    %uFb3ToRb = uRbToFb2;
     %uFb2ToSb = uSbToFb1_0;
 
     for(iter=1:params.bpIter)
         
         %% up pass
-        %compute uGbkFb3
+        %compute uGbkToFb3
         display('---uGbkFb3---');
         tic
+        uGbkToFb3_old = uGbkToFb3;
         uGbkToFb3 = compute_uGbkFb3(nTypes,maxSlots,uFb1ToGbk_total_0);
         toc
-        %compute uGbkFb3
-        
-        % compute uFb3ToRb = uRbToFb2
+        figure(1);
+        for(k=1:maxSlots)
+            for (n=1:nTypes)
+                subplot(nTypes,maxSlots,k+(n-1)*maxSlots); imshow(uGbkToFb3{n,k});
+            end
+        end
+        %compute uGbkToFb3
+         
+        %compute uFb3ToRb = uRbToFb2
         display('---uFb3ToRb---');
         tic
+        uRbToFb2_old = uRbToFb2;
         logPgbkRbMuFb3 = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,cellParams,pGbkRbStruct,uGbkToFb3);
         for (n=1:nTypes)
             % normalize messages for each type
@@ -87,23 +96,25 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
             uRbToFb2{n} = exp(bsxfun(@minus,temp,denom));
         end
         toc
-        % compute uFb3ToRb
-        
-        % compute uSbFb1_0 = uFb2ToSb
+        %compute uFb3ToRb = uRbToFb2
+         
+        %compute uSbFb1_0 = uFb2ToSb
         display('---uFb2ToSb---');
         tic
+        uSbToFb1_0_old = uSbToFb1_0;
         for (n=1:nTypes)
             ruleIds = ruleStruct.parents==n;
             probs = ruleStruct.probs(ruleIds)';
+            temp1 = sum(bsxfun(@times,uRbToFb2{n},probs),2); % sb=1
             
-            temp = sum(bsxfun(@times,uRbToFb2{n},probs),2); % sb=1
-            uSbToFb1_0{n} = reshape(bsxfun(@rdivide, uRbToFb2{n}(:,1), temp + uRbToFb2{n}(:,1)),nCoordsInds(n,:));
+            uSbToFb1_0{n} = reshape(bsxfun(@rdivide, uRbToFb2{n}(:,1), temp1 + uRbToFb2{n}(:,1)),nCoordsInds(n,:));
         end
         toc
         % compute uSbFb1_0 = uFb2ToSb
         
         % compute uFb1ToGbk_total_0
         tic
+        uFb1ToGbk_total_0_old = uFb1ToGbk_total_0;
         display('---uFb1ToGbk_total_0---');
         % indexed by parent;
         reverse_uSbToFb1_0 = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uSbToFb1_0);
@@ -119,11 +130,11 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
                temp0 = reverse_uSbToFb1_0{n,k}.*reverse_uFb1ToSb_0{n,k}./uGbkToFb1_0{n,k} + ...
                        (1-reverse_uSbToFb1_0{n,k}).*(1-reverse_uFb1ToSb_0{n,k}./uGbkToFb1_0{n,k});
                temp1 = (1-reverse_uSbToFb1_0{n,k});
-               uFb1ToGbk_total_0{n,k} = temp0 ./ (temp0+temp1);
+               uFb1ToGbk_total_0{n,k} = temp0 ./ (temp0+temp1); %for each parent, what signal the child sends
            end
         end
         toc
-        % compute uFb1ToGbk_total_0
+        %compute uFb1ToGbk_total_0
 
         %% up pass
         
@@ -132,6 +143,7 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
         % compute uFb1ToSb_0 = uSbToFb2_0
         tic
         display('---uFb1ToSb_0---');
+        uFb1ToSb_0_old = uFb1ToSb_0;
         prodGbk_holder_0 = computeAllProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uGbkToFb1_0);
         for (n=1:nTypes)
             uFb1ToSb_0{n} = (1-params.probRoot)*prodGbk_holder_0{n};
@@ -154,7 +166,7 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
         toc
         % compute uFb2ToRb  = uRbToFb3
         
-         % compute uFb3Gbk
+         % compute uFb3ToGbk
         display('---uFb3Gbk---');
         tic
         logPgbkRbMuFb3 = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,cellParams,pGbkRbStruct,uGbkToFb3);
@@ -192,19 +204,20 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
             end
         end
         toc
-        % compute uFb3Gbk
+        % compute uFbTo3Gbk
         
         % compute uGbkToFb1_0
         display('---uGbkToFb1_0---');
         tic
+        uGbkToFb1_0_old = uGbkToFb1_0;
         for (n=1:nTypes) % loop over parents
             for(k=1:maxSlots)
                 singleLogMess_0 = log(uFb1ToGbk_total_0{n,k}/(size(uFb1ToGbk_total_0{n,k},2)-1));
-                leaveOneOut_0 = bsxfun(@minus,sum(singleLogMess_0,2),singleLogMess_0);
-                leaveOneOut_0 = [sum(singleLogMess_0,2),leaveOneOut_0]; % add in prob of dont point to anyone no point
+                allOtherProd0 = bsxfun(@minus,sum(singleLogMess_0,2),singleLogMess_0); %log(prod_{b,k} != this brick and slot)
                 
-                temp = log(uFb3ToGbk_1{n,k}) + leaveOneOut_0; % product of all others being 0, and this guy being 1. ie, this is the guy to be pointed to (including null brick)
-                normProbs_1 = exp(bsxfun(@minus,temp,logsum(temp,2)));
+                logProbs_1 = [sum(singleLogMess_0,2),allOtherProd0 + log(1-uFb1ToGbk_total_0{n,k})];
+                logProbs_1 = logProbs_1 + log(uFb3ToGbk_1{n,k});
+                normProbs_1 = exp(bsxfun(@minus,logProbs_1,logsum(logProbs_1,2)));
                 uGbkToFb1_0{n,k} = 1 - normProbs_1(:,2:end);
             end
         end
@@ -221,6 +234,9 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
             prob0 = Fb1Sb0.*Fb2Sb0;
             prob1 = (1-Fb1Sb0).*(1-Fb2Sb0);
             probOn{n} = prob1./(prob0+prob1);
+            probOn{n} =  probOn{n}(:);
+            figure(100);
+            subplot(nTypes,1,n); plot(probOn{n});
         end
         
     end

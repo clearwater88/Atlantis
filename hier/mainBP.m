@@ -69,9 +69,9 @@ function mainBP(ds,noiseParam,useContext)
             toc
         end 
 
+        
+        sampleParticlesBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct);
 
-        %[allParticles,allConnPars,allConnChilds, allParticleProbs, saliencyScores] = sampleParticles(testData,likePxIdxCells,likePxStruct,cellMapStruct,cellParams,params,ruleStruct,templateStruct);
-        doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct);
 
     end
 end

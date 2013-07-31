@@ -38,7 +38,7 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
              %who messages are intended for given by gBkLookUp.
              % 1+ is for null (no point)
             uFb3ToGbk_1{n,k} = 0.0001 + 0.00005*rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
-            uFb3ToGbk_1{n,k}(:,1) = 0.99;
+            uFb3ToGbk_1{n,k}(:,1) = 10000;
             uFb3ToGbk_1{n,k} = bsxfun(@rdivide, uFb3ToGbk_1{n,k}, sum(uFb3ToGbk_1{n,k},2));
             uGbkToFb1_0{n,k} = 1-((0.004*params.probRoot) + 0.1*(0.004*params.probRoot)*rand(nBricksType(n),size(gBkLookUp{n,k},2))); %[#bricks, #potential children]
         end
@@ -69,20 +69,20 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
     %uFb2ToSb = uSbToFb1_0;
 
     for(iter=1:params.bpIter)
-        
         %% up pass
+         
         %compute uGbkToFb3
         display('---uGbkFb3---');
         tic
-        uGbkToFb3_old = uGbkToFb3;
+        uGbkToFb3_old{iter} = uGbkToFb3;
         uGbkToFb3 = compute_uGbkFb3(nTypes,maxSlots,uFb1ToGbk_total_0);
         toc
         %compute uGbkToFb3
          
-        %compute uFb3ToRb = uRbToFb2
+        %if (mod(iter,nMess) == 2)
         display('---uFb3ToRb---');
         tic
-        uRbToFb2_old = uRbToFb2;
+        uRbToFb2_old{iter} = uRbToFb2;
         % logPgbkRbMuFb3: [nbricks, #rules, maxSlots]
         logPgbkRbMuFb3 = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,cellParams,pGbkRbStruct,uGbkToFb3);
         for (n=1:nTypes)
@@ -96,12 +96,11 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
         %compute uSbFb1_0 = uFb2ToSb
         display('---uFb2ToSb---');
         tic
-        uSbToFb1_0_old = uSbToFb1_0;
+        uSbToFb1_0_old{iter} = uSbToFb1_0;
         for (n=1:nTypes)
             ruleIds = ruleStruct.parents==n;
             probs = ruleStruct.probs(ruleIds)';
             temp1 = sum(bsxfun(@times,uRbToFb2{n},probs),2); % sb=1
-            
             uSbToFb1_0{n} = reshape(bsxfun(@rdivide, uRbToFb2{n}(:,1), temp1 + uRbToFb2{n}(:,1)),nCoordsInds(n,:));
         end
         toc
@@ -109,24 +108,24 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
         
         % compute uFb1ToGbk_total_0
         tic
-        uFb1ToGbk_total_0_old = uFb1ToGbk_total_0;
+        uFb1ToGbk_total_0_old{iter} = uFb1ToGbk_total_0;
         display('---uFb1ToGbk_total_0---');
         % indexed by parent;
         reverse_uSbToFb1_0 = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uSbToFb1_0);
         reverse_uFb1ToSb_0 = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uFb1ToSb_0);
         for (n=1:nTypes)
-           for (k=1:maxSlots)
-               
-               %hack so things don't change size
-               if(isempty(reverse_uSbToFb1_0{n,k}))
-                   uFb1ToGbk_total_0{n,k} = uGbkToFb1_0{n,k};
-                   continue;
-               end; 
-               temp0 = reverse_uSbToFb1_0{n,k}.*reverse_uFb1ToSb_0{n,k}./uGbkToFb1_0{n,k} + ...
-                       (1-reverse_uSbToFb1_0{n,k}).*(1-reverse_uFb1ToSb_0{n,k}./uGbkToFb1_0{n,k});
-               temp1 = (1-reverse_uSbToFb1_0{n,k});
-               uFb1ToGbk_total_0{n,k} = temp0 ./ (temp0+temp1); %for each parent, what signal the child sends
-           end
+            for (k=1:maxSlots)
+                
+                %hack so things don't change size
+                if(isempty(reverse_uSbToFb1_0{n,k}))
+                    uFb1ToGbk_total_0{n,k} = uGbkToFb1_0{n,k};
+                    continue;
+                end;
+                temp0 = reverse_uSbToFb1_0{n,k}.*reverse_uFb1ToSb_0{n,k}./uGbkToFb1_0{n,k} + ...
+                    (1-reverse_uSbToFb1_0{n,k}).*(1-reverse_uFb1ToSb_0{n,k}./uGbkToFb1_0{n,k});
+                temp1 = (1-reverse_uSbToFb1_0{n,k});
+                uFb1ToGbk_total_0{n,k} = temp0 ./ (temp0+temp1); %for each parent, what signal the child sends
+            end
         end
         toc
         %compute uFb1ToGbk_total_0
@@ -138,8 +137,9 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
         % compute uFb1ToSb_0 = uSbToFb2_0
         tic
         display('---uFb1ToSb_0---');
-        uFb1ToSb_0_old = uFb1ToSb_0;
+        uFb1ToSb_0_old{iter} = uFb1ToSb_0;
         prodGbk_holder_0 = computeAllProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uGbkToFb1_0);
+        prodGbk_holder_0_oldFb1{iter} = prodGbk_holder_0;
         for (n=1:nTypes)
             uFb1ToSb_0{n} = (1-params.probRoot)*prodGbk_holder_0{n};
         end
@@ -161,52 +161,50 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
         toc
         % compute uFb2ToRb  = uRbToFb3
         
-         % compute uFb3ToGbk
-        display('---uFb3Gbk---');
-        uFb3ToGbk_1_old = uFb3ToGbk_1;
-        tic
-        % logPgbkRbMuFb3: [nbricks, #rules, maxSlots]
-        logPgbkRbMuFb3 = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,cellParams,pGbkRbStruct,uGbkToFb3);
-        for (n=1:nTypes)
-            ags = cellParams.coords{n}(:,3);
-            nAngles = numel(unique(ags));
-
-            allSumG = sum(logPgbkRbMuFb3{n},3); %[#bricks, #rulesInvolved]
-            leaveOneSlotOut = bsxfun(@minus,allSumG,logPgbkRbMuFb3{n});
-            % have message for all bricks of this type, and all slots.
-            % just need to include P(gbk|rb) now
-            tempLogMess = bsxfun(@plus, log(uRbToFb2{n}), leaveOneSlotOut); %[#bricks,#rulesInvolved,maxSlots]
-            ruleIds = find(ruleStruct.parents==n);
-            for(k=1:maxSlots) % sweep over angles, so we can index into pGbkRb
-                logMessageTemp = zeros(nBricksType(n),1+size(gBkLookUp{n,k},2),numel(ruleIds));
-                for (r=1:numel(ruleIds))
-                    
-                    pGbkRb = pGbkRbStruct{ruleIds(r),k};
-                    if(isempty(pGbkRb))
-                        logMessageTemp(:,2:end,r) = -Inf;
-                        continue;
-                    end;
-                    for (ag=1:nAngles)
-                        agId = ags==ag;
-                        pGbkRbTemp = [0,pGbkRb(:,ag)'];
-                        logMessageTemp(agId,:,r) = bsxfun(@plus,tempLogMess(agId,r,k),log(pGbkRbTemp));
-                    end
-                    
-                end
-                finalLogMess = logsum(logMessageTemp,3);
-                finalLogMess(isnan(finalLogMess)) = -Inf;
-                uFb3ToGbk_1{n,k} = exp(bsxfun(@minus,finalLogMess,logsum(finalLogMess,2)));
-                temp =  uFb3ToGbk_1{n,k}(:);
-                assert(~any(isnan(temp)));
-            end
-        end
-        toc
-        % compute uFbTo3Gbk
+         % compute uFb3ToGbk_1
+         display('---uFb3Gbk---');
+         uFb3ToGbk_1_old{iter} = uFb3ToGbk_1;
+         tic
+         % logPgbkRbMuFb3: [nbricks, #rules, maxSlots]
+         logPgbkRbMuFb3 = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,cellParams,pGbkRbStruct,uGbkToFb3);
+         for (n=1:nTypes)
+             ags = cellParams.coords{n}(:,3);
+             nAngles = numel(unique(ags));
+             
+             allSumG = sum(logPgbkRbMuFb3{n},3); %[#bricks, #rulesInvolved]
+             leaveOneSlotOut = bsxfun(@minus,allSumG,logPgbkRbMuFb3{n});
+             % have message for all bricks of this type, and all slots.
+             % just need to include P(gbk|rb) now
+             tempLogMess = bsxfun(@plus, log(uFb2ToRb{n}), leaveOneSlotOut); %[#bricks,#rulesInvolved,maxSlots]
+             ruleIds = find(ruleStruct.parents==n);
+             for(k=1:maxSlots) % sweep over angles, so we can index into pGbkRb
+                 logMessageTemp = zeros(nBricksType(n),1+size(gBkLookUp{n,k},2),numel(ruleIds));
+                 for (r=1:numel(ruleIds))
+                     
+                     pGbkRb = pGbkRbStruct{ruleIds(r),k};
+                     if(isempty(pGbkRb))
+                         logMessageTemp(:,2:end,r) = -Inf;
+                         continue;
+                     end;
+                     for (ag=1:nAngles)
+                         agId = ags==ag;
+                         pGbkRbTemp = [0,pGbkRb(:,ag)'];
+                         logMessageTemp(agId,:,r) = bsxfun(@plus,tempLogMess(agId,r,k),log(pGbkRbTemp));
+                     end
+                     
+                 end
+                 finalLogMess = logsum(logMessageTemp,3);
+                 finalLogMess(isnan(finalLogMess)) = -Inf;
+                 uFb3ToGbk_1{n,k} = exp(bsxfun(@minus,finalLogMess,logsum(finalLogMess,2)));
+             end
+         end
+         toc
+        % compute uFb3ToGbk_1
         
         % compute uGbkToFb1_0
         display('---uGbkToFb1_0---');
         tic
-        uGbkToFb1_0_old = uGbkToFb1_0;
+        uGbkToFb1_0_old{iter} = uGbkToFb1_0;
         for (n=1:nTypes) % loop over parents
             for(k=1:maxSlots)
                 %singleLogMess_0 = log(uFb1ToGbk_total_0{n,k}/(size(uFb1ToGbk_total_0{n,k},2)-1)); % WRONG WAY TO NORMALIZE
@@ -235,6 +233,7 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
             probOn{n} = prob1./(prob0+prob1);
             probOn{n} =  probOn{n}(:);
             figure(100);
+            title(int2str(iter));
             subplot(nTypes,1,n); plot(probOn{n});
         end
         
@@ -257,6 +256,8 @@ function res = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,convers
 end
 
 function prodGbk_holder_0 = computeAllProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uGbkToFb1_0)
+    % prodGbk_holder_0{n}(coord): product of Gbk's of this brick's parents
+
     prodGbk_holder_0 = cell(nTypes,1);
     for (n=1:nTypes)
         prodGbk_holder_0{n} = ones(nCoordsInds(n,:));

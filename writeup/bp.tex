@@ -97,10 +97,10 @@ $s_b$ only has two values, so this is easy to compute.
 \subsection{$\mFbGbk3$}
 
 \begin{eqnarray}
-\mFbGbk3(g_{b,k}) &=& \sum_{r_b} \sum_{k' \neq k} \fb3(r_b,\vec{g}_b) \mRbFb2(r_b) \prod_{k' \neq k} \mGbkFb3(g_{b,k'}) \\
-&=& \sum_{r_b} \mRbFb2(r_b) \sum_{k' \neq k}P(\vec{g}_b \mid r_b)  \prod_{k' \neq k}  \mGbkFb3(g_{b,k'}) \\
-&=& \sum_{r_b} \mRbFb2(r_b) \sum_{k' \neq k} P(\vec{g}_{b,k} \mid r_b)  \prod_{k' \neq k} P(\vec{g}_{b,k'} \mid r_b)  \mGbkFb3(g_{b,k'}) \\
-&=& \sum_{r_b} \mRbFb2(r_b)  P(\vec{g}_{b,k} \mid r_b) \prod_{k' \neq k} \sum_{g_{b,k'}}  P(\vec{g}_{b,k'} \mid r_b)  \mGbkFb3(g_{b,k'})
+\mFbGbk3(g_{b,k}) &=& \sum_{r_b} \sum_{k' \neq k} \fb3(r_b,\vec{g}_b) \mRbFb3(r_b) \prod_{k' \neq k} \mGbkFb3(g_{b,k'}) \\
+&=& \sum_{r_b} \mRbFb3(r_b) \sum_{k' \neq k}P(\vec{g}_b \mid r_b)  \prod_{k' \neq k}  \mGbkFb3(g_{b,k'}) \\
+&=& \sum_{r_b} \mRbFb3(r_b) \sum_{k' \neq k} P(\vec{g}_{b,k} \mid r_b)  \prod_{k' \neq k} P(\vec{g}_{b,k'} \mid r_b)  \mGbkFb3(g_{b,k'}) \\
+&=& \sum_{r_b} \mRbFb3(r_b)  P(\vec{g}_{b,k} \mid r_b) \prod_{k' \neq k} \sum_{g_{b,k'}}  P(\vec{g}_{b,k'} \mid r_b)  \mGbkFb3(g_{b,k'})
 \end{eqnarray}
 
 The number of values $r_b$ can take should be small (no more than, say $10$? $20$?), so this should be possible to compute.

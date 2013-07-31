@@ -1,7 +1,7 @@
 function [params] = initParams()
     
     params.probRoot = 0.0001; %epsilon
-    params.bpIter = 5;
+    params.bpIter = 10;
     params.nParticles = 20;
     
     % start,increment,end

@@ -88,12 +88,14 @@ void mexFunction( int nlhs, mxArray *plhs[],
                         if (childY < 0.99) continue;
                         if (childY > dims[1]+0.01) continue;
                         
-                        /*
-                        printf("childType,x,y,agInd: %d,%d,%d,%d\n", childType, childX, childY, childAgInd);
-                        printf("mess: %f \n",message);
-                         */
+                        if (ind == 71) {
+                            printf("childType,x,y,agInd: %d,%d,%d,%d\n", childType, childX, childY, childAgInd);
+                            /*printf("childId,%d\n", i+1);
+                            printf("mess: %f \n",message);*/
+                            printf("incrementing entry: %d\n", childX-1 + dims[0]*(childY-1) + dims[0]*dims[1]*(childAgInd-1));
+                        }
                         
-                        uFb1ToSb_0_holder[childX-1 + dims[0]*(childY-1) + dims[0]*dims[1]*(agInd-1)] *= message;
+                        uFb1ToSb_0_holder[childX-1 + dims[0]*(childY-1) + dims[0]*dims[1]*(childAgInd-1)] *= message;
                     }
                     
                     

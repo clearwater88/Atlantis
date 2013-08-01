@@ -27,7 +27,7 @@ function [allParticles,probOn] = sampleParticlesBP(data,posesStruct,likePxIdxCel
         st2 = viewOverlayTest(data,particles,templateStruct,params);
         subplot(1,3,3); imshow(st2);
         
-        particles{1} = [1,1,70]';
+        %particles{1} = [1,1,70]';
         sOn = getProbOn(particles);
         probOn{qq} = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn);
         viewHeatMap(probOn{qq},cellParams);

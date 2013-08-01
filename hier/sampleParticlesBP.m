@@ -1,7 +1,6 @@
 function [allParticles,probOn] = sampleParticlesBP(data,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct)
 
     [likeTemp,countsTemp] = initLike(data,templateStruct);
-    %particles{1} = [];
     particles{1} = [];
     
     particleProbs  = 1;
@@ -28,11 +27,13 @@ function [allParticles,probOn] = sampleParticlesBP(data,posesStruct,likePxIdxCel
         st2 = viewOverlayTest(data,particles,templateStruct,params);
         subplot(1,3,3); imshow(st2);
         
+        particles{1} = [1,1,70]';
         sOn = getProbOn(particles);
-        
-        [logProbCellRatioOldParticle,ratiosImOldParticle,defaultLogLikeIm] = evalDataRatio(data,nPosesCell,particleProbs,likePxIdxCells,likesIm,countsIm,templateStruct,cellParams,posesStruct,dirtyRegion,ratiosIm,logLikeCell,params);
         probOn{qq} = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn);
         viewHeatMap(probOn{qq},cellParams);
+        
+        [logProbCellRatioOldParticle,ratiosImOldParticle,defaultLogLikeIm] = evalDataRatio(data,nPosesCell,particleProbs,likePxIdxCells,likesIm,countsIm,templateStruct,cellParams,posesStruct,dirtyRegion,ratiosIm,logLikeCell,params);
+        
         
         [cellType,cellLocIdx,probBrickOn] = getMostSalient(particles,probOn{qq},logProbCellRatioOldParticle,defaultLogLikeIm);
         dirtyRegion = findCellBounds(cellType,cellLocIdx,cellParams);

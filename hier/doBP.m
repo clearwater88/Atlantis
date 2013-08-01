@@ -21,7 +21,7 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
     [gBkLookUp,refPoints] = getGbkLookUp(nTypes,maxSlots,ruleStruct,cellMapStruct);
     conversions = getConversions(nTypes, cellParams);
     
-    pGbkRbStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct);
+    pGbkRbStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct,cellParams);
 
     % allocate space for top-down messages
     uFb1ToSb_0 = cell(nTypes,1); % only stores uFb1ToSb=0
@@ -29,18 +29,18 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
     uFb3ToGbk_1 = cell(nTypes,maxSlots);
     uGbkToFb1_0 = cell(nTypes,maxSlots); % only stores gbk->fb1= no point. All mass of 0.
     for (n=1:nTypes)
-        uFb1ToSb_0{n} = 0.9994 + 0.0005*rand(nCoordsInds(n,:));
+        uFb1ToSb_0{n} = 0.9994 + 0*rand(nCoordsInds(n,:));
            
-        uFb2ToRb{n} = 0.01 + 0.005*rand(nBricksType(n),sum(ruleStruct.parents== n));
+        uFb2ToRb{n} = 0.01 + 0*rand(nBricksType(n),sum(ruleStruct.parents== n));
         uFb2ToRb{n} = bsxfun(@rdivide, uFb2ToRb{n}, sum(uFb2ToRb{n},2));
         
         for (k=1:maxSlots)
              %who messages are intended for given by gBkLookUp.
              % 1+ is for null (no point)
-            uFb3ToGbk_1{n,k} = 0.0001 + 0.00005*rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
+            uFb3ToGbk_1{n,k} = 0.0001 + 0*rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
             uFb3ToGbk_1{n,k}(:,1) = 10000;
             uFb3ToGbk_1{n,k} = bsxfun(@rdivide, uFb3ToGbk_1{n,k}, sum(uFb3ToGbk_1{n,k},2));
-            uGbkToFb1_0{n,k} = 1-((0.004*params.probRoot) + 0.1*(0.004*params.probRoot)*rand(nBricksType(n),size(gBkLookUp{n,k},2))); %[#bricks, #potential children]
+            uGbkToFb1_0{n,k} = 1-((0.004*params.probRoot) + 0*(0.004*params.probRoot)*rand(nBricksType(n),size(gBkLookUp{n,k},2))); %[#bricks, #potential children]
         end
     end
     uSbToFb2_0 = uFb1ToSb_0;
@@ -55,16 +55,16 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
     for (n=1:nTypes)
         for (k=1:maxSlots)
             % 1+ is for null (no point)
-            uGbkToFb3{n,k} = 0.001+0.0001*rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
+            uGbkToFb3{n,k} = 0.001+0*rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
             uGbkToFb3{n,k}(:,1) = 10000; % likely point to nothing
             uGbkToFb3{n,k} = bsxfun(@rdivide, uGbkToFb3{n,k}, sum(uGbkToFb3{n,k},2));
-            uFb1ToGbk_total_0{n,k} = 1- (0.00001 + 0.000001*rand(nBricksType(n),size(gBkLookUp{n,k},2)));
+            uFb1ToGbk_total_0{n,k} = 1- (0.00001 + 0.0*rand(nBricksType(n),size(gBkLookUp{n,k},2)));
         end
         
-        uRbToFb2{n} = 0.01 + 0.005*rand(nBricksType(n),sum(ruleStruct.parents== n));
+        uRbToFb2{n} = 0.01 + 0.0*rand(nBricksType(n),sum(ruleStruct.parents== n));
         uRbToFb2{n} = bsxfun(@rdivide, uRbToFb2{n}, sum(uRbToFb2{n},2));
         
-        uSbToFb1_0{n} = 0.994 + 0.005*rand(nCoordsInds(n,:));
+        uSbToFb1_0{n} = 0.994 + 0.0*rand(nCoordsInds(n,:));
     end
     uSbToFb1_0 = correctFromSb_0(uSbToFb1_0,sOn);
     %uFb3ToRb = uRbToFb2;
@@ -150,7 +150,7 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
         
         
         uSbToFb2_0 = uFb1ToSb_0;
-        uFb1ToSb_0 = correctFromSb_0(uFb1ToSb_0,sOn);
+        uSbToFb2_0 = correctFromSb_0(uSbToFb2_0,sOn);
         % compute uFb1ToSb_0 = uSbToFb2_0
         
         % compute uFb2ToRb = uRbToFb3
@@ -340,7 +340,6 @@ function res = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,
                     tempFill(agId,k) = temp;
                 end
             end
-
         end
         res{parType}(:,thisRuleIndex,:) = tempFill;
     end
@@ -356,7 +355,7 @@ function conversions = getConversions(nTypes, cellParams)
     end
 end
 
-function pGbkRStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct)
+function pGbkRStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct,cellParams)
     % in raster order!
 
     nTypes = numel(unique(ruleStruct.parents));
@@ -376,27 +375,50 @@ function pGbkRStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct)
             if(ruleStruct.children(r,k) ==0) continue; end;
             gbkInds = gBkLookUp{parType,k};
             tempAll = [];
+            
+            % testing
+
+            
             for (ag=1:numel(cellMapStruct.angles{parType}))   
-               probMapUse = cellMapStruct.probMap{r,k,ag};
-               locsUse = cellMapStruct.locs{r,k,ag}';
-               locsUse = [ruleStruct.children(r,k)*ones(1,size(locsUse,2)); ...
-                          locsUse];
+                probMapUse = cellMapStruct.probMap{r,k,ag};
+                locsUse = cellMapStruct.locs{r,k,ag}';
+                locsUse = [ruleStruct.children(r,k)*ones(1,size(locsUse,2)); locsUse];
+            
                temp = zeros(size(gbkInds,2),1);
                idGuess = 1;
-               for (i=1:numel(probMapUse))
-                   d = gbkInds(:,idGuess) - locsUse(:,i);
+               
+               for (i=1:numel(temp))
+                   d = gbkInds(:,i) - locsUse(:,idGuess);
                    if (any(d > 0.001))
-                       a=sum(abs(bsxfun(@minus,gbkInds',locsUse(:,i)')),2);
+                       a=sum(abs(bsxfun(@minus,gbkInds(:,i),locsUse)),1);
                        id = find(a < 0.001);
                    else
                        id = idGuess;
                    end
-                   temp(id) = probMapUse(i);
-                   idGuess = min(id+1,size(gbkInds,2));
+                   if(~isempty(id))
+                       temp(i) = probMapUse(id);
+                       idGuess = min(id+1,size(locsUse,2));
+                   else
+                       idGuess = 1;
+                   end
+                   
+                   
                end
+               
+%                for (i=1:numel(probMapUse))id
+%                    d = gbkInds(:,idGuess) - locsUse(:,i);
+%                    if (any(d > 0.001))
+%                        a=sum(abs(bsxfun(@minus,gbkInds',locsUse(:,i)')),2);
+%                        id = find(a < 0.001);
+%                    else
+%                        id = idGuess;
+%                    end
+%                    temp(id) = probMapUse(i);
+%                    idGuess = min(id+1,size(gbkInds,2));
+%                end
                tempAll = [tempAll, temp];
             end
-             pGbkRStruct{r,k} = tempAll;
+            pGbkRStruct{r,k} = tempAll;
         end
     end
 end

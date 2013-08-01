@@ -13,7 +13,7 @@ function [probMapStruct] = initProbMaps(ruleStruct,templates)
     covCentresParents(:,:,3) = [4^2,0; ...
                                 0,4^2];
     
-    vonMisesConcParents = [0.2,0.2,0.2];
+    vonMisesConcParents = [5,5,5];
     
     for (i=1:size(parents,1))
         tp = templates{parents(i)};

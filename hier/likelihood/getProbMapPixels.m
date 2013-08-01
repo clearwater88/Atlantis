@@ -26,6 +26,7 @@ function [res] = getProbMapPixels(ruleId,slot,cellCentre,probMapStruct,imSize,an
     tempProb(inds) = mvnpdf([x2(:),y2(:)],centreUse(1:2),covar(1:2,1:2));
     
     probVon = exp(vonM*cos(angleRange-centreUse(3)));
+    probVon = probVon/sum(probVon);
     probVon = reshape(probVon,[1,1,numel(probVon)]);
     
     res = bsxfun(@times,tempProb,probVon);

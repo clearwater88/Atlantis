@@ -76,6 +76,9 @@ function [cellMapStruct] = getAllProbMapCells(cellParams,probMapStruct,ruleStruc
                  % may not be symmetric; depends on how gridding of parent 
                  % and child centres align
                  probMapSpatial{ruleId,slot,a} = reshape(probMapTemp,rg);
+                 [val] = max(probMapSpatial{ruleId,slot,a},[],3);
+                 temp = probMapSpatial{ruleId,slot,a}(:,:,a);
+                 assert(~any(val(:)-temp(:) > 0.000001));
             end
         end
         toc

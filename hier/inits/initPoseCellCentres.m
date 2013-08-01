@@ -6,9 +6,11 @@ function cellParams = initPoseCellCentres(imSize)
     % Make odd so centre is unambiguous
     cellDims(1,:) = [11,11,pi];
     cellDims(2,:) = [9,9,pi];
+    cellDims(3,:) = [7,7,pi];
     
     strides(1,:) = [8,8,pi/4];
     strides(2,:) = [4,4,pi/4];
+    strides(3,:) = [4,4,pi/4];
     
     %cellStrides = cellDims;
     

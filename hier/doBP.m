@@ -1,10 +1,10 @@
-function probOn = doBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct)
+function probOn = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn)
 
     % cell returned in raster order for each cell
-    probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct);
+    probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn);
 end
 
-function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
+function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn)
     % things stored in raster order:x,y,angleInd
     
     nTypes = numel(unique(ruleStruct.parents));
@@ -43,7 +43,8 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
             uGbkToFb1_0{n,k} = 1-((0.004*params.probRoot) + 0.1*(0.004*params.probRoot)*rand(nBricksType(n),size(gBkLookUp{n,k},2))); %[#bricks, #potential children]
         end
     end
-    % uSbToFb2 = uFb1ToSb
+    uSbToFb2_0 = uFb1ToSb_0;
+    uSbToFb2_0 = correctFromSb_0(uSbToFb2_0,sOn);
     % uRbToFb3 = uFb2ToRb
 
     % allocate space for bottom-up messages
@@ -65,6 +66,7 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
         
         uSbToFb1_0{n} = 0.994 + 0.005*rand(nCoordsInds(n,:));
     end
+    uSbToFb1_0 = correctFromSb_0(uSbToFb1_0,sOn);
     %uFb3ToRb = uRbToFb2;
     %uFb2ToSb = uSbToFb1_0;
 
@@ -103,6 +105,7 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
             temp1 = sum(bsxfun(@times,uRbToFb2{n},probs),2); % sb=1
             uSbToFb1_0{n} = reshape(bsxfun(@rdivide, uRbToFb2{n}(:,1), temp1 + uRbToFb2{n}(:,1)),nCoordsInds(n,:));
         end
+        uSbToFb1_0 = correctFromSb_0(uSbToFb1_0,sOn);
         toc
         % compute uSbFb1_0 = uFb2ToSb
         
@@ -144,6 +147,10 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
             uFb1ToSb_0{n} = (1-params.probRoot)*prodGbk_holder_0{n};
         end
         toc
+        
+        
+        uSbToFb2_0 = uFb1ToSb_0;
+        uFb1ToSb_0 = correctFromSb_0(uFb1ToSb_0,sOn);
         % compute uFb1ToSb_0 = uSbToFb2_0
         
         % compute uFb2ToRb = uRbToFb3
@@ -154,7 +161,7 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
             probs = ruleStruct.probs(ruleIds)';
             
             temp = zeros(nBricksType(i), numel(probs));
-            temp(:,1) = uFb1ToSb_0{i}(:); % stores P(rb|sb=0)m_{sb->fb2}(sb)
+            temp(:,1) = uSbToFb2_0{i}(:); % stores P(rb|sb=0)m_{sb->fb2}(sb)
             temp = bsxfun(@times, (1-uFb1ToSb_0{i}(:)), probs) + temp;
             uFb2ToRb{i} = bsxfun(@rdivide,temp,sum(temp,2));
         end
@@ -234,10 +241,23 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct)
             probOn{n} =  probOn{n}(:);
             figure(100);
             title(int2str(iter));
-            subplot(nTypes,1,n); plot(probOn{n});
+            subplot(nTypes,1,n); plot(probOn{n}); 
         end
-        
     end
+end
+
+function fromSb = correctFromSb_0(fromSb,sOn)
+    %sOn(:,i) = [type,idx,probOn]
+
+    for (i=1:size(sOn,2))
+        type = sOn(1,i);
+        idx = sOn(2,i);
+        probOn = sOn(3,i);
+        temp = fromSb{type};
+        temp(idx) = 1-probOn;
+        fromSb{type} = temp;
+    end
+
 end
 
 function res = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uSbToFb1_0)

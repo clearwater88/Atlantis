@@ -7,7 +7,7 @@ function [allParticles,probOn] = sampleParticlesBP(data,posesStruct,likePxIdxCel
     
     likesIm{1} = likeTemp;
     countsIm{1} = countsTemp;
-    
+    probOn{1} = [];
     allParticles = {};
     allParticleProbs = {};
 
@@ -30,7 +30,6 @@ function [allParticles,probOn] = sampleParticlesBP(data,posesStruct,likePxIdxCel
         %particles{1} = [1,1,70]';
         sOn = getProbOn(particles);
         probOn{qq} = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn);
-        viewHeatMap(probOn{qq},cellParams);
         
         [logProbCellRatioOldParticle,ratiosImOldParticle,defaultLogLikeIm] = evalDataRatio(data,nPosesCell,particleProbs,likePxIdxCells,likesIm,countsIm,templateStruct,cellParams,posesStruct,dirtyRegion,ratiosIm,logLikeCell,params);
         

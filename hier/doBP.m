@@ -43,8 +43,7 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
             uGbkToFb1_0{n,k} = 1-((0.004*params.probRoot) + 0*(0.004*params.probRoot)*rand(nBricksType(n),size(gBkLookUp{n,k},2))); %[#bricks, #potential children]
         end
     end
-    uSbToFb2_0 = uFb1ToSb_0;
-    uSbToFb2_0 = correctFromSb_0(uSbToFb2_0,sOn);
+    prodGbk_0 = computeAllProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uGbkToFb1_0);
     % uRbToFb3 = uFb2ToRb
 
     % allocate space for bottom-up messages
@@ -78,6 +77,11 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
         tic
         uGbkToFb3_old{iter} = uGbkToFb3;
         uGbkToFb3 = compute_uGbkFb3(nTypes,maxSlots,uFb1ToGbk_total_0);
+        for (n=1:size(uGbkToFb3,1))
+            for(k=1:size(uGbkToFb3,2))
+                assert(~any(isnan(uGbkToFb3{n,k}(:))));
+            end
+        end
         toc
         %compute uGbkToFb3
          
@@ -91,6 +95,7 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
             % normalize messages for each type
             temp = sum(logPgbkRbMuFb3{n},3);
             uRbToFb2{n} = exp(bsxfun(@minus,temp,logsum(temp,2)));
+            assert(~any(isnan(uRbToFb2{n}(:))));
         end
         toc
         %compute uFb3ToRb = uRbToFb2
@@ -104,6 +109,7 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
             probs = ruleStruct.probs(ruleIds)';
             temp1 = sum(bsxfun(@times,uRbToFb2{n},probs),2); % sb=1
             uSbToFb1_0{n} = reshape(bsxfun(@rdivide, uRbToFb2{n}(:,1), temp1 + uRbToFb2{n}(:,1)),nCoordsInds(n,:));
+            assert(~any(isnan(uSbToFb1_0{n}(:))));
         end
         uSbToFb1_0 = correctFromSb_0(uSbToFb1_0,sOn);
         toc
@@ -115,7 +121,7 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
         display('---uFb1ToGbk_total_0---');
         % indexed by parent;
         reverse_uSbToFb1_0 = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uSbToFb1_0);
-        reverse_uFb1ToSb_0 = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uFb1ToSb_0);
+        reverseProdGbk = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,prodGbk_0);
         for (n=1:nTypes)
             for (k=1:maxSlots)
                 
@@ -124,10 +130,14 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
                     uFb1ToGbk_total_0{n,k} = uGbkToFb1_0{n,k};
                     continue;
                 end;
-                temp0 = reverse_uSbToFb1_0{n,k}.*reverse_uFb1ToSb_0{n,k}./uGbkToFb1_0{n,k} + ...
-                    (1-reverse_uSbToFb1_0{n,k}).*(1-reverse_uFb1ToSb_0{n,k}./uGbkToFb1_0{n,k});
+                tempRatio = (1-params.probRoot)*reverseProdGbk{n,k}./uGbkToFb1_0{n,k};
+                
+                temp0 = reverse_uSbToFb1_0{n,k}.*tempRatio + ...
+                    (1-reverse_uSbToFb1_0{n,k}).*(1-tempRatio);
                 temp1 = (1-reverse_uSbToFb1_0{n,k});
                 uFb1ToGbk_total_0{n,k} = temp0 ./ (temp0+temp1); %for each parent, what signal the child sends
+                assert(~any(isnan(uFb1ToGbk_total_0{n,k}(:))));
+                assert(~any(uFb1ToGbk_total_0{n,k}(:)< -0.0001));
             end
         end
         toc
@@ -141,14 +151,11 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
         tic
         display('---uFb1ToSb_0---');
         uFb1ToSb_0_old{iter} = uFb1ToSb_0;
-        prodGbk_holder_0 = computeAllProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uGbkToFb1_0);
-        prodGbk_holder_0_oldFb1{iter} = prodGbk_holder_0;
         for (n=1:nTypes)
-            uFb1ToSb_0{n} = (1-params.probRoot)*prodGbk_holder_0{n};
+            uFb1ToSb_0{n} = (1-params.probRoot)*prodGbk_0{n};
+            assert(~any(isnan(uFb1ToSb_0{n}(:))));
         end
-        toc
-        
-        
+ 
         uSbToFb2_0 = uFb1ToSb_0;
         uSbToFb2_0 = correctFromSb_0(uSbToFb2_0,sOn);
         % compute uFb1ToSb_0 = uSbToFb2_0
@@ -156,14 +163,15 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
         % compute uFb2ToRb = uRbToFb3
         display('---uFb2ToRb---');
         tic
-        for (i=1:nTypes)
-            ruleIds = ruleStruct.parents==i;
+        for (n=1:nTypes)
+            ruleIds = ruleStruct.parents==n;
             probs = ruleStruct.probs(ruleIds)';
             
-            temp = zeros(nBricksType(i), numel(probs));
-            temp(:,1) = uSbToFb2_0{i}(:); % stores P(rb|sb=0)m_{sb->fb2}(sb)
-            temp = bsxfun(@times, (1-uFb1ToSb_0{i}(:)), probs) + temp;
-            uFb2ToRb{i} = bsxfun(@rdivide,temp,sum(temp,2));
+            temp = zeros(nBricksType(n), numel(probs));
+            temp(:,1) = uSbToFb2_0{n}(:); % stores P(rb|sb=0)m_{sb->fb2}(sb)
+            temp = bsxfun(@times, (1-uFb1ToSb_0{n}(:)), probs) + temp;
+            uFb2ToRb{n} = bsxfun(@rdivide,temp,sum(temp,2));
+            assert(~any(isnan(uFb2ToRb{n}(:))));
         end
         toc
         % compute uFb2ToRb  = uRbToFb3
@@ -203,6 +211,7 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
                  finalLogMess = logsum(logMessageTemp,3);
                  finalLogMess(isnan(finalLogMess)) = -Inf;
                  uFb3ToGbk_1{n,k} = exp(bsxfun(@minus,finalLogMess,logsum(finalLogMess,2)));
+                 assert(~any(isnan(uFb3ToGbk_1{n,k}(:))));
              end
          end
          toc
@@ -223,8 +232,11 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
                 logProbs_1 = logProbs_1 + log(uFb3ToGbk_1{n,k});
                 normProbs_1 = exp(bsxfun(@minus,logProbs_1,logsum(logProbs_1,2)));
                 uGbkToFb1_0{n,k} = 1 - normProbs_1(:,2:end);
+                assert(~any(isnan(uGbkToFb1_0{n,k}(:))));
             end
         end
+        prodGbk_0 = computeAllProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uGbkToFb1_0);
+        prodGbk_0_oldFb1{iter} = prodGbk_0;
         toc
         % compute uGbkToFb1_0
 
@@ -242,7 +254,9 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
             figure(100);
             title(int2str(iter));
             subplot(nTypes,1,n); plot(probOn{n}); 
+            assert(~any(isnan(probOn{n})));
         end
+        viewHeatMap(probOn,cellParams);
     end
 end
 
@@ -275,12 +289,12 @@ function res = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,convers
     end
 end
 
-function prodGbk_holder_0 = computeAllProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uGbkToFb1_0)
+function prodGbk_0 = computeAllProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uGbkToFb1_0)
     % prodGbk_holder_0{n}(coord): product of Gbk's of this brick's parents
 
-    prodGbk_holder_0 = cell(nTypes,1);
+    prodGbk_0 = cell(nTypes,1);
     for (n=1:nTypes)
-        prodGbk_holder_0{n} = ones(nCoordsInds(n,:));
+        prodGbk_0{n} = ones(nCoordsInds(n,:));
     end
 
     for (n=1:nTypes) % loop over parents
@@ -290,7 +304,7 @@ function prodGbk_holder_0 = computeAllProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsI
             conversionsType = squeeze(conversions(:,n,:));
             refPointType = refPoints(:,n);
             
-            prodGbk_holder_0 = computeProdGbk(gbkType,  conversionsType,  refPointType, nCoordsInds(n,:)', uGbkToFb1_0{n,k}, prodGbk_holder_0);
+            prodGbk_0 = computeProdGbk(gbkType,  conversionsType,  refPointType, nCoordsInds(n,:)', uGbkToFb1_0{n,k}, prodGbk_0);
         end
     end
 end

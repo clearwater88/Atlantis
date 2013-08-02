@@ -2,7 +2,7 @@ function mainBP(ds,noiseParam,useContext)
 
     startup;
     trainInds = 6:10;
-    testInd = 1:3;
+    testInd = 1:5;
     nTest = numel(testInd);
 
     params = initParams;

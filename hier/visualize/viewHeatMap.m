@@ -7,7 +7,6 @@ function viewHeatMap(probOn,cellParams)
     end
     maxAngle = max(nCoordsInds(:,3));
     
-    figure(1000);
     for (n=1:nTypes)
        probOnType = reshape(probOn{n}, nCoordsInds(n,:));
        nAg = nCoordsInds(n,3);

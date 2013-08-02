@@ -97,13 +97,19 @@ $s_b$ only has two values, so this is easy to compute.
 \subsection{$\mFbGbk3$}
 
 \begin{eqnarray}
-\mFbGbk3(g_{b,k}) &=& \sum_{r_b} \sum_{k' \neq k} \fb3(r_b,\vec{g}_b) \mRbFb2(r_b) \prod_{k' \neq k} \mGbkFb3(g_{b,k'}) \\
-&=& \sum_{r_b} \mRbFb2(r_b) \sum_{k' \neq k}P(\vec{g}_b \mid r_b)  \prod_{k' \neq k}  \mGbkFb3(g_{b,k'}) \\
-&=& \sum_{r_b} \mRbFb2(r_b) \sum_{k' \neq k} P(\vec{g}_{b,k} \mid r_b)  \prod_{k' \neq k} P(\vec{g}_{b,k'} \mid r_b)  \mGbkFb3(g_{b,k'}) \\
-&=& \sum_{r_b} \mRbFb2(r_b)  P(\vec{g}_{b,k} \mid r_b) \prod_{k' \neq k} \sum_{g_{b,k'}}  P(\vec{g}_{b,k'} \mid r_b)  \mGbkFb3(g_{b,k'})
+\mFbGbk3(g_{b,k}) &=& \sum_{r_b} \sum_{k' \neq k} \fb3(r_b,\vec{g}_b) \mRbFb3(r_b) \prod_{k' \neq k} \mGbkFb3(g_{b,k'}) \\
+&=& \sum_{r_b} \mRbFb3(r_b) \sum_{k' \neq k}P(\vec{g}_b \mid r_b)  \prod_{k' \neq k}  \mGbkFb3(g_{b,k'}) \\
+&=& \sum_{r_b} \mRbFb3(r_b) \sum_{k' \neq k} P(\vec{g}_{b,k} \mid r_b)  \prod_{k' \neq k} P(\vec{g}_{b,k'} \mid r_b)  \mGbkFb3(g_{b,k'}) \\
+&=& \sum_{r_b} \mRbFb3(r_b)  P(\vec{g}_{b,k} \mid r_b) \prod_{k' \neq k} \sum_{g_{b,k'}}  P(\vec{g}_{b,k'} \mid r_b)  \mGbkFb3(g_{b,k'})
 \end{eqnarray}
 
 The number of values $r_b$ can take should be small (no more than, say $10$? $20$?), so this should be possible to compute.
+
+\subsection{$\mGbkFb1$}
+
+\begin{eqnarray}
+\mGbkFb1(g_{b,k}) &=& \mFbGbk3(g_{b,k}) \prod_{b' \neq b} \mu_{f_{b'}^1 \rightarrow g_{b,k}}(g_{b,k})
+\end{eqnarray}
 
 \section{Bottom-up messages}
 
@@ -135,12 +141,8 @@ We divide the cases into  $g_{b',k}=0$, and  $g_{b',k}=1$
 &=&   \mSbFb1(s_b=0) \times (1-\epsilon)  \times \frac{ \prod_{g}\mu_{g \rightarrow \fb1}(g=0)}{\mu^0_{g_{b',k} \rightarrow \fb1}(g=0)}  \\
 & & + \mSbFb1(s_b=1) \big( \frac{\prod_{g} \mu_{g \rightarrow \fb1}(g=0) }{\mu^0_{g_{b',k} \rightarrow \fb1}(g=0) }
  (\epsilon -1) + 1)  \big) \nonumber \\
-&=&  \mSbFb1(s_b=0)  \times \frac{\mSbFb1(s_b=0)}{\mu^0_{g_{b',k} \rightarrow \fb1}(g=0)}  \\
-& & + \mSbFb1(s_b=1) \big( \frac{\mSbFb1(s_b=0)}{\mu^0_{g_{b',k} \rightarrow \fb1}(g=0) } \nonumber
- (\epsilon -1) + 1)  \big) \nonumber \\
-&=& \frac{\mSbFb1(s_b=0)^2}{\mu^0_{g_{b',k} \rightarrow \fb1}(g=0)}  \\
-& & + \frac{\mSbFb1(s_b=1)\mSbFb1(s_b=0)(\epsilon-1) + \mu^0_{g_{b',k} \rightarrow \fb1}(g=0) }{\mu^0_{g_{b',k} \rightarrow \fb1}(g=0) } \nonumber \\
-&=&  \frac{\mSbFb1(s_b=0)^2 + \mSbFb1(s_b=1)\mSbFb1(s_b=0)(\epsilon-1) + \mu^0_{g_{b',k} \rightarrow \fb1}(g=0) }{\mu^0_{g_{b',k} \rightarrow \fb1}(g=0) }
+&=&   \mSbFb1(s_b=0)  \times \frac{\mFbSb1(s_b=0)}{\mu^0_{g_{b',k} \rightarrow \fb1}(g=0)}  \\
+& & + \mSbFb1(s_b=1) \times \big(1- \frac{\mFbSb1(s_b=0)}{\mu^0_{g_{b',k} \rightarrow \fb1}(g=0)}  \big) \nonumber
 \end{eqnarray}
 
 where  $\mu^0_{g_{b',k} \rightarrow \fb1}$ means the old message sent by $g_{b',k}$, and we have made use of the property that messages from a node/factor sum to $1$. Note that we can compute this message without having to explicitly examine all the other $g_{b,k}'s$; we re-used the computation from computing $\mSbFb1(s_b=0)$.

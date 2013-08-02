@@ -44,14 +44,14 @@ void mexFunction( int nlhs, mxArray *plhs[],
     double point[2], convToChild[2];
     
     const mxArray *gBkIndsMx, *conversionMx, *refPointMx;
-    
+    mxArray* shiftedInds;
     gBkIndsMx = prhs[0]; conversionMx = prhs[1]; refPointMx = prhs[2];
     
     for (x = 1; x <= pointTest[0]; x++) {
         point[0] = x;
             for (y = 1; y <= pointTest[1]; y++) {
                 point[1] = y;
-                plhs[0] = shiftGbkInds(gBkIndsMx, conversionMx, refPointMx,point);
+                shiftedInds = shiftGbkInds(gBkIndsMx, conversionMx, refPointMx,point);
             }
     }
             

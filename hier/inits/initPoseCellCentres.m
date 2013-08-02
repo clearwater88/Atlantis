@@ -10,7 +10,7 @@ function cellParams = initPoseCellCentres(imSize)
     
     strides(1,:) = [8,8,pi/4];
     strides(2,:) = [4,4,pi/4];
-    strides(3,:) = [2,2,pi/4]; 
+    strides(3,:) = [4,4,pi/4];
     
     %cellStrides = cellDims;
     

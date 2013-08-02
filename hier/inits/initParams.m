@@ -1,7 +1,9 @@
 function [params] = initParams()
     
     params.probRoot = 0.0001; %epsilon
-    params.nParticles = 20;
+    params.bpIter = 10;
+    params.nParticles = 50;
+    params.thingsToSee=75;
     
     % start,increment,end
     % angles are -pi:pi

@@ -3,6 +3,7 @@ function [res,dirtyCoords] = getProbMapCells(ruleId,slot,chType,refPoint,probMap
     % angleDisc.
     % returns prob maps according to order in poseCellLocs
     
+    centres = cellParams.centres{chType};
     centreBoundaries = cellParams.centreBoundaries{chType};
     coords = cellParams.coords{chType};
     
@@ -20,27 +21,38 @@ function [res,dirtyCoords] = getProbMapCells(ruleId,slot,chType,refPoint,probMap
     
     dirtyInds = find(doesIntersect(dirtyBounds,centreBoundaries(1:2,:,:))==1);    
     dirtyCoords = coords(dirtyInds,:);
+    dirtyBd = centreBoundaries(:,:,dirtyInds);
+    dirtyCentre = centres(dirtyInds,:);
     
     res= zeros(numel(dirtyInds),1);
     for (i=1:numel(dirtyInds))
-        bd = centreBoundaries(:,:,dirtyInds(i));
+        bd = dirtyBd(:,:,i);
+        centre = dirtyCentre(i,:);
         
         mapXY = resPixels(bd(1,1):bd(1,2), ...
                           bd(2,1):bd(2,2), ...
                           :);
         sumXY = sum(sum(mapXY,1),2);
         sumXY = sumXY(:);
-
-        indStart = find(angles >= bd(3,1),1,'first');
-        nAngleBins = (bd(3,2)-bd(3,1))/(angles(2)-angles(1));
         
-        temp = 0;
+        indStart = find(abs(angles - centre(3)) < 0.001,1,'first');
+        nAngleBins = floor(abs(bd(3,2)-bd(3,1))/abs(angles(2)-angles(1)))/2;
+        
+        temp = sumXY(indStart);
         for (j=1:nAngleBins)
-           indUse = mod(indStart-j,numel(sumXY))+1;
-           temp=temp+sumXY(indUse);
+            indUseLow = mod(indStart-1-j,numel(sumXY))+1;
+            indUseHigh = mod(indStart-1+j,numel(sumXY))+1;
+            temp=temp+sumXY(indUseLow)+sumXY(indUseHigh);
+
         end
+        
+%         temp = 0;
+%         for (j=1:nAngleBins)
+%            indUse = mod(indStart-j,numel(sumXY))+1;
+%            temp=temp+sumXY(indUse);
+%         end
         res(i) = temp;
     end
-    res = res/sum(res); % is this necessary?
+    res = res/sum(res);
 end
 

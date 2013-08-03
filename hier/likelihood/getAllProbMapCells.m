@@ -78,7 +78,7 @@ function [cellMapStruct] = getAllProbMapCells(cellParams,probMapStruct,ruleStruc
                  probMapSpatial{ruleId,slot,a} = reshape(probMapTemp,rg);
                  [val] = max(probMapSpatial{ruleId,slot,a},[],3);
                  temp = probMapSpatial{ruleId,slot,a}(:,:,a);
-                 assert(~any(val(:)-temp(:) > 0.000001));
+                 assert(~any(val(:)-temp(:) > 0.001));
             end
         end
         toc

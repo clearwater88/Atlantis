@@ -69,7 +69,6 @@ function mainBP(ds,noiseParam,useContext)
             toc
         end 
 
-        
         [allParticles,probOn] = sampleParticlesBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct);
         save(saveStr,'cleanTestData', 'testData', 'allParticles', 'probOn', ...
                  'templateStruct', 'probMapStruct', 'ruleStruct', 'cellParams', ...

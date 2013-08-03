@@ -40,22 +40,22 @@ void mexFunction( int nlhs, mxArray *plhs[],
 		  int nrhs, const mxArray*prhs[] )
      
 { 
-    int ind=0,i,x,y,agInd,childType,childX,childY,childAgInd;
+    int ind,i,x,y,agInd,childType,childX,childY,childAgInd;
     double point[2], convToChild[2], message;
-    double *pointsBoundary, *allMessages, *uFb1ToSb_0_holder, *shiftedInds;
+    double *pointsBoundary, *allMessages, *prodGbk, *shiftedInds;
     size_t m_uGbkToFb1_0, n_uGbkToFb1_0, m_gbkInds, n_gbkInds;
     
     const mwSize* dims;
     
-    const mxArray *gBkIndsMx, *conversionMx, *refPointMx, *pointsBoundaryMx, *uGbkToFb1_0, *uFb1ToSb_0_holderMx;
-    mxArray * shiftedIndsMx, *uFb1ToSb_0_TypeMx;
+    const mxArray *gBkIndsMx, *conversionMx, *refPointMx, *pointsBoundaryMx, *uGbkToFb1_0, *prodGbkMx;
+    mxArray * shiftedIndsMx, *prodGbk_TypeMx;
     
-    gBkIndsMx = prhs[0]; conversionMx = prhs[1]; refPointMx = prhs[2]; pointsBoundaryMx = prhs[3]; uGbkToFb1_0 = prhs[4], uFb1ToSb_0_holderMx = prhs[5];
+    gBkIndsMx = prhs[0]; conversionMx = prhs[1]; refPointMx = prhs[2]; pointsBoundaryMx = prhs[3]; uGbkToFb1_0 = prhs[4], prodGbkMx = prhs[5];
     pointsBoundary = mxGetPr(pointsBoundaryMx);
     allMessages = mxGetPr(uGbkToFb1_0);
     
     /*plhs[0] = mxDuplicateArray(uFb1ToSb_0_holderMx);*/
-    plhs[0] = mxDuplicateArray(uFb1ToSb_0_holderMx);
+    plhs[0] = mxDuplicateArray(prodGbkMx);
     
     m_uGbkToFb1_0 = mxGetM(uGbkToFb1_0);
     n_uGbkToFb1_0 = mxGetN(uGbkToFb1_0);
@@ -69,6 +69,9 @@ void mexFunction( int nlhs, mxArray *plhs[],
                 shiftedIndsMx = shiftGbkInds(gBkIndsMx, conversionMx, refPointMx,point);
                 shiftedInds = mxGetPr(shiftedIndsMx); 
                 for (agInd=1; agInd <= pointsBoundary[2]; agInd++) {
+                    
+                    ind = (x-1) + (y-1)*pointsBoundary[0] + (agInd-1)*pointsBoundary[0]*pointsBoundary[1];
+                    
                     for (i=0; i < n_uGbkToFb1_0; i++) { /* iterate over children */
                         message = allMessages[ind + m_uGbkToFb1_0*i];
                         
@@ -78,30 +81,23 @@ void mexFunction( int nlhs, mxArray *plhs[],
                         childY = shiftedInds[m_gbkInds*i+2];
                         childAgInd = shiftedInds[m_gbkInds*i+3];
                         
-                        
-                        uFb1ToSb_0_TypeMx = mxGetCell(plhs[0],childType-1);
-                        uFb1ToSb_0_holder = mxGetPr(uFb1ToSb_0_TypeMx);
-                        dims = mxGetDimensions(uFb1ToSb_0_TypeMx);
-                        
+                        prodGbk_TypeMx = mxGetCell(plhs[0],childType-1);
+                        prodGbk = mxGetPr(prodGbk_TypeMx);
+                        dims = mxGetDimensions(prodGbk_TypeMx);
+
                         if (childX < 0.99) continue;
                         if (childX > dims[0]+0.01) continue;
                         if (childY < 0.99) continue;
                         if (childY > dims[1]+0.01) continue;
                         
-                        /*
-                        if (ind == 71) {
+                        if (ind == 1) {
                             printf("childType,x,y,agInd: %d,%d,%d,%d\n", childType, childX, childY, childAgInd);
-                            printf("childId,%d\n", i+1);
-                            printf("mess: %f \n",message);
-                            printf("incrementing entry: %d\n", childX-1 + dims[0]*(childY-1) + dims[0]*dims[1]*(childAgInd-1));
+                            printf("message: fd\n", message);
+                            printf("parent x,y,agInd: %d,%d,%d\n", x,y,agInd);
                         }
-                        */
-                        
-                        uFb1ToSb_0_holder[childX-1 + dims[0]*(childY-1) + dims[0]*dims[1]*(childAgInd-1)] *= message;
+                        prodGbk[childX-1 + dims[0]*(childY-1) + dims[0]*dims[1]*(childAgInd-1)] *= message;
                     }
                     
-                    
-                    ind++;
                 }
                 
                 mxDestroyArray(shiftedIndsMx);

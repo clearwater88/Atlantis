@@ -89,12 +89,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
                         if (childX > dims[0]+0.01) continue;
                         if (childY < 0.99) continue;
                         if (childY > dims[1]+0.01) continue;
-                        
-                        if (ind == 1) {
-                            printf("childType,x,y,agInd: %d,%d,%d,%d\n", childType, childX, childY, childAgInd);
-                            printf("message: fd\n", message);
-                            printf("parent x,y,agInd: %d,%d,%d\n", x,y,agInd);
-                        }
+
                         prodGbk[childX-1 + dims[0]*(childY-1) + dims[0]*dims[1]*(childAgInd-1)] *= message;
                     }
                     

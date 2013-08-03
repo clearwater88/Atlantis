@@ -10,9 +10,9 @@ function viewHeatMap(sOn,probOn,cellParams,imSize,figNum)
     for (n=1:nTypes)
         nCoordsInds(n,:) = max(cellParams.coords{n},[],1);
     end
-    maxAngle = max(nCoordsInds(:,3));
+
+    ims = {};
     
-    figure(figNum);
     for (n=1:nTypes)
         probOnType = reshape(probOn{n}, nCoordsInds(n,:));
         nAg = nCoordsInds(n,3);
@@ -24,7 +24,7 @@ function viewHeatMap(sOn,probOn,cellParams,imSize,figNum)
             maskLayer = zeros(imSize);
             
             % zero out active bricks
-            centre = cellParams.centres{n}(sOn(1,:) == n,:);
+            centre = cellParams.centres{n}(sOn(2,sOn(1,:)==n),:);
             centreInds = sub2ind(imSize(1:2),centre(:,1),centre(:,2));
             maskLayer(centreInds) = 1;
             
@@ -37,9 +37,12 @@ function viewHeatMap(sOn,probOn,cellParams,imSize,figNum)
             temp = repmat(temp,[1,1,3]);
             temp(:,:,2:3) = bsxfun(@times,1-maskLayer,temp(:,:,2:3));
             
-            subplot(nTypes,maxAngle,ct); imshow(temp);
+            %subplot(nTypes,maxAngle,ct); imagesc(temp,[0,1]); axis off;
+            ims{end+1} = temp;
             ct=ct+1;
         end
     end
+    figure(figNum);
+    imshow(makeCollage(ims,[nTypes,nAg]));
 end
 

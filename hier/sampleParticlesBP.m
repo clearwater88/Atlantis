@@ -20,12 +20,12 @@ function [allParticles,probOn] = sampleParticlesBP(data,posesStruct,likePxIdxCel
     probOn = cell(params.thingsToSee,1);
     
     for (qq=1:params.thingsToSee);
-
-        figure(200); subplot(1,3,1); imshow(data);
-        st = viewAllParticles(particles,templateStruct,params);
-        subplot(1,3,2); imshow(st);
-        st2 = viewOverlayTest(data,particles,templateStruct,params);
-        subplot(1,3,3); imshow(st2);
+% 
+%         figure(200); subplot(1,3,1); imshow(data);
+%         st = viewAllParticles(particles,templateStruct,params);
+%         subplot(1,3,2); imshow(st);
+%         st2 = viewOverlayTest(data,particles,templateStruct,params);
+%         subplot(1,3,3); imshow(st2);
         
         %particles{1} = [1,1,69]';
         sOn = getProbOn(particles);

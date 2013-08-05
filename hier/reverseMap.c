@@ -41,7 +41,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
      
 { 
     double* pointsBoundary, *shiftedInds, *res, *map_0;
-    int ind=0,i,x,y,agInd,childType,childX,childY,childAgInd;
+    int ind,i,x,y,agInd,childType,childX,childY,childAgInd;
     double point[2], convToChild[2], message;
     size_t m_gbkInds,n_gbkInds,nChildren,m_res,n_res;
     
@@ -74,6 +74,9 @@ void mexFunction( int nlhs, mxArray *plhs[],
             shiftedIndsMx = shiftGbkInds(gBkIndsMx, conversionMx, refPointMx,point);
             shiftedInds = mxGetPr(shiftedIndsMx);
             for (agInd=1; agInd <= pointsBoundary[2]; agInd++) {
+                
+                ind = (x-1) + (y-1)*pointsBoundary[0] + (agInd-1)*pointsBoundary[0]*pointsBoundary[1];
+                
                 for (i=0; i < nChildren; i++) {
                     
                     /*1-indexed*/
@@ -97,7 +100,6 @@ void mexFunction( int nlhs, mxArray *plhs[],
                     printf("childType,x,y,agInd: %d,%d,%d,%d\n", childType, childX, childY, childAgInd);
                      **/
                 }
-                ind++;
             }
         }
     }

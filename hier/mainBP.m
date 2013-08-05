@@ -1,4 +1,9 @@
-function mainBP(ds,noiseParam,useContext)
+function mainBP(ds,noiseParam,useContext,resFolder,tStart,nTrials)
+
+    if(nargin < 4)
+        resFolder = 'res/';
+    end
+    [~]=mkdir(resFolder);
 
     startup;
     trainInds = 6:10;
@@ -7,6 +12,7 @@ function mainBP(ds,noiseParam,useContext)
 
     params = initParams;
     params.downSampleFactor = ds;
+    params.useContext = useContext;
 
     templateStruct = initTemplates;
     templateStruct.bg=noiseParam;
@@ -19,22 +25,17 @@ function mainBP(ds,noiseParam,useContext)
     probMapStruct = initProbMaps(ruleStruct,templateStruct.app);
 
     for (i=1:nTest)
-
+        
         [cleanTestData,testData] = readData(params,templateStruct.app{end},testInd(i));
 
         params.imSize = size(testData);
         cellParams = initPoseCellCentres(params.imSize);
 
         % careful with new probMap distributions
-        mapStr= [probMapStruct.toString(probMapStruct), '_', ...
+        mapStr= ['sweep0', ruleStruct.toString(ruleStruct), '_', probMapStruct.toString(probMapStruct), '_', ...
                  'sz-', int2str(params.imSize(1)), 'x', int2str(params.imSize(2)), '_', ...
                  cellParams.toString(cellParams)];
         templateStr = templateStruct.toString(templateStruct);
-        saveStr = ['test', int2str(i), '_', ruleStruct.toString(ruleStruct), '_', ...
-                   probMapStruct.toString(probMapStruct), '_', ...
-                   params.toString(params), '_', ...
-                   cellParams.toString(cellParams), '_', ...
-                   templateStr, '-noise', int2str(100*templateStruct.bg)];
 
         if(exist([mapStr,'.mat'],'file'))
             display('loading probmap file');
@@ -69,12 +70,23 @@ function mainBP(ds,noiseParam,useContext)
             toc
         end 
 
-        
-        [allParticles,probOn] = sampleParticlesBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct);
-        save(saveStr,'cleanTestData', 'testData', 'allParticles', 'probOn', ...
-                 'templateStruct', 'probMapStruct', 'ruleStruct', 'cellParams', ...
-                 'params', '-v7.3');
-
-
+        for (t=tStart:tStart+nTrials-1)
+            saveStr = [resFolder,'testSweep0', int2str(i), '_', ruleStruct.toString(ruleStruct), '_', ...
+                   probMapStruct.toString(probMapStruct), '_', ...
+                   params.toString(params), '_', ...
+                   cellParams.toString(cellParams), '_', ...
+                   'context', int2str(params.useContext), '_', ...
+                   templateStr, '-noise', int2str(100*templateStruct.bg), '_trial', int2str(t)];
+            
+            if(exist([saveStr,'.mat'],'file'))
+                display(['File exists: ', saveStr]);
+                continue;
+            else
+                [allParticles,probOn] = sampleParticlesBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct);
+                save(saveStr,'cleanTestData', 'testData', 'allParticles', 'probOn', ...
+                         'templateStruct', 'probMapStruct', 'ruleStruct', 'cellParams', ...
+                         'params', '-v7.3');
+            end
+        end
     end
 end

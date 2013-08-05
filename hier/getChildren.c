@@ -39,23 +39,15 @@ mxArray* shiftGbkInds(const mxArray *gBkIndsMx, const mxArray *conversionMx, con
 void mexFunction( int nlhs, mxArray *plhs[], 
 		  int nrhs, const mxArray*prhs[] )
      
-{ 
-    int x,y;
-    double pointTest[2] = {18,28};
-    double point[2], convToChild[2];
+{
+    double *point;
     
     const mxArray *gBkIndsMx, *conversionMx, *refPointMx;
     mxArray* shiftedInds;
     gBkIndsMx = prhs[0]; conversionMx = prhs[1]; refPointMx = prhs[2];
+    point = mxGetPr(prhs[3]);
     
-    for (x = 1; x <= pointTest[0]; x++) {
-        point[0] = x;
-            for (y = 1; y <= pointTest[1]; y++) {
-                point[1] = y;
-                shiftedInds = shiftGbkInds(gBkIndsMx, conversionMx, refPointMx,point);
-            }
-    }
-            
-    
+    plhs[0] = shiftGbkInds(gBkIndsMx, conversionMx, refPointMx,point);
+
     return;
 }

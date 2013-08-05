@@ -137,15 +137,10 @@ We divide the cases into  $g_{b',k}=0$, and  $g_{b',k}=1$
 & & +  \mSbFb1(s_b=1) (1 - \prod_{g \neq g_{b',k}} \mu_{g \rightarrow \fb1}(g=0)) \nonumber \\
 %
 &=& \mSbFb1(s_b=0) \times (1-\epsilon)  \times  \prod_{g \neq g_{b',k}}\mu_{g \rightarrow \fb1}(g=0) \nonumber \\
-& & +  \mSbFb1(s_b=1) \big(   \prod_{g \neq g_{b',k}} \mu_{g \rightarrow \fb1}(g=0)  (\epsilon -1) + 1)  \big) \\
-&=&   \mSbFb1(s_b=0) \times (1-\epsilon)  \times \frac{ \prod_{g}\mu_{g \rightarrow \fb1}(g=0)}{\mu^0_{g_{b',k} \rightarrow \fb1}(g=0)}  \\
-& & + \mSbFb1(s_b=1) \big( \frac{\prod_{g} \mu_{g \rightarrow \fb1}(g=0) }{\mu^0_{g_{b',k} \rightarrow \fb1}(g=0) }
- (\epsilon -1) + 1)  \big) \nonumber \\
-&=&   \mSbFb1(s_b=0)  \times \frac{\mFbSb1(s_b=0)}{\mu^0_{g_{b',k} \rightarrow \fb1}(g=0)}  \\
-& & + \mSbFb1(s_b=1) \times \big(1- \frac{\mFbSb1(s_b=0)}{\mu^0_{g_{b',k} \rightarrow \fb1}(g=0)}  \big) \nonumber
+& & +  \mSbFb1(s_b=1) \big( 1- \prod_{g \neq g_{b',k}} \mu_{g \rightarrow \fb1}(g=0)  (1-\epsilon)  \big)
 \end{eqnarray}
 
-where  $\mu^0_{g_{b',k} \rightarrow \fb1}$ means the old message sent by $g_{b',k}$, and we have made use of the property that messages from a node/factor sum to $1$. Note that we can compute this message without having to explicitly examine all the other $g_{b,k}'s$; we re-used the computation from computing $\mSbFb1(s_b=0)$.
+where we have made use of the property that messages from a node/factor sum to $1$. 
 
 \begin{eqnarray}
 \mu_{\fb1 \rightarrow g_{b',k}}(g_{b,k'}=1) &=& \mSbFb1(s_b=1) \prod_{g \neq g_{b',k}} \sum_{g}  \mu_{g \rightarrow \fb1}(g) \\

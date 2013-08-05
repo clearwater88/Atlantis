@@ -4,9 +4,9 @@ function [templateStruct] = initTemplates()
     templateStruct.mix(end+1) = 0.001;
     %templateStruct.bg = 0.1;
                          
-    templateStruct.sizes = [9,1; ...
-                            5,1; ...
-                            3,1];
+    templateStruct.sizes = [15,1; ...
+                            11,1; ...
+                            7,1];
                         
     templateStruct.doLearning = 1;
     templateStruct.SIGMA = 1;
@@ -18,6 +18,9 @@ function [res] = toString(templateStruct)
     res = 'templates-';
     for (i=1:size(templateStruct.sizes,1))
        res = [res,int2str(templateStruct.sizes(i,1)),'x',int2str(templateStruct.sizes(i,2))];
+       if (i ~= size(templateStruct.sizes,1))
+           res = [res,'_'];
+       end
     end
 end
 

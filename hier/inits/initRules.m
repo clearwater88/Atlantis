@@ -11,9 +11,9 @@ function [ruleStruct] = initRules(useContext)
                  2,3,0; ...
                  3,0,0];
     else
-        rules = [1,0,0,0; ...
-                 2,0,0,0; ...
-                 3,0,0,0];
+        rules = [1; ...
+                 2; ...
+                 3];
     end
     
 %     rules = [1,0,0,0; ...
@@ -31,7 +31,6 @@ function [ruleStruct] = initRules(useContext)
         ruleProbs(ids) = temp;
     end
 
-    ruleStruct.useContext = useContext;
     ruleStruct.rules = rules;
     ruleStruct.parents = rules(:,1);
     ruleStruct.children = rules(:,2:end);
@@ -53,7 +52,9 @@ function [ruleStruct] = initRules(useContext)
     for (n=1:numel(types))
        rulesInd = ruleStruct.parents==n;
        rules = ruleStruct.rules(rulesInd,2:end);
+       if(isempty(rules)) continue; end;
        for (k=1:size(rules,3))
+           
           slice = diff(rules(:,k)); 
           assert(~any(slice < 0));
        end
@@ -64,7 +65,7 @@ function [ruleStruct] = initRules(useContext)
 end
 
 function [res] = toString(ruleStruct)
-    res=['context-', int2str(ruleStruct.useContext)];
+    res=['nRules-', int2str(size(ruleStruct.rules,1))];
 end
 
 

@@ -21,10 +21,6 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
     conversions = getConversions(nTypes, cellParams);
     
     pGbkRbStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct);
-
-%     for (r=1:numel(pGbkRbStruct))
-%         pGbkRbStruct{r} = ones(size(pGbkRbStruct{r}))/size(pGbkRbStruct{r},1);
-%     end
     
     % allocate space for top-down messages
     uFb1ToSb_0 = cell(nTypes,1); % only stores uFb1ToSb=0
@@ -77,8 +73,8 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
          
         %compute uGbkToFb3
         %if(mod(iter-1,8) == 0)
-            display('---uGbkFb3---');
-            tic
+%             display('---uGbkFb3---');
+%             tic
             uGbkToFb3_old{iter} = uGbkToFb3;
             uGbkToFb3 = compute_uGbkFb3(nTypes,maxSlots,uFb1ToGbk_total_0);
             for (n=1:size(uGbkToFb3,1))
@@ -86,14 +82,14 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
                     assert(~any(isnan(uGbkToFb3{n,k}(:))));
                 end
             end
-            toc
+%             toc
         %end
         %compute uGbkToFb3
          
         %compute uFb3ToRb = uRbToFb2
         %if(mod(iter-1,8) == 1)
-            display('---uFb3ToRb---');
-            tic
+%             display('---uFb3ToRb---');
+%             tic
             uRbToFb2_old{iter} = uRbToFb2;
             % logPgbkRbMuFb3: [nbricks, #rules, maxSlots]
             logPgbkRbMuFb3 = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,cellParams,pGbkRbStruct,uGbkToFb3);
@@ -103,14 +99,14 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
                 uRbToFb2{n} = exp(bsxfun(@minus,temp,logsum(temp,2)));
                 assert(~any(isnan(uRbToFb2{n}(:))));
             end
-            toc
+%             toc
         %end
         %compute uFb3ToRb = uRbToFb2
          
         %compute uSbFb1_0 = uFb2ToSb
         %if(mod(iter-1,8) == 2)
-            display('---uFb2ToSb---');
-            tic
+%             display('---uFb2ToSb---');
+%             tic
             uSbToFb1_0_old{iter} = uSbToFb1_0;
             for (n=1:nTypes)
                 ruleIds = ruleStruct.parents==n;
@@ -120,15 +116,15 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
                 assert(~any(isnan(uSbToFb1_0{n}(:))));
             end
             uSbToFb1_0 = correctFromSb_0(uSbToFb1_0,sOn);
-            toc
+%             toc
         %end
         % compute uSbFb1_0 = uFb2ToSb
         
         % compute uFb1ToGbk_total_0
         %if(mod(iter-1,8) == 3)
-            tic
+%             display('---uFb1ToGbk_total_0---');
+%             tic
             uFb1ToGbk_total_0_old{iter} = uFb1ToGbk_total_0;
-            display('---uFb1ToGbk_total_0---');
             % indexed by parent;
             reverse_uSbToFb1_0 = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uSbToFb1_0);
             reverseProdGbk = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,prodGbk_0);
@@ -150,7 +146,7 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
                     assert(~any(uFb1ToGbk_total_0{n,k}(:)< -0.0001));
                 end
             end
-            toc
+%             toc
         %end
         %compute uFb1ToGbk_total_0
 
@@ -160,8 +156,8 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
         
         % compute uFb1ToSb_0 = uSbToFb2_0
         %if(mod(iter-1,8) == 4)
-            tic
-            display('---uFb1ToSb_0---');
+%             display('---uFb1ToSb_0---');
+%             tic
             uFb1ToSb_0_old{iter} = uFb1ToSb_0;
             for (n=1:nTypes)
                 uFb1ToSb_0{n} = (1-params.probRoot)*prodGbk_0{n};
@@ -170,14 +166,14 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
 
             uSbToFb2_0 = uFb1ToSb_0;
             uSbToFb2_0 = correctFromSb_0(uSbToFb2_0,sOn);
-            toc;
+%             toc;
         %end
         % compute uFb1ToSb_0 = uSbToFb2_0
         
         % compute uFb2ToRb = uRbToFb3
         %if(mod(iter-1,8) == 5)
-            display('---uFb2ToRb---');
-            tic
+%             display('---uFb2ToRb---');
+%             tic
             for (n=1:nTypes)
                 ruleIds = ruleStruct.parents==n;
                 probs = ruleStruct.probs(ruleIds)';
@@ -188,15 +184,15 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
                 uFb2ToRb{n} = bsxfun(@rdivide,temp,sum(temp,2));
                 assert(~any(isnan(uFb2ToRb{n}(:))));
             end
-            toc
+%             toc
         %end
         % compute uFb2ToRb  = uRbToFb3
         
          % compute uFb3ToGbk_1
          %if(mod(iter-1,8) == 6)
-             display('---uFb3Gbk---');
+%              display('---uFb3Gbk---');
+%              tic
              uFb3ToGbk_1_old{iter} = uFb3ToGbk_1;
-             tic
              % logPgbkRbMuFb3: [nbricks, #rules, maxSlots]
              logPgbkRbMuFb3 = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,cellParams,pGbkRbStruct,uGbkToFb3);
              for (n=1:nTypes)
@@ -231,14 +227,14 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
                      assert(~any(isnan(uFb3ToGbk_1{n,k}(:))));
                  end
              end
-             toc
+%              toc
          %end
         % compute uFb3ToGbk_1
         
         % compute uGbkToFb1_0
         %if(mod(iter-1,8) == 7)
-            display('---uGbkToFb1_0---');
-            tic
+%             display('---uGbkToFb1_0---');
+%             tic
             uGbkToFb1_0_old{iter} = uGbkToFb1_0;
             for (n=1:nTypes) % loop over parents
                 for(k=1:maxSlots)
@@ -256,8 +252,7 @@ function probOn = getProbBricksOn(cellMapStruct,cellParams,params,ruleStruct,sOn
             end
             prodGbk_0_oldFb1{iter} = prodGbk_0;
             prodGbk_0 = computeAllProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uGbkToFb1_0);
-            
-            toc
+%             toc
         %end
         % compute uGbkToFb1_0
 
@@ -455,7 +450,11 @@ function [gBkLookUp,refPoints,typeInds] = getGbkLookUp(nTypes,maxSlots,ruleStruc
     
     for(n=1:nTypes)
         r = find(ruleStruct.parents==n,1,'last');
-        refPoints(:,n) = cellMapStruct.refPoints(:,r);
+        if(isempty(cellMapStruct.refPoints))
+           refPoints(:,n) = [-1,-1]'; % no context hack
+        else
+            refPoints(:,n) = cellMapStruct.refPoints(:,r);
+        end
     end
     
     % make look up tables. Guaranteed that looking at a slot, and going in

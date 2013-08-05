@@ -1,5 +1,7 @@
 function [allParticles,probOn] = sampleParticlesBP(data,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct)
 
+    nTypes = numel(cellParams.centres);
+
     [likeTemp,countsTemp] = initLike(data,templateStruct);
     particles{1} = [];
     
@@ -20,7 +22,9 @@ function [allParticles,probOn] = sampleParticlesBP(data,posesStruct,likePxIdxCel
     probOn = cell(params.thingsToSee,1);
     
     for (qq=1:params.thingsToSee);
-% 
+        
+        display(['bp iter: ', int2str(qq)]);
+        
 %         figure(200); subplot(1,3,1); imshow(data);
 %         st = viewAllParticles(particles,templateStruct,params);
 %         subplot(1,3,2); imshow(st);
@@ -29,7 +33,16 @@ function [allParticles,probOn] = sampleParticlesBP(data,posesStruct,likePxIdxCel
         
         %particles{1} = [1,1,69]';
         sOn = getProbOn(particles);
-        probOn{qq} = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn);
+        if(params.useContext)
+            probOn{qq} = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn);
+        else
+            temp = cell(nTypes,1);
+            for (n=1:nTypes)
+                nBricks = prod(cellParams.coordsSize(n,:),2);
+                temp{n} = ones(nBricks,1)/nBricks;
+            end
+            probOn{qq} = temp;
+        end
         
         [logProbCellRatioOldParticle,ratiosImOldParticle,defaultLogLikeIm] = evalDataRatio(data,nPosesCell,particleProbs,likePxIdxCells,likesIm,countsIm,templateStruct,cellParams,posesStruct,dirtyRegion,ratiosIm,logLikeCell,params);
         
@@ -74,19 +87,6 @@ function [allParticles,probOn] = sampleParticlesBP(data,posesStruct,likePxIdxCel
 
         brickIdx=brickIdx+1;        
     end
-end
-
-function res = getProbOn(particles)
-    res = zeros(3,size(particles{1},2)); %cellType,cellIdx,probOn
-    if(isempty(particles{1})) return; end;
-    
-    
-    res(1:2,:) = particles{1}(2:3,:);
-
-    for (i=1:numel(particles))
-        res(3,:) = res(3,:) + particles{i}(1,:);
-    end
-    res(3,:) = res(3,:)/numel(particles);
 end
 
 function [logProbCellRatio,ratiosIm,defaultLogLikeIm] = evalDataRatio(data,nPosesCell,particleProbs,likePxIdxCells,likesIm,countsIm,templateStruct,cellParams,posesStruct,dirtyRegion,ratiosImOld,logLikeCellOld,params)

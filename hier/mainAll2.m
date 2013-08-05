@@ -1,6 +1,6 @@
 ds = [4]';
 noise = [0.1,0.2]';
-context = [0]';
+context = [1]';
 folder = ['res_sweep1', '/'];
 
 tStart=0;

@@ -28,8 +28,11 @@ function [logProbCell] = getLogLikeCellRatio(ratios,cellParams,likePxIdxCells,di
         for (j=1:numel(dirty))
             i= dirty(j);
             id = likePxIdxCellsUse{i};
-
-            logProbCellTemp(i) = logsum(ratiosType(id),1) - log(nPosesCell{n}(i));  % add in prior over poses
+            if(~isempty(ratiosType(id)))
+                logProbCellTemp(i) = logsum(ratiosType(id),1) - log(nPosesCell{n}(i));  % add in prior over poses
+            else
+                logProbCellTemp(i) = -Inf;
+            end
         end
         logProbCell{n} = logProbCellTemp;        
     end

@@ -1,8 +1,8 @@
 function [params] = initParams()
     
-    params.probRoot = 0.001; %epsilon
+    params.probRoot = 0.0001; %epsilon
     params.bpIter = 10;
-    params.nParticles = 50;
+    params.nParticles = 20;
     params.thingsToSee=75;
     
     % start,increment,end

@@ -43,6 +43,17 @@ function [probMapStruct] = initProbMaps(ruleStruct,templates)
 end
 
 function [ res ] = toString(probMapStruct)
-    res = ['probMap-','strat', int2str(probMapStruct.strat)];
+
+    res = ['probMap-cov'];
+    for (i=1:numel(probMapStruct.cov))
+        if(~isempty(probMapStruct.cov{i}))
+            xCov =  probMapStruct.cov{i}(1,1);
+            yCov =  probMapStruct.cov{i}(2,2);
+            res = [res, int2str(xCov),'x',int2str(yCov)];
+            if (i~= numel(probMapStruct.cov))
+                res = [res,'_'];
+            end
+        end
+    end
 end
 

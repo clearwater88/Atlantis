@@ -65,7 +65,8 @@ function [ruleStruct] = initRules(useContext)
 end
 
 function [res] = toString(ruleStruct)
-    res=['nRules-', int2str(size(ruleStruct.rules,1))];
+    %res=['nRules-', int2str(size(ruleStruct.rules,1))];
+    res='';
 end
 
 

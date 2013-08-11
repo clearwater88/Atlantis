@@ -1,7 +1,7 @@
 ds = [4]';
 noise = [0.1,0.2]';
 context = [1]';
-folder = ['res_sweep2', '/'];
+folder = ['res_sweep3', '/'];
 
 tStart=0;
 nTrials=3;

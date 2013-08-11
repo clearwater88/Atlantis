@@ -60,28 +60,30 @@ function res = evalLikeRatioPartition(partition,agInd,type,initLikes,initCounts,
     % all sizes guaranteed to be same
     sz = [bd(1,2,1)-bd(1,1,1)+1,bd(2,2,1)-bd(2,1,1)+1];
     
-    dataUse = zeros([sz,size(bd,3)]);
-    likeUse = zeros([sz,size(bd,3)]);
-    countsUse = zeros([sz,size(bd,3)]);
+%     dataUse = zeros([sz,size(bd,3)]);
+%     likeUse = zeros([sz,size(bd,3)]);
+%     countsUse = zeros([sz,size(bd,3)]);
+%     
+%     for (i=1:size(bd,3))
+%         dataUse(:,:,i) = data(bd(1,1,i):bd(1,2,i),bd(2,1,i):bd(2,2,i));
+%         likeUse(:,:,i) = initLikes(bd(1,1,i):bd(1,2,i),bd(2,1,i):bd(2,2,i));
+%         countsUse(:,:,i) = initCounts(bd(1,1,i):bd(1,2,i),bd(2,1,i):bd(2,2,i));
+%     end
+
+    d2 = zeros([sz,size(bd,3)]);
+    dataUse = collect(double(data),bd,size(bd,3),size(bd,1)*size(bd,2),size(data),prod(sz),d2);
+    likeUse = collect(double(initLikes),bd,size(bd,3),size(bd,1)*size(bd,2),size(initLikes),prod(sz),d2);
+    countsUse = collect(double(initCounts),bd,size(bd,3),size(bd,1)*size(bd,2),size(initCounts),prod(sz),d2);
     
-    for (i=1:size(bd,3))
-        dataUse(:,:,i) = data(bd(1,1,i):bd(1,2,i),bd(2,1,i):bd(2,2,i));
-        likeUse(:,:,i) = initLikes(bd(1,1,i):bd(1,2,i),bd(2,1,i):bd(2,2,i));
-        countsUse(:,:,i) = initCounts(bd(1,1,i):bd(1,2,i),bd(2,1,i):bd(2,2,i));
-    end
-
-%     b2 = reshape(bd(1:2,1:2,:),[4,numel(bd(1:2,1:2,:))/4]);            
-%     rg = reshape([1:size(b2,2)],[1,1,size(b2,2)]);
 %     
-%     dataUse = arrayfun(@(x)(data(b2(1,x):b2(3,x),b2(2,x):b2(4,x))),rg,'UniformOutput',0);
-%     dataUse = cell2mat(dataUse);
+%     a=abs(dataUse-dataUse2);
+%     assert(max(a(:)) < 0.0001);
 %     
-%     likeUse = arrayfun(@(x)(initLikes(b2(1,x):b2(3,x),b2(2,x):b2(4,x))),rg,'UniformOutput',0);
-%     likeUse = cell2mat(likeUse);
-%             
-%     countsUse = arrayfun(@(x)(initCounts(b2(1,x):b2(3,x),b2(2,x):b2(4,x))),rg,'UniformOutput',0);
-%     countsUse = cell2mat(countsUse);
-
+%     a=abs(likeUse-likeUse2);
+%     assert(max(a(:)) < 0.0001);
+%     
+%     a=abs(countsUse-countsUse2);
+%     assert(max(a(:)) < 0.0001);    
     
     likePatch = mix(type)* ...
                 bsxfun(@power,template,dataUse) .* ...

@@ -1,4 +1,4 @@
-function [probMapStruct] = initProbMaps(ruleStruct,templates)
+function [probMapStruct] = initProbMaps(ruleStruct,templateSizes)
     % simple initialization for line model
 
     parents = ruleStruct.parents;
@@ -16,7 +16,7 @@ function [probMapStruct] = initProbMaps(ruleStruct,templates)
     vonMisesConcParents = [5,5,5];
     
     for (i=1:size(parents,1))
-        tp = templates{parents(i)};
+        tp = templateSizes(parents(i),:);
         ch = ruleStruct.children(i,:);
         
         validChildren = ch(ch~=0);
@@ -26,7 +26,7 @@ function [probMapStruct] = initProbMaps(ruleStruct,templates)
             % split up probMap top to bottom, use middle for width
             
             % x,y,angle
-            offset{i}(j,1) = round(j*(1+size(tp,1))/(1+totCh))-(1+size(tp,1))/2; % offset along length of template
+            offset{i}(j,1) = round(j*(1+tp(1))/(1+totCh))-(1+tp(1))/2; % offset along length of template
             offset{i}(j,2) = 0;
             offset{i}(j,3) = 0;
             

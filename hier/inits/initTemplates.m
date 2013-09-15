@@ -10,7 +10,6 @@ function [templateStruct] = initTemplates()
                         
     templateStruct.doLearning = 1;
     templateStruct.SIGMA = 1;
-    %templateStruct.angles = 0:pi/8:pi;
     templateStruct.toString = @toString;
 end
 

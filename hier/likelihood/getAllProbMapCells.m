@@ -1,4 +1,4 @@
-function [cellMapStruct] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params)
+function [cellMapStruct] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params,imSize)
     % resPixels: probMap across pixels. [imSize x nAngles] per each element
     %            of cell array
 
@@ -21,7 +21,7 @@ function [cellMapStruct] = getAllProbMapCells(cellParams,probMapStruct,ruleStruc
     refPointsTemp = zeros(cellParams.nTypes,2);
     
     % find reference point
-    imCentre = (params.imSize+1)/2;
+    imCentre = (imSize+1)/2;
     for (n=1:cellParams.nTypes)
         locsUse = cellCentres{n};          
         diff = sum(bsxfun(@minus,locsUse(:,1:2),imCentre).^2,2);
@@ -66,7 +66,7 @@ function [cellMapStruct] = getAllProbMapCells(cellParams,probMapStruct,ruleStruc
                     getProbMapCells(ruleId,slot, chType, ...
                                     [refPointPixel';angles{type}(a)]', ...
                                     probMapStruct, ...
-                                    params.imSize,params.angles, ...
+                                    imSize,params.angles, ...
                                     cellParams);
                                  
                  probMap{ruleId,slot,a} = probMapTemp;

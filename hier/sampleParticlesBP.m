@@ -1,8 +1,8 @@
-function [allParticles,probOn] = sampleParticlesBP(data,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct)
+function [allParticles,probOn,msgs] = sampleParticlesBP(data,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct,imSize)
 
     nTypes = numel(cellParams.centres);
 
-    [likeTemp,countsTemp] = initLike(data,templateStruct);
+    [likeTemp,countsTemp] = initLike(data,templateStruct,params.alpha);
     particles{1} = [];
     
     particleProbs  = 1;
@@ -21,20 +21,41 @@ function [allParticles,probOn] = sampleParticlesBP(data,posesStruct,likePxIdxCel
     nPosesCell = getNumPoses(likePxIdxCells);
     probOn = cell(params.thingsToSee,1);
     
+    [rotTemplates,~] = getRotTemplates(params,templateStruct);
     for (qq=1:params.thingsToSee);
         
         display(['bp iter: ', int2str(qq)]);
         
 %         figure(200); subplot(1,3,1); imshow(data);
-%         st = viewAllParticles(particles,templateStruct,params);
+%         st = viewAllParticles(particles,rotTemplates,params,imSize);
 %         subplot(1,3,2); imshow(st);
-%         st2 = viewOverlayTest(data,particles,templateStruct,params);
+%         st2 = viewOverlayTest(data,particles,rotTemplates,params,imSize);
 %         subplot(1,3,3); imshow(st2);
         
         %particles{1} = [1,1,69]';
         sOn = getProbOn(particles);
         if(params.useContext)
-            probOn{qq} = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn);
+            %clampToOff = qq==params.thingsToSee;
+            clampToOff = 0;
+            [probOn{qq},msgs] = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn,imSize,clampToOff);
+            
+%             if(qq>=params.thingsToSee-1)
+%                 newRuleProbs = zeros(size(ruleStruct.probs));
+%                 for (n=1:nTypes)
+%                     % WRONG! Doesn't take into account image evidence
+%                     inds= ruleStruct.parents==n;
+%                     ruleProbTemp = combineMsgs(cat(3, ...
+%                         msgs.uFb2ToRb{n}, ...
+%                         msgs.uRbToFb2{n})); %equivalent. See factor graph.
+%                     % weight avg prob on by activation
+%                     ruleProbTemp = bsxfun(@plus, log(ruleProbTemp), log(probOn{qq}{n}));
+%                     ruleProbTemp = logsum(ruleProbTemp,1);
+%                     newRuleProbs(inds) = exp(ruleProbTemp-logsum(ruleProbTemp,2));
+%                 end
+%                 newRuleProbs
+%             end
+           
+            
         else
             temp = cell(nTypes,1);
             for (n=1:nTypes)

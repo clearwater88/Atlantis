@@ -28,30 +28,15 @@ function [ratios] = evalNewLikeRatio(data,templateStruct,initLikes,initCounts,po
         for (i=1:size(dirtyPartitions,2))
            agInd = find(abs(posesStruct.angles-ags(i)) < 0.001);
            ids = dirty(dirtyPartitions(:,i));
-           ratioTemp(ids) = evalLikeRatioPartition(dirty(dirtyPartitions(:,i)),agInd,n,initLikes,initCounts,posesStruct,data,templateStruct.mix);
+           ratioTemp(ids) = evalLikeRatioPartition(dirty(dirtyPartitions(:,i)),agInd,n,initLikes,initCounts,posesStruct,data,templateStruct.mix,params.alpha);
         end
-        
-%         for (j=1:numel(dirty))
-%             i= dirty(j);
-%             
-%             bd = boundariesUse(:,:,i);
-%             initLikeUse = initLike(bd(1,1):bd(1,2),bd(2,1):bd(2,2));
-%             initCountsUse = initCounts(bd(1,1):bd(1,2),bd(2,1):bd(2,2));
-%             
-%             likesTemp = likesUse{i} + initLikeUse;
-%             countsTemp = countsUse{i} + initCountsUse;
-% 
-%             temp = log((likesTemp./countsTemp) ./ (initLikeUse./initCountsUse));
-%             ratioTemp(i) =  sum(temp(:));
-%             
-%         end
         
         ratios{n} = ratioTemp;
     end
     
 end
 
-function res = evalLikeRatioPartition(partition,agInd,type,initLikes,initCounts,posesStruct,data,mix)
+function res = evalLikeRatioPartition(partition,agInd,type,initLikes,initCounts,posesStruct,data,mix,alpha)
     template = posesStruct.rotTemplate{type}{agInd};
     mask = posesStruct.mask{type}{agInd};
     counts = posesStruct.counts{type}{agInd};
@@ -85,11 +70,12 @@ function res = evalLikeRatioPartition(partition,agInd,type,initLikes,initCounts,
 %     a=abs(countsUse-countsUse2);
 %     assert(max(a(:)) < 0.0001);    
     
-    likePatch = mix(type)* ...
-                bsxfun(@power,template,dataUse) .* ...
+    likePatch = bsxfun(@power,template,dataUse) .* ...
                 bsxfun(@power,1-template,1-dataUse);
+    likePatch = mix(type)*(likePatch.^alpha);
+    likePatch = likePatch.^alpha;
     likePatch = bsxfun(@times,likePatch,mask);
-    
+    likePatch = likePatch.^alpha;
     likesTot = likePatch+likeUse;
 
     countsTot = bsxfun(@plus,counts,countsUse);

@@ -1,4 +1,4 @@
-function [posesStruct] = getPoses(params,templateStruct)
+function [posesStruct] = getPoses(params,templateStruct,imSize)
 
     nTemplates = numel(templateStruct.app)-1;
     posesStruct.angles = params.angles;
@@ -25,7 +25,7 @@ function [posesStruct] = getPoses(params,templateStruct)
     end
     
     % poses can at most be centred at all pixels, all orientations
-    maxElem = prod(params.imSize)*numel(params.angles);
+    maxElem = prod(imSize)*numel(params.angles);
     
     posesStruct.poses = cell(nTemplates,1);
     posesStruct.bounds = cell(nTemplates,1);
@@ -34,7 +34,7 @@ function [posesStruct] = getPoses(params,templateStruct)
         posesTemp = zeros(maxElem,3);
         boundariesTemp = zeros(3,2,maxElem);
         
-        [x,y] = meshgrid(1:params.imSize(2),1:params.imSize(1));
+        [x,y] = meshgrid(1:imSize(2),1:imSize(1));
         pts = [y(:),x(:)];
         pts2 = reshape(pts',[1,2,numel(pts)/2]);
             
@@ -49,7 +49,7 @@ function [posesStruct] = getPoses(params,templateStruct)
             boundary(3,:,:) = ag;
             
             outOfBounds = any(boundary(1:2,1,:) < 1) | ...
-                          any(bsxfun(@gt,boundary(1:2,2,:),params.imSize'));
+                          any(bsxfun(@gt,boundary(1:2,2,:),imSize'));
             
             b1 = boundary(:,:,~outOfBounds);      
             nFill = sum(~outOfBounds);

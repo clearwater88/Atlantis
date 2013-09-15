@@ -52,22 +52,6 @@ function [templateStruct] = learnTemplates(trainInds,params,templateStruct)
             
             ag(count) = angleUse;
             count = count+1;
-            
-%             figure(2);
-%             imagescGray(templateStore(:,:,count-1));
-%             
-%             yStart = y-(templateMax(1)-1)/2;
-%             yEnd = y+(templateMax(1)-1)/2;
-%             xStart = x-(templateMax(2)-1)/2;
-%             xEnd = x+(templateMax(1)-1)/2;
-%             
-%             if (yStart < 1 || yEnd > size(dataUse,1) || ...
-%                 xStart < 1 || xEnd > size(dataUse,2)) continue; end;
-%         
-%             figure(1);
-%             imagescGray(dataUse(yStart:yEnd,xStart:xEnd));
-%             angleUse
-%             pause;
         end
             
     end

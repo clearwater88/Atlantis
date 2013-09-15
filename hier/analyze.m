@@ -1,12 +1,12 @@
 function allAuc = analyze()
 
-    resFolder = 'res_sweep2/';
+    resFolder = 'resAlpha/';
     %resFile = 'testSweep01__probMap-cov4x1_4x1_4x1_4x1__ds4_cell-dims7_7_5-strides8_8_4_context1_templates-15x3_11x3_7x3-noise10_trial%d';
     %resFile = 'testSweep01__probMap-cov_ds4_cell-dims7_7_5-strides8_8_4_context0_templates-15x3_11x3_7x3-noise10_trial%d';
-    resFile = 'testSweep04__probMap-cov4x1_4x1_4x1_4x1__ds4_cell-dims7_7_5-strides8_8_4_context1_templates-15x3_11x3_7x3-noise10_trial%d';
+    resFile = 'testSweep01__probMap-cov4x1_4x1_4x1_4x1__ds8_cell-dims7_7_5-strides8_8_4_context1_alpha100_templates-15x3_11x3_7x3-selfRoot1-noise10_trial%d';
     
     trialStart = 0;
-    nTrials = 2;
+    nTrials = 3;
     
     allAuc= zeros(nTrials,1);
     
@@ -15,6 +15,7 @@ function allAuc = analyze()
         display(['Analyzing: ', file]);
         
         load(file);
+        imSize = size(cleanTestData);
         
         y = cleanTestData(:);
         tp = zeros(numel(cleanTestData),numel(probOn));
@@ -23,7 +24,7 @@ function allAuc = analyze()
         [rotTemplates,~] = getRotTemplates(params,templateStruct);
         
         for (i=1:numel(probOn))
-            probPixel = viewAllParticles(allParticles{i},rotTemplates,params);
+            probPixel = viewAllParticles(allParticles{i},rotTemplates,params,imSize);
             [tp(:,i),fp(:,i),auc(i)] = getROC(probPixel(:),y);
         end
         

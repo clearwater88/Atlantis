@@ -1,5 +1,5 @@
-function [res] = viewOverlayTest(testData,particles,templateStruct,imSize)
-    st = viewAllParticles(particles,templateStruct,imSize);
+function [res] = viewOverlayTest(testData,particles,templateStruct,params,imSize)
+    st = viewAllParticles(particles,templateStruct,params,imSize);
     
     res = repmat(testData,[1,1,3]);
 

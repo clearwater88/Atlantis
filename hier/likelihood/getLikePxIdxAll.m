@@ -19,8 +19,8 @@ function res = getLikePxIdxAll(cellCentre,cellDims,poseCentres)
 
     ct = 1;
     for (n=1:NBATCH)
-        display(['On batch ', int2str(n) '/', int2str(NBATCH)]);
-        tic
+        %display(['On batch ', int2str(n) '/', int2str(NBATCH)]);
+        %tic
         nStart = (n-1)*batchSize+1;
         nEnd = min(n*batchSize,sz);
         
@@ -37,7 +37,7 @@ function res = getLikePxIdxAll(cellCentre,cellDims,poseCentres)
            res{ct} = find(temp==1);
            ct = ct+1;
         end
-        toc
+        %toc
     end
     
 %     nCell = size(lowCell,2);

@@ -9,9 +9,7 @@ function [allParticles,probOn,msgs] = sampleParticlesBP(data,posesStruct,likePxI
     
     likesIm{1} = likeTemp;
     countsIm{1} = countsTemp;
-    probOn{1} = [];
     allParticles = {};
-    allParticleProbs = {};
 
     % initialize
     brickIdx = 1;
@@ -37,7 +35,7 @@ function [allParticles,probOn,msgs] = sampleParticlesBP(data,posesStruct,likePxI
         if(params.useContext)
             %clampToOff = qq==params.thingsToSee;
             clampToOff = 0;
-            [probOn{qq},msgs] = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn,imSize,clampToOff);
+            [probOn{qq},~] = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn,imSize,clampToOff);
             
 %             if(qq>=params.thingsToSee-1)
 %                 newRuleProbs = zeros(size(ruleStruct.probs));
@@ -57,6 +55,7 @@ function [allParticles,probOn,msgs] = sampleParticlesBP(data,posesStruct,likePxI
            
             
         else
+            msgs = [];
             temp = cell(nTypes,1);
             for (n=1:nTypes)
                 nBricks = prod(cellParams.coordsSize(n,:),2);
@@ -108,6 +107,10 @@ function [allParticles,probOn,msgs] = sampleParticlesBP(data,posesStruct,likePxI
 
         brickIdx=brickIdx+1;        
     end
+    
+    % clamp here; just need final msgs of the active set
+    clampToOff = 1;
+    [~,msgs] = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn,imSize,clampToOff);
 end
 
 function [logProbCellRatio,ratiosIm,defaultLogLikeIm] = evalDataRatio(data,nPosesCell,particleProbs,likePxIdxCells,likesIm,countsIm,templateStruct,cellParams,posesStruct,dirtyRegion,ratiosImOld,logLikeCellOld,params)

@@ -11,5 +11,6 @@ addpath(genpath('readData'));
 addpath(genpath('saliency'));
 addpath(genpath('learn'));
 addpath(genpath('bpmatlab'));
+addpath(genpath('learning'));
 
 javaaddpath(fullfile('.','bp.jar'));

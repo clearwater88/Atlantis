@@ -1,4 +1,6 @@
-function [allParticles,probOn,msgs] = sampleParticlesBP(data,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct,imSize)
+function [allParticles,probOn,probOnFinal,msgs] = sampleParticlesBP(data,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct,imSize)
+
+    verbose = 1;
 
     nTypes = numel(cellParams.centres);
 
@@ -24,11 +26,13 @@ function [allParticles,probOn,msgs] = sampleParticlesBP(data,posesStruct,likePxI
         
         display(['bp iter: ', int2str(qq)]);
         
-%         figure(200); subplot(1,3,1); imshow(data);
-%         st = viewAllParticles(particles,rotTemplates,params,imSize);
-%         subplot(1,3,2); imshow(st);
-%         st2 = viewOverlayTest(data,particles,rotTemplates,params,imSize);
-%         subplot(1,3,3); imshow(st2);
+        if(verbose)
+            figure(200); subplot(1,3,1); imshow(data);
+            st = viewAllParticles(particles,rotTemplates,params,imSize);
+            subplot(1,3,2); imshow(st);
+            st2 = viewOverlayTest(data,particles,rotTemplates,params,imSize);
+            subplot(1,3,3); imshow(st2);
+        end
         
         %particles{1} = [1,1,69]';
         sOn = getProbOn(particles);
@@ -55,6 +59,12 @@ function [allParticles,probOn,msgs] = sampleParticlesBP(data,posesStruct,likePxI
         newParticles = cell(params.nParticles,1);
         newLikes = cell(params.nParticles,1);
         newCounts = cell(params.nParticles,1);
+        
+        display(['type: ', int2str(cellType)]);
+        display(['probBrickOn: ', num2str(probBrickOn)]);
+%         if(probBrickOn < 0.1)
+%             
+%         end
         
         for(n=1:params.nParticles)
             particleId = find(mnrnd(1,particleProbs),1,'first');
@@ -93,7 +103,7 @@ function [allParticles,probOn,msgs] = sampleParticlesBP(data,posesStruct,likePxI
     
     % clamp here; just need final msgs of the active set
     clampToOff = 1;
-    [~,msgs] = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn,imSize,clampToOff);
+    [probOnFinal,msgs] = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn,imSize,clampToOff);
 end
 
 function [logProbCellRatio,ratiosIm,defaultLogLikeIm] = evalDataRatio(data,nPosesCell,particleProbs,likePxIdxCells,likesIm,countsIm,templateStruct,cellParams,posesStruct,dirtyRegion,ratiosImOld,logLikeCellOld,params)

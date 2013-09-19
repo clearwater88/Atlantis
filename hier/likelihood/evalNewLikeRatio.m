@@ -73,9 +73,7 @@ function res = evalLikeRatioPartition(partition,agInd,type,initLikes,initCounts,
     likePatch = bsxfun(@power,template,dataUse) .* ...
                 bsxfun(@power,1-template,1-dataUse);
     likePatch = mix(type)*(likePatch.^alpha);
-    likePatch = likePatch.^alpha;
     likePatch = bsxfun(@times,likePatch,mask);
-    likePatch = likePatch.^alpha;
     likesTot = likePatch+likeUse;
 
     countsTot = bsxfun(@plus,counts,countsUse);

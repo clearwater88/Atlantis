@@ -1,4 +1,4 @@
-function [allParticles,probOn,msgs] = doInfer(testData,params,ruleStruct,templateStruct,probMapStruct,cellParams,imSize)
+function [allParticles,probOn,probOnFinal,msgs] = doInfer(testData,params,ruleStruct,templateStruct,probMapStruct,cellParams,imSize)
 
     % careful with new probMap distributions
     mapStr= ['sweep0', ruleStruct.toString(ruleStruct), '_', probMapStruct.toString(probMapStruct), '_', ...
@@ -37,7 +37,7 @@ function [allParticles,probOn,msgs] = doInfer(testData,params,ruleStruct,templat
         save(pxStr,'likePxIdxCells', '-v7.3');
         toc
     end
-    [allParticles,probOn,msgs] = sampleParticlesBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct,imSize);
+    [allParticles,probOn,probOnFinal,msgs] = sampleParticlesBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct,imSize);
 
 end
 

@@ -21,6 +21,9 @@ function mainBP(ds,noiseParam,useContext,alpha,resFolder,nStart,nTrials)
     
     for (t=nStart:nStart+nTrials-1)
         templateStruct = initTemplates();
+        
+        assert(numel(params.probRoot) == numel(templateStruct.mix)-1);
+        
         templateStruct.bg=noiseParam;
         ruleStruct = initRules(useContext);
         probMapStruct = initProbMaps(ruleStruct,templateStruct.sizes);
@@ -45,12 +48,11 @@ function mainBP(ds,noiseParam,useContext,alpha,resFolder,nStart,nTrials)
             if(exist([saveStr,'.mat'],'file'))
                 display(['File exists: ', saveStr]);
             else
-                [allParticles,probOn,msgs] = doInfer(testData,params,ruleStruct,templateStruct,probMapStruct,cellParams,imSize);
+                [allParticles,probOn,probOnFinal,msgs] = doInfer(testData,params,ruleStruct,templateStruct,probMapStruct,cellParams,imSize);
                 finalParticles = allParticles{end};
-                finalProbOn = probOn{end};
                 save(saveStr,'cleanTestData', 'testData', 'allParticles', 'probOn', ...
                     'templateStruct', 'probMapStruct', 'ruleStruct', 'cellParams', ...
-                    'params','msgs', 'finalParticles','finalProbOn','ruleStruct','-v7.3');
+                    'params','msgs', 'finalParticles','finalProbOn','ruleStruct','probOnFinal','-v7.3');
             end
 
         end

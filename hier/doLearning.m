@@ -17,7 +17,7 @@ function [templateStruct,probMapStruct,ruleStruct] = doLearning(trainInds,params
                 imSize = size(trainData);
                 cellParams = initPoseCellCentres(imSize);
                 
-                [allParticles{i},probOn{i},msgs{i}] = doInfer(trainData,params,ruleStruct,templateStruct,probMapStruct,cellParams,imSize);
+                [allParticles{i},probOn{i},probOnFinal,msgs{i}] = doInfer(trainData,params,ruleStruct,templateStruct,probMapStruct,cellParams,imSize);
                 
             end
             
@@ -27,6 +27,14 @@ function [templateStruct,probMapStruct,ruleStruct] = doLearning(trainInds,params
             ruleProbs = getNewRuleProbs(ruleStruct,msgs,probOn);
             ruleStruct.probs = ruleProbs;
             ruleStruct.probHist(:,end+1) = ruleProbs;
+            
+            %params.probRoot
+            %probMapStruct.offset
+            %probMapStruct.cov
+            %params.alpha % not differentiable; will need BO?
+            
+            %templateStruct.app
+            %templateStruct.mix
             
         end
 end

@@ -51,7 +51,7 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
             uFb3ToGbk_1{n,k} = 0.001 + 0.0001*rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
             uFb3ToGbk_1{n,k}(:,1) = 10000;
             uFb3ToGbk_1{n,k} = bsxfun(@rdivide, uFb3ToGbk_1{n,k}, sum(uFb3ToGbk_1{n,k},2));
-            uGbkToFb1_0{n,k} = 1-((0.004*params.probRoot) + (0.004*params.probRoot)*0.1*rand(nBricksType(n),size(gBkLookUp{n,k},2))); %[#bricks, #potential children]
+            uGbkToFb1_0{n,k} = 1-((0.004*params.probRoot(n)) + (0.004*params.probRoot(n))*0.1*rand(nBricksType(n),size(gBkLookUp{n,k},2))); %[#bricks, #potential children]
         end
     end
     prodGbk_0 = computeAllProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uGbkToFb1_0);
@@ -124,7 +124,7 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
                     uFb1ToGbk_total_0{n,k} = uGbkToFb1_0{n,k};
                     continue;
                 end;
-                tempRatio = (1-params.probRoot)*reverseProdGbk{n,k}./uGbkToFb1_0{n,k};
+                tempRatio = (1-params.probRoot(n))*reverseProdGbk{n,k}./uGbkToFb1_0{n,k};
                 
                 temp0 = reverse_uSbToFb1_0{n,k}.*tempRatio + (1-reverse_uSbToFb1_0{n,k}).*(1-tempRatio); % this is for a single value of g
                 temp0 = temp0*size(gBkLookUp{n,k},2);
@@ -139,7 +139,7 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
         %% down pass
         
         for (n=1:nTypes)
-            uFb1ToSb_0{n} = (1-params.probRoot)*prodGbk_0{n};
+            uFb1ToSb_0{n} = (1-params.probRoot(n))*prodGbk_0{n};
             assert(~any(isnan(uFb1ToSb_0{n}(:))));
         end
         
@@ -373,7 +373,6 @@ function pGbkRStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct)
     pGbkRStruct = cell(nRules,maxSlots);
     
     for (r=1:size(ruleStruct.rules,1))
-        display(['Processing rule: ', int2str(r)]);
         parType = ruleStruct.parents(r);
         for (k=1:maxSlots)
             if(ruleStruct.children(r,k) ==0) continue; end;

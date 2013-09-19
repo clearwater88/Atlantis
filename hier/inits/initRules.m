@@ -36,8 +36,10 @@ function [ruleStruct] = initRules(useContext)
     ruleStruct.children = rules(:,2:end);
     ruleStruct.probs = ruleProbs;
     ruleStruct.maxChildren = size(ruleStruct.children,2);
+    ruleStruct.probHist(:,1) = ruleStruct.probs;
     
     ruleStruct.toString = @toString;
+    
     
     % perform checks
     types = unique(ruleStruct.parents);

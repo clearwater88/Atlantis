@@ -1,10 +1,11 @@
-function [templateStruct,probMapStruct] = doLearning(trainInds,params,ruleStruct,templateStruct,probMapStruct)
+function [templateStruct,probMapStruct,ruleStruct] = doLearning(trainInds,params,ruleStruct,templateStruct,probMapStruct)
         
         allParticles = cell(numel(trainInds),1);
         probOn = cell(numel(trainInds),1);
         msgs = cell(numel(trainInds),1);
             
         % learning
+        % templates separate for now
         if(templateStruct.doLearning == 1)
             templateStruct = learnTemplates(trainInds,params,templateStruct);
         end
@@ -21,7 +22,11 @@ function [templateStruct,probMapStruct] = doLearning(trainInds,params,ruleStruct
             end
             
             % update here
-            newRuleProbs = getNewRuleProbs(ruleStruct,msgs,probOn);
+            
+            % rule probs
+            ruleProbs = getNewRuleProbs(ruleStruct,msgs,probOn);
+            ruleStruct.probs = ruleProbs;
+            ruleStruct.probHist(:,end+1) = ruleProbs;
             
         end
 end

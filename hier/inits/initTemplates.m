@@ -5,8 +5,8 @@ function [templateStruct] = initTemplates()
     %templateStruct.bg = 0.1;
                          
     templateStruct.sizes = [15,3; ...
-                            11,3; ...
-                            7,3];
+                            9,3; ...
+                            5,3];
                         
     templateStruct.doLearning = 1;
     templateStruct.SIGMA = 1;

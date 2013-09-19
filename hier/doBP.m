@@ -7,10 +7,10 @@
     probOn = cell(nTypes,1);
 
     for (n=1:nTypes)
-        probs = combineMsgs(cat(3, ...
-                                [msgs.uFb1ToSb_0{n}(:), 1-msgs.uFb1ToSb_0{n}(:)], ...
-                                [msgs.uSbToFb1_0{n}(:), 1-msgs.uFb1ToSb_0{n}(:)]));
-        probOn{n} = probs(:,2);
+        logProbs = combineLogMsgs(cat(3, ...
+                                      [msgs.uFb1ToSb_0{n}(:), 1-msgs.uFb1ToSb_0{n}(:)], ...
+                                      [msgs.uSbToFb1_0{n}(:), 1-msgs.uFb1ToSb_0{n}(:)]));
+        probOn{n} = exp(logProbs(:,2));
         if(clampToOff)
             probOn{n} = 1-clamp_msg_0(1-probOn{n},sOn,n);
         end

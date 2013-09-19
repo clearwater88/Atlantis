@@ -35,24 +35,7 @@ function [allParticles,probOn,msgs] = sampleParticlesBP(data,posesStruct,likePxI
         if(params.useContext)
             %clampToOff = qq==params.thingsToSee;
             clampToOff = 0;
-            [probOn{qq},~] = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn,imSize,clampToOff);
-            
-%             if(qq>=params.thingsToSee-1)
-%                 newRuleProbs = zeros(size(ruleStruct.probs));
-%                 for (n=1:nTypes)
-%                     % WRONG! Doesn't take into account image evidence
-%                     inds= ruleStruct.parents==n;
-%                     ruleProbTemp = combineMsgs(cat(3, ...
-%                         msgs.uFb2ToRb{n}, ...
-%                         msgs.uRbToFb2{n})); %equivalent. See factor graph.
-%                     % weight avg prob on by activation
-%                     ruleProbTemp = bsxfun(@plus, log(ruleProbTemp), log(probOn{qq}{n}));
-%                     ruleProbTemp = logsum(ruleProbTemp,1);
-%                     newRuleProbs(inds) = exp(ruleProbTemp-logsum(ruleProbTemp,2));
-%                 end
-%                 newRuleProbs
-%             end
-           
+            [probOn{qq},~] = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn,imSize,clampToOff);           
             
         else
             msgs = [];

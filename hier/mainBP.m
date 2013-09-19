@@ -11,9 +11,8 @@ function mainBP(ds,noiseParam,useContext,alpha,resFolder,nStart,nTrials)
     startup;
 
     %[trainInds,testInds] = splitData(10,0.5,0.5);
-    trainInds = [1:5];
+    trainInds = [1:3];
     testInds=[6:10];
-    %splitData(nData,nTrainPerc,nTestPerc,trainMask)
     
     params = initParams;
     params.downSampleFactor = ds;
@@ -26,8 +25,8 @@ function mainBP(ds,noiseParam,useContext,alpha,resFolder,nStart,nTrials)
         ruleStruct = initRules(useContext);
         probMapStruct = initProbMaps(ruleStruct,templateStruct.sizes);
 
-        [templateStruct,probMapStruct] = doLearning(trainInds,params,ruleStruct,templateStruct,probMapStruct);
-        
+        [templateStruct,probMapStruct,ruleStruct] = doLearning(trainInds,params,ruleStruct,templateStruct,probMapStruct);
+        save('learning2', 'templateStruct','probMapStruct','ruleStruct', '-v7.3');
         % inference
         for (i=1:numel(testInds))
             [cleanTestData,testData] = readData(params,templateStruct.app{end},testInds(i));
@@ -51,7 +50,7 @@ function mainBP(ds,noiseParam,useContext,alpha,resFolder,nStart,nTrials)
                 finalProbOn = probOn{end};
                 save(saveStr,'cleanTestData', 'testData', 'allParticles', 'probOn', ...
                     'templateStruct', 'probMapStruct', 'ruleStruct', 'cellParams', ...
-                    'params','msgs', 'finalParticles','finalProbOn','-v7.3');
+                    'params','msgs', 'finalParticles','finalProbOn','ruleStruct','-v7.3');
             end
 
         end

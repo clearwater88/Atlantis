@@ -1,18 +1,19 @@
 #include <math.h>
 #include "mex.h"
 
-mxArray* shiftGbkInds(const mxArray *gBkIndsMx, const mxArray *conversionMx, const mxArray *refPointMx, double point[]) {
-    /* might return indices out of range */     
+mxArray* shiftGbkInds(const mxArray *gBkIndsMx, const mxArray *conversionMx, const mxArray *refPointMx, const mxArray *pointMx) {
+    /* might return indices out of range */    
     
     size_t szGbkTable[2], szConversionTable[2];
     int i, chType;
     int convToChild[2];
-    double *gBkInds, *conversionTable, *res, *refPoint;
+    double *gBkInds, *conversionTable, *res, *refPoint, *point;
     mxArray *resMx;
     
     gBkInds = mxGetPr(gBkIndsMx);
     conversionTable = mxGetPr(conversionMx);
     refPoint = mxGetPr(refPointMx);
+    point = mxGetPr(pointMx);    
     
     szConversionTable[0] = mxGetM(conversionMx);
     szConversionTable[1] = mxGetN(conversionMx);
@@ -37,25 +38,17 @@ mxArray* shiftGbkInds(const mxArray *gBkIndsMx, const mxArray *conversionMx, con
 }
 
 void mexFunction( int nlhs, mxArray *plhs[], 
-		  int nrhs, const mxArray*prhs[] )
+		  int nrhs, const mxArray *prhs[] )
      
 { 
-    int x,y;
-    double pointTest[2] = {18,28};
-    double point[2], convToChild[2];
-    
-    const mxArray *gBkIndsMx, *conversionMx, *refPointMx;
-    mxArray* shiftedInds;
-    gBkIndsMx = prhs[0]; conversionMx = prhs[1]; refPointMx = prhs[2];
-    
-    for (x = 1; x <= pointTest[0]; x++) {
-        point[0] = x;
-            for (y = 1; y <= pointTest[1]; y++) {
-                point[1] = y;
-                shiftedInds = shiftGbkInds(gBkIndsMx, conversionMx, refPointMx,point);
-            }
-    }
+    const mxArray *gBkIndsMx, *conversionMx, *refPointMx, *pointMx;
+    mxArray *shiftedIndsMx;
             
-    
-    return;
+    gBkIndsMx = prhs[0];
+    conversionMx = prhs[1];
+    refPointMx = prhs[2];
+    pointMx = prhs[3];
+
+    plhs[0] = shiftGbkInds(gBkIndsMx, conversionMx,refPointMx,pointMx);
 }
+

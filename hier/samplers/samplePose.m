@@ -25,12 +25,13 @@ function [pose,likeNew,countNew] = samplePose(data,likeIm,countsIm,ratiosIm,like
     [~,agInd] = min(abs(posesStruct.angles-pose(3)));
     
     template = posesStruct.rotTemplate{cellType}{agInd};
-    countsUse = posesStruct.counts{cellType}{agInd};
     boundUse = posesStruct.bounds{cellType}(:,:,poseId);
+    countsUse = posesStruct.counts{cellType}{agInd};
     
+    % for projecting into image
     dataUse = data(boundUse(1,1):boundUse(1,2),boundUse(2,1):boundUse(2,2));
-    likeUse =  template.^dataUse .* (1-template).^(1-dataUse);
-        
+    likeUse = evalLikePixels(template,dataUse,[],1);
+    
     [likeNew,countNew] = projectIntoIm(likeIm,countsIm,likeUse,countsUse,boundUse);
 end
 

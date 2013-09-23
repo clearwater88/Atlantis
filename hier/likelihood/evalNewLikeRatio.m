@@ -4,8 +4,6 @@ function [ratios] = evalNewLikeRatio(data,templateStruct,initLikes,initCounts,po
     ratios = cell(nTypes,1);
     
     for (n=1:nTypes)
-        %likesUse = likePxStruct.likes{n};
-        %countsUse = likePxStruct.counts{n};
         boundariesUse = posesStruct.bounds{n};
         
         if(~isempty(dirtyRegion))
@@ -44,42 +42,21 @@ function res = evalLikeRatioPartition(partition,agInd,type,initLikes,initCounts,
     
     % all sizes guaranteed to be same
     sz = [bd(1,2,1)-bd(1,1,1)+1,bd(2,2,1)-bd(2,1,1)+1];
-    
-%     dataUse = zeros([sz,size(bd,3)]);
-%     likeUse = zeros([sz,size(bd,3)]);
-%     countsUse = zeros([sz,size(bd,3)]);
-%     
-%     for (i=1:size(bd,3))
-%         dataUse(:,:,i) = data(bd(1,1,i):bd(1,2,i),bd(2,1,i):bd(2,2,i));
-%         likeUse(:,:,i) = initLikes(bd(1,1,i):bd(1,2,i),bd(2,1,i):bd(2,2,i));
-%         countsUse(:,:,i) = initCounts(bd(1,1,i):bd(1,2,i),bd(2,1,i):bd(2,2,i));
-%     end
 
     d2 = zeros([sz,size(bd,3)]);
     dataUse = collect(double(data),bd,size(bd,3),size(bd,1)*size(bd,2),size(data),prod(sz),d2);
     likeUse = collect(double(initLikes),bd,size(bd,3),size(bd,1)*size(bd,2),size(initLikes),prod(sz),d2);
     countsUse = collect(double(initCounts),bd,size(bd,3),size(bd,1)*size(bd,2),size(initCounts),prod(sz),d2);
-    
-%     
-%     a=abs(dataUse-dataUse2);
-%     assert(max(a(:)) < 0.0001);
-%     
-%     a=abs(likeUse-likeUse2);
-%     assert(max(a(:)) < 0.0001);
-%     
-%     a=abs(countsUse-countsUse2);
-%     assert(max(a(:)) < 0.0001);    
-    
-    likePatch = bsxfun(@power,template,dataUse) .* ...
-                bsxfun(@power,1-template,1-dataUse);
-    likePatch = mix(type)*(likePatch.^alpha);
-    likePatch = bsxfun(@times,likePatch,mask);
-    likesTot = likePatch+likeUse;
+   
+    likePatch = evalLikePixels(template,dataUse,mask,mix(type));
 
+    likesTot = likePatch+likeUse;
+    
     countsTot = bsxfun(@plus,counts,countsUse);
 
-    temp = log((likesTot./countsTot) ./ (likeUse./countsUse));
+    temp = log(evalLike(likesTot,countsTot,alpha) ./ evalLike(likeUse,countsUse,alpha));
     temp = sum(sum(temp,1),2);
+    
     res = reshape(temp,[numel(temp),1]);
     
 end

@@ -13,5 +13,6 @@ addpath(genpath('learn'));
 addpath(genpath('bpmatlab'));
 addpath(genpath('learning'));
 addpath(genpath('genData'));
+addpath(genpath('m2html'));
 
 javaaddpath(fullfile('.','bp.jar'));

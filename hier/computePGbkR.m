@@ -1,6 +1,7 @@
 function pGbkRStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct)
     % in raster order!
-
+    % pGbkRStruct = cell(nRules,maxSlots);
+    
     nTypes = numel(unique(ruleStruct.parents));
     maxSlots = size(ruleStruct.children,2);
     nRules = numel(ruleStruct.parents); 

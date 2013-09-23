@@ -12,7 +12,7 @@ function [gBkLookUp,refPoints,typeInds] = getGbkLookUp(nTypes,maxSlots,ruleStruc
     for(n=1:nTypes)
         r = find(ruleStruct.parents==n,1,'last');
         if(isempty(cellMapStruct.refPoints))
-           refPoints(:,n) = [-1,-1]'; % no context hack
+            refPoints(:,n) = [-1,-1]'; % no context hack
         else
             refPoints(:,n) = cellMapStruct.refPoints(:,r);
         end

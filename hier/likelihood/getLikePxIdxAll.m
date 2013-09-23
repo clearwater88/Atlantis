@@ -1,7 +1,27 @@
-function res = getLikePxIdxAll(cellCentre,cellDims,poseCentres)
+function likePxIdxCells = getLikePxIdxAll(cellParams,posesStruct,pxStr)
     % generates indices that indicate which poses this cell can take on.
     % This is different than the poses that OVERLAP with this cell; such
     % poses may not be a value this call can take.
+
+    if(exist([pxStr,'.mat'],'file'))
+        display('loading pxIdxCell file');
+        load(pxStr,'likePxIdxCells');
+    else
+        tic
+        display('Starting likePxIdxCells computation');
+        likePxIdxCells = cell(cellParams.nTypes,1);
+        for (n=1:cellParams.nTypes)
+            likePxIdxCells{n}= doGetLikePxIdxAll(cellParams.centres{n}, ...
+                                                 cellParams.dims(n,:), ...
+                                                 posesStruct.poses{n});
+        end
+        display('Done likePxIdxCells computation');
+        save(pxStr,'likePxIdxCells', '-v7.3');
+        toc
+    end
+    
+end
+function res = doGetLikePxIdxAll(cellCentre,cellDims,poseCentres)
 
     NBATCH = 20;
 

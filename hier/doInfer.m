@@ -21,22 +21,9 @@ function [allParticles,probOn,probOnFinal,msgs] = doInfer(testData,params,ruleSt
     % precompute
     pxStr = ['pxInds_', 'sz-', int2str(imSize(1)), 'x', int2str(imSize(2)), '_', ...
         cellParams.toString(cellParams), '_', templateStr];
-    if(exist([pxStr,'.mat'],'file'))
-        display('loading pxIdxCell file');
-        load(pxStr,'likePxIdxCells');
-    else
-        tic
-        display('Starting likePxIdxCells computation');
-        likePxIdxCells = cell(cellParams.nTypes,1);
-        for (n=1:cellParams.nTypes)
-            likePxIdxCells{n}= getLikePxIdxAll(cellParams.centres{n}, ...
-                cellParams.dims(n,:), ...
-                posesStruct.poses{n});
-        end
-        display('Done likePxIdxCells computation');
-        save(pxStr,'likePxIdxCells', '-v7.3');
-        toc
-    end
+    
+    likePxIdxCells = getLikePxIdxAll(cellParams,posesStruct,pxStr);
+    
     [allParticles,probOn,probOnFinal,msgs] = sampleParticlesBP(testData,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct,imSize);
 
 end

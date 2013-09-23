@@ -4,7 +4,7 @@ function [allParticles,probOn,probOnFinal,msgs] = sampleParticlesBP(data,posesSt
 
     nTypes = numel(cellParams.centres);
 
-    [likeTemp,countsTemp] = initLike(data,templateStruct,params.alpha);
+    [likeTemp,countsTemp] = initLike(data,templateStruct);
     particles{1} = [];
     
     particleProbs  = 1;
@@ -114,7 +114,8 @@ function [logProbCellRatio,ratiosIm,defaultLogLikeIm] = evalDataRatio(data,nPose
 
     for (i=1:numel(particleProbs))
         
-        defaultLogLikeIm(i) = sum(log(likesIm{i}(:)./countsIm{i}(:)));
+        temp = evalLike(likesIm{i},countsIm{i},params.alpha);
+        defaultLogLikeIm(i) = sum(log(temp(:)));
         %ratio ONLY
         temp = evalNewLikeRatio(data,templateStruct,likesIm{i},countsIm{i},posesStruct,dirtyRegion,ratiosImOld{i},params);
         ratiosIm{i} = temp;

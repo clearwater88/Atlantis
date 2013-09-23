@@ -16,6 +16,11 @@ function [posesStruct] = getPoses(params,templateStruct,imSize)
         for (j=1:numel(params.angles))
             ag = posesStruct.angles(j);
             rotTemplate{j} = trimIm(imrotate(template,-180*(ag)/pi,'nearest','loose'));
+            
+            sz = size(rotTemplate{j});
+            assert(mod(sz(1),2) == 1);
+            assert(mod(sz(2),2) == 1);
+            
             mask{j} = trimIm(imrotate(ones(size(template)),-180*(ag)/pi,'nearest','loose'));
             counts{j} = mask{j}.*(templateStruct.mix(type)*ones(size(mask{j})));
         end

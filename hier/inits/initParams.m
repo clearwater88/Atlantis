@@ -3,7 +3,7 @@ function [params] = initParams()
     params.probRoot = [0.001,0.01,0.1]; %epsilon
     params.bpIter = 10;
     params.nParticles = 5;
-    params.thingsToSee=75;
+    params.thingsToSee=5;
     params.emIters = 5;
     
     % start,increment,end

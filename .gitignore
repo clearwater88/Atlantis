@@ -172,4 +172,5 @@ res/*
 writeup/*.aux
 writeup/*.log
 writeup/*.gz
-
+hier/m2html/*
+m2html/*

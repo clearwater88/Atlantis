@@ -2,8 +2,8 @@ function [allParticles,probOn,probOnFinal,msgs] = doInfer(testData,params,ruleSt
 
     % careful with new probMap distributions
     mapStr= ['sweep0', ruleStruct.toString(ruleStruct), '_', probMapStruct.toString(probMapStruct), '_', ...
-        'sz-', int2str(imSize(1)), 'x', int2str(imSize(2)), '_', ...
-        cellParams.toString(cellParams)];
+             'sz-', int2str(imSize(1)), 'x', int2str(imSize(2)), '_', ...
+             cellParams.toString(cellParams)];
     if(exist([mapStr,'.mat'],'file'))
         display('loading probmap file');
         load(mapStr,'cellMapStruct');

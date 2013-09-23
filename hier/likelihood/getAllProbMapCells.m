@@ -1,6 +1,5 @@
 function [cellMapStruct] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params,imSize)
-    % resPixels: probMap across pixels. [imSize x nAngles] per each element
-    %            of cell array
+% probMap = cell(nRules,maxSlots,maxAngles);
 
     cellCentres = cellParams.centres;
 
@@ -16,8 +15,6 @@ function [cellMapStruct] = getAllProbMapCells(cellParams,probMapStruct,ruleStruc
     probMapSpatial = cell(nRules,maxSlots,maxAngles);
     locs = cell(nRules,maxSlots,maxAngles);
     
-    %probMap = cell(nRules,maxSlots,numel(angles));
-    %locInds = cell(nRules,maxSlots,numel(angles));
     refPointsTemp = zeros(cellParams.nTypes,2);
     
     % find reference point

@@ -1,23 +1,29 @@
-function [data] = genData(nExamples)
-    imSize = [20,100];
+function [data,probPixel,mask] = genData(nExamples)
+
+    imSize = [100,100];
     noiseParam = 0.1;
+    
+    data = zeros([imSize,nExamples]);
+    probPixel = zeros([imSize,nExamples]);
+    mask = zeros([imSize,nExamples]);
     
     params = initParams();
     params.useContext = 1;
     params.alpha = 1;
-
-    cellParams = initPoseCellCentres(imSize);
+    
     templateStruct = initTemplates();
     templateStruct.bg=noiseParam;
     
     templateStruct.app = setTemplateApp(templateStruct.sizes);
     templateStruct.app{end+1} = templateStruct.bg;
+    cellParams = initPoseCellCentres(imSize,templateStruct.sizes);
     
     ruleStruct = initRules(params.useContext);
     
     probMapStruct = initProbMaps(ruleStruct,templateStruct.sizes);
     cellMapStruct = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params,imSize);
     posesStruct = getPoses(params,templateStruct,imSize);
+    [rotTemplates,~] = getRotTemplates(params,templateStruct);
     
     templateStr = templateStruct.toString(templateStruct);
     pxStr = ['pxInds_', 'sz-', int2str(imSize(1)), 'x', int2str(imSize(2)), '_', ...
@@ -37,8 +43,9 @@ function [data] = genData(nExamples)
     
     pGbkRbStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct);
     
-    particles = []; % column: type, locIdx, ruleInd, poseX,poseY,poseAngle
     for (n=1:nExamples)
+        %bricks: on/off, type, cellCentreIndex,[poseX,Y,theta], rule
+        particle = [];
         for(t=1:nTypes) % assume partial ordering goes 1:nTypes
             
             poses = posesStruct.poses{t};
@@ -52,35 +59,37 @@ function [data] = genData(nExamples)
                selfRoot(idx) = 1;
             end
             selfRootIdx = find(selfRoot == 1);
-            
-            toAdd = zeros(6,numel(selfRootIdx),1);
-            toAdd(1,:) = t;
-            toAdd(2,:) = selfRootIdx;
-            particles = cat(2,particles,toAdd);
-            
+            if(~isempty(selfRootIdx))
+                toAdd = zeros(7,numel(selfRootIdx),1);
+
+                toAdd(1,:) = 1;
+                toAdd(2,:) = t;
+                toAdd(3,:) = selfRootIdx;
+                particle = cat(2,particle,toAdd);
+            end
             % choose rules
             ruleIdx = find(ruleStruct.parents==t);
             ruleProbs = ruleStruct.probs(ruleIdx);
-            idx = find(particles(1,:)==t);
+            idx = find(particle(2,:)==t);
             
             for(k=1:numel(idx))
                 
                 % choose rule
                 ruleUse = ruleIdx(find(mnrnd(1,ruleProbs)==1));
                 
-                particles(3,idx(k)) = ruleUse;
+                particle(7,idx(k)) = ruleUse;
                 
                 % now choose pose
-                centreIdx =  particles(2,idx(k));
+                centreIdx =  particle(3,idx(k));
                 centre = cellParams.centres{t}(centreIdx,:);
                 coord = cellParams.coords{t}(centreIdx,:);
                 
                 ids = likePxIdxCell{t}{centreIdx};
                 posesChoose = poses(ids,:);
                 id = randi(size(posesChoose,1),1);
-                particles(4:6,idx(k)) = posesChoose(id,:);
+                particle(4:6,idx(k)) = posesChoose(id,:);
                 
-                % use psoe of cell for angle, not pose itself.
+                % use pose of cell for angle, not pose itself.
                 [~,agInd] = min(abs(posesStruct.angles-centre(3)));
                 
                 % now choose children
@@ -89,8 +98,9 @@ function [data] = genData(nExamples)
                     
                     cType = childrenTypes(slot);
                     if(cType == 0) continue; end;
-                    toAdd = zeros(6,1);
-                    toAdd(1) = cType;
+                    toAdd = zeros(7,1);
+                    toAdd(1) = 1;
+                    toAdd(2) = cType;
                     
                     % need to choose child cell
                     probMapAll = pGbkRbStruct{ruleUse,slot}(:,agInd);
@@ -107,13 +117,23 @@ function [data] = genData(nExamples)
                     
                     childIdx = find(mnrnd(1,probMap)==1);
                     indUse = shiftedInds(2:end,childIdx);
-                    toAdd(2) = sub2ind(coordInds(cType,:),indUse(1),indUse(2),indUse(3));
-                    particles = cat(2,particles,toAdd);
+                    toAdd(3) = sub2ind(coordInds(cType,:),indUse(1),indUse(2),indUse(3));
+                    particle = cat(2,particle,toAdd);
                 end
             end
             
             
         end
+        particleUse{1} = particle;
+        probPixel(:,:,n) = viewAllParticles(particleUse,rotTemplates,params,imSize);
+        
+        mask(:,:,n) = (probPixel(:,:,n) > 0.001);
+        dataTemp = rand(imSize) < probPixel(:,:,n);
+        bgUse = rand(imSize) < templateStruct.bg;
+        
+        data(:,:,n) = dataTemp.*mask(:,:,n) + bgUse.*(1-mask(:,:,n));
+        
+        %imshowFull(probPixel(:,:,n));
     end
 
 end

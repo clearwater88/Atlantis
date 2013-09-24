@@ -1,5 +1,5 @@
 %centre of pose cells of each type
-function cellParams = initPoseCellCentres(imSize)
+function cellParams = initPoseCellCentres(imSize,sizes)
     
     imSize = [imSize,2*pi]; % append range of angles in pose space
     
@@ -22,8 +22,9 @@ function cellParams = initPoseCellCentres(imSize)
     coordsSize = zeros([nTypes,3]);
     
     for (i=1:nTypes)
+        sz = sizes(i,:);
         
-        cellCentres{i} = getLocsUse(strides(i,:), cellDims(i,:), imSize);
+        cellCentres{i} = getLocsUse(strides(i,:), cellDims(i,:), sz, imSize);
         origins(i,:) = cellCentres{i}(1,:);
         
         coords{i} = round(centre2CellFrame(cellCentres{i},strides(i,:),origins(i,:)));

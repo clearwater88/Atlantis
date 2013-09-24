@@ -61,7 +61,7 @@ function [posesStruct] = getPoses(params,templateStruct,imSize)
             
             poses = [pts,ag*ones(size(pts,1),1)];
             posesTemp(ct:ct-1+nFill,:) = poses(~outOfBounds,:);            
-            
+            assert(size(posesTemp,1) ~= 0);
             boundariesTemp(:,:,ct:ct-1+nFill) = b1;
             
             ct = ct+nFill;

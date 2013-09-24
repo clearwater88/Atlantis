@@ -1,6 +1,6 @@
 function [params] = initParams()
     
-    params.probRoot = [0.001,0.01,0.1]; %epsilon
+    params.probRoot = [0.001,0.00001,0.00001]; %epsilon
     params.bpIter = 10;
     params.nParticles = 5;
     params.thingsToSee=5;

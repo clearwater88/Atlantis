@@ -15,7 +15,7 @@ function [templateStruct,probMapStruct,ruleStruct] = doLearning(trainInds,params
                 [~,trainData] = readData(params,templateStruct.app{end},trainInds(i));
                 
                 imSize = size(trainData);
-                cellParams = initPoseCellCentres(imSize);
+                cellParams = initPoseCellCentres(imSize,templateStruct.sizes);
                 
                 [allParticles{i},probOn{i},probOnFinal,msgs{i}] = doInfer(trainData,params,ruleStruct,templateStruct,probMapStruct,cellParams,imSize);
                 

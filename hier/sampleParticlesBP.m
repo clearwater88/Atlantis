@@ -1,6 +1,6 @@
 function [allParticles,probOn,probOnFinal,msgs] = sampleParticlesBP(data,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct,imSize)
 
-    verbose = 1;
+    verbose = 0;
 
     nTypes = numel(cellParams.centres);
 
@@ -98,7 +98,10 @@ function [allParticles,probOn,probOnFinal,msgs] = sampleParticlesBP(data,posesSt
         
         allParticles{end+1} = particles;
 
-        brickIdx=brickIdx+1;        
+        brickIdx=brickIdx+1;  
+        if(probBrickOn < 0.01)
+            break;
+        end
     end
     
     % clamp here; just need final msgs of the active set

@@ -1,11 +1,12 @@
 function mainBP(ds,noiseParam,useContext,alpha,resFolder,nStart,nTrials)
 % mainBP(16,0.1,1,1,'resTemp/',0,1);
-    if(isempty('resFolder'))
-        resFolder = 'resTemp/';
+    if(isempty(resFolder))
+        resFolder = 'res/';
     end
-    if(isempty('alpha'))
-        alpha = 1;
+    if(isempty(alpha))
+        alpha = 100;
     end
+    alpha = alpha/100; % stupid cluster thing
     [~,~]=mkdir(resFolder);
 
     startup;
@@ -34,8 +35,13 @@ function mainBP(ds,noiseParam,useContext,alpha,resFolder,nStart,nTrials)
         for (i=1:numel(testInds))
             [cleanTestData,testData] = readData(params,templateStruct.app{end},testInds(i));
             imSize = size(testData);
-            cellParams = initPoseCellCentres(imSize);
+            cellParams = initPoseCellCentres(imSize,templateStruct.sizes);
     
+            selfRootStr = 'selfRoot';
+            for (j=1:numel(params.probRoot))
+                selfRootStr = [selfRootStr, '-', int2str(1000000*params.probRoot(j))];
+            end
+            
             saveStr = [resFolder,'testSweep0', int2str(testInds(i)), '_', ruleStruct.toString(ruleStruct), '_', ...
                        probMapStruct.toString(probMapStruct), '_', ...
                        params.toString(params), '_', ...
@@ -43,7 +49,9 @@ function mainBP(ds,noiseParam,useContext,alpha,resFolder,nStart,nTrials)
                        'context', int2str(params.useContext), '_', ...
                        'alpha', int2str(1000*alpha), '_', ...
                        templateStruct.toString(templateStruct), '-', ...
-                       'selfRoot', int2str(1000000*params.probRoot), '-noise', int2str(100*templateStruct.bg), '_trial', int2str(t)];
+                       selfRootStr, ...
+                       '_noise', int2str(100*templateStruct.bg), ...
+                       '_trial', int2str(t)];
                    
             if(exist([saveStr,'.mat'],'file'))
                 display(['File exists: ', saveStr]);
@@ -52,7 +60,7 @@ function mainBP(ds,noiseParam,useContext,alpha,resFolder,nStart,nTrials)
                 finalParticles = allParticles{end};
                 save(saveStr,'cleanTestData', 'testData', 'allParticles', 'probOn', ...
                     'templateStruct', 'probMapStruct', 'ruleStruct', 'cellParams', ...
-                    'params','msgs', 'finalParticles','finalProbOn','ruleStruct','probOnFinal','-v7.3');
+                    'params','msgs', 'finalParticles','ruleStruct','probOnFinal','-v7.3');
             end
 
         end

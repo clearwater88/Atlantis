@@ -1,9 +1,11 @@
 function [params] = initParams()
     
-    params.probRoot = [0.001,0.00001,0.00001]; %epsilon
-    params.bpIter = 10;
-    params.nParticles = 5;
-    params.thingsToSee=5;
+    params.doLearning = 0;
+
+    params.probRoot = [0.001,0.0001,0.00001]; %epsilon
+    params.bpIter = 20;
+    params.nParticles = 10;
+    params.thingsToSee=75;
     params.emIters = 5;
     
     % start,increment,end

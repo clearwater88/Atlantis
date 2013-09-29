@@ -1,13 +1,12 @@
-function [data,probPixel,mask] = genData(nExamples)
+function [data,probPixel,mask] = genData(nExamples,imSize,noiseParam)
+    genFolder = 'genDataEx/';
+    [~,~] = mkdir(genFolder);
 
-    imSize = [100,100];
-    noiseParam = 0.1;
-    
-    data = zeros([imSize,nExamples]);
-    probPixel = zeros([imSize,nExamples]);
-    mask = zeros([imSize,nExamples]);
-    
+    saveStr= [genFolder,'ex%d_imSize', int2str(imSize(1)), '-', int2str(imSize(2)), ...
+               '_', '_noiseParam-', int2str(100*noiseParam)] ;
+           
     params = initParams();
+    params.downSampleFactor = 1;
     params.useContext = 1;
     params.alpha = 1;
     
@@ -18,7 +17,7 @@ function [data,probPixel,mask] = genData(nExamples)
     templateStruct.app{end+1} = templateStruct.bg;
     cellParams = initPoseCellCentres(imSize,templateStruct.sizes);
     
-    ruleStruct = initRules(params.useContext);
+    ruleStruct = initRules();
     
     probMapStruct = initProbMaps(ruleStruct,templateStruct.sizes);
     cellMapStruct = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params,imSize);
@@ -44,6 +43,8 @@ function [data,probPixel,mask] = genData(nExamples)
     pGbkRbStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct);
     
     for (n=1:nExamples)
+        display(sprintf('Generating example: %d', n));
+        
         %bricks: on/off, type, cellCentreIndex,[poseX,Y,theta], rule
         particle = [];
         for(t=1:nTypes) % assume partial ordering goes 1:nTypes
@@ -125,15 +126,15 @@ function [data,probPixel,mask] = genData(nExamples)
             
         end
         particleUse{1} = particle;
-        probPixel(:,:,n) = viewAllParticles(particleUse,rotTemplates,params,imSize);
         
-        mask(:,:,n) = (probPixel(:,:,n) > 0.001);
-        dataTemp = rand(imSize) < probPixel(:,:,n);
-        bgUse = rand(imSize) < templateStruct.bg;
+        probPixel = viewAllParticles(particleUse,rotTemplates,params,imSize);
+        mask = (probPixel > 0.001);
+        cleanData = rand(imSize) < probPixel;
+        bg = rand(imSize) < templateStruct.bg;
+        data = cleanData.*mask + bg.*(1-mask);
+
+        save(sprintf(saveStr,n), 'probPixel', 'mask', 'data', 'cleanData', 'templateStruct', 'params', 'ruleStruct','probMapStruct', '-v7.3');
         
-        data(:,:,n) = dataTemp.*mask(:,:,n) + bgUse.*(1-mask(:,:,n));
-        
-        %imshowFull(probPixel(:,:,n));
     end
 
 end

@@ -1,7 +1,13 @@
-function mainBP(ds,noiseParam,useContext,alpha,resFolder,nStart,nTrials)
-% mainBP(16,0.1,1,1,'resTemp/',0,1);
+function mainGen(imSize, noiseParam, useContext,alpha,resFolder,nStart,nTrials)
+% mainGen([50,50], 0.1, 1,1,'resTemp/',0,1);
+    startup;
+    
+    genFolder = 'genDataEx/';
+    genStr= [genFolder,'ex%d_imSize', int2str(imSize(1)), '-', int2str(imSize(2)), ...
+               '_', '_noiseParam-', int2str(100*noiseParam)] ;
+           
     if(isempty(resFolder))
-        resFolder = 'res/';
+        resFolder = 'resDataEx/';
     end
     if(isempty(alpha))
         alpha = 100;
@@ -9,31 +15,26 @@ function mainBP(ds,noiseParam,useContext,alpha,resFolder,nStart,nTrials)
     alpha = alpha/100; % stupid cluster thing
     [~,~]=mkdir(resFolder);
 
-    startup;
-
     %[trainInds,testInds] = splitData(10,0.5,0.5);
-    trainInds = [1:3];
+    trainInds = [1:5];
     testInds=[6:10];
     
-    params = initParams;
-    params.downSampleFactor = ds;
-    params.useContext = useContext;
-    params.alpha = alpha;
+%     params = initParams;
+%     params.downSampleFactor = ds;
+%     params.useContext = useContext;
+%     params.alpha = alpha;
     
     for (t=nStart:nStart+nTrials-1)
-        templateStruct = initTemplates();
-        
-        assert(numel(params.probRoot) == numel(templateStruct.mix)-1);
-        
-        templateStruct.bg=noiseParam;
-        ruleStruct = initRules();
-        probMapStruct = initProbMaps(ruleStruct,templateStruct.sizes);
-
-        [templateStruct,probMapStruct,ruleStruct] = doLearning(trainInds,params,ruleStruct,templateStruct,probMapStruct);
-        save('learning2', 'templateStruct','probMapStruct','ruleStruct', '-v7.3');
+       
         % inference
         for (i=1:numel(testInds))
-            [cleanTestData,testData] = readData(params,templateStruct.app{end},testInds(i));
+            
+            load(sprintf(genStr,testInds(i)),'probPixel', 'mask', 'data', 'cleanData','ruleStruct','probMapStruct','templateStruct','ruleStruct','params');
+            params.useContext=useContext;
+
+            cleanTestData = cleanData;
+            testData = data;
+            
             imSize = size(testData);
             cellParams = initPoseCellCentres(imSize,templateStruct.sizes);
     

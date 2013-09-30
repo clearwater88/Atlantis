@@ -46,7 +46,7 @@ function [allParticles,probOn,probOnFinal,msgs] = sampleParticlesBP(data,posesSt
             temp = cell(nTypes,1);
             for (n=1:nTypes)
                 nBricks = prod(cellParams.coordsSize(n,:),2);
-                temp{n} = ones(nBricks,1)/nBricks;
+                temp{n} = params.probRoot(n)*ones(nBricks,1);
             end
             probOn{qq} = temp;
         end

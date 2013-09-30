@@ -1,40 +1,46 @@
 function allAuc = analyze()
 
-    resFolder = 'resAlpha2/';
-    resFile = 'testSweep0%d__probMap-cov4x1_4x1_4x1_4x1__ds4_cell-dims7_7_5-strides8_8_4_context1_alpha%d_templates-15x3_11x3_7x3-selfRoot100-noise10_trial%d';
+    resFolder = 'resDataEx/';
+    resFile = 'testSweep0%d_imSize%d-%d__probMap-cov4x1_4x1_4x1_4x1__ds1_cell-dims7_7_5-strides8_8_4_context%d_alpha10_templates-17x3_9x3_5x3-selfRoot-10-100-1000_noise%d_trial%d';
     
-    alphaTry = [400:100:1000];
-    testInds =[1:5];
+    imSizeTry = [50,75,100];
+    contextTry = [0,1];
+    noiseTry = [1:2:19,20,25];
+    
+    testInds =[6:10];
     
     trialStart = 0;
-    nTrials = 3;
+    nTrials = 2;
     
-    allAuc= zeros(numel(testInds),numel(alphaTry),nTrials);
-    
-    for(ti=1:numel(testInds))
-        for (at=1:numel(alphaTry))
-            for (t=trialStart:trialStart+nTrials-1)
-                file = [resFolder,sprintf(resFile,testInds(ti),alphaTry(at),t)];
-                display(['Analyzing: ', file]);
+    allAuc= zeros(numel(noiseTry),numel(contextTry),numel(testInds),numel(imSizeTry),nTrials);
+    for (imt=1:numel(imSizeTry))
+        for (at=1:numel(contextTry))        
+            for(ti=1:numel(testInds))
+                for(nt=1:numel(noiseTry))
+                    for (t=trialStart:trialStart+nTrials-1)
+                        file = [resFolder,sprintf(resFile,testInds(ti),imSizeTry(imt),imSizeTry(imt),contextTry(at),noiseTry(nt),t)];
+                        display(['Analyzing: ', file]);
 
-                load(file,'cleanTestData','allParticles','probOn','params','templateStruct');
-                imSize = size(cleanTestData);
+                        load(file,'cleanTestData','allParticles','params','templateStruct');
 
-                y = cleanTestData(:);
-                tp = zeros(numel(cleanTestData),numel(probOn));
-                fp = zeros(numel(cleanTestData),numel(probOn));
-                auc = zeros(numel(probOn),1);
-                [rotTemplates,~] = getRotTemplates(params,templateStruct);
+                        imSize = size(cleanTestData);
 
-                for (i=1:numel(probOn))
-                    probPixel = viewAllParticles(allParticles{i},rotTemplates,params,imSize);
-                    [tp(:,i),fp(:,i),auc(i)] = getROC(probPixel(:),y);
+                        y = cleanTestData(:);
+                        tp = zeros(numel(cleanTestData),numel(allParticles));
+                        fp = zeros(numel(cleanTestData),numel(allParticles));
+                        auc = zeros(numel(allParticles),1);
+                        [rotTemplates,~] = getRotTemplates(params,templateStruct);
+
+                        for (i=1:numel(allParticles))
+                            probPixel = viewAllParticles(allParticles{i},rotTemplates,params,imSize);
+                            [tp(:,i),fp(:,i),auc(i)] = getROC(probPixel(:),y);
+                        end
+
+                        allAuc(nt,at,ti,imt,t-trialStart+1) = auc(end);
+                    end
                 end
-
-                allAuc(ti,at,t-trialStart+1) = auc(end);
             end
         end
-        
 %         figure(88);
 %         plot(fp(:,end),tp(:,end),'o-'); hold on; plot(0:0.1:1,0:0.1:1,'r');
 %         xlabel('false positive');

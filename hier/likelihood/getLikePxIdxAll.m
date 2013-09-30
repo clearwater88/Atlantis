@@ -16,7 +16,7 @@ function likePxIdxCells = getLikePxIdxAll(cellParams,posesStruct,pxStr)
                                                  posesStruct.poses{n});
         end
         display('Done likePxIdxCells computation');
-        save(pxStr,'likePxIdxCells', '-v7.3');
+        save(pxStr,'likePxIdxCells'); % something goes wrong with '-v7.3' flag on cluster?
         toc
     end
     
@@ -54,7 +54,10 @@ function res = doGetLikePxIdxAll(cellCentre,cellDims,poseCentres)
         for (i=1:nEnd-nStart+1)
            resAngle = checkAngle(ags,angleLow(i),angleHigh(i));
            temp = bsxfun(@and,resAngle,squeeze(resSpatial(1,i,:)));
+           
            res{ct} = find(temp==1);
+           assert(size(res{ct},1) > 0);
+           
            ct = ct+1;
         end
         %toc

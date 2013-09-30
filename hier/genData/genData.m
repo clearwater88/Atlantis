@@ -1,9 +1,8 @@
-function [data,probPixel,mask] = genData(nExamples,imSize,noiseParam)
+function [data,probPixel,mask] = genData(nExamples,imSize)
     genFolder = 'genDataEx/';
     [~,~] = mkdir(genFolder);
 
-    saveStr= [genFolder,'ex%d_imSize', int2str(imSize(1)), '-', int2str(imSize(2)), ...
-               '_', '_noiseParam-', int2str(100*noiseParam)] ;
+    saveStr= [genFolder,'exClean%d_imSize', int2str(imSize(1)), '-', int2str(imSize(2))] ;
            
     params = initParams();
     params.downSampleFactor = 1;
@@ -11,7 +10,7 @@ function [data,probPixel,mask] = genData(nExamples,imSize,noiseParam)
     params.alpha = 1;
     
     templateStruct = initTemplates();
-    templateStruct.bg=noiseParam;
+    templateStruct.bg=0;
     
     templateStruct.app = setTemplateApp(templateStruct.sizes);
     templateStruct.app{end+1} = templateStruct.bg;
@@ -130,10 +129,8 @@ function [data,probPixel,mask] = genData(nExamples,imSize,noiseParam)
         probPixel = viewAllParticles(particleUse,rotTemplates,params,imSize);
         mask = (probPixel > 0.001);
         cleanData = rand(imSize) < probPixel;
-        bg = rand(imSize) < templateStruct.bg;
-        data = cleanData.*mask + bg.*(1-mask);
 
-        save(sprintf(saveStr,n), 'probPixel', 'mask', 'data', 'cleanData', 'templateStruct', 'params', 'ruleStruct','probMapStruct', '-v7.3');
+        save(sprintf(saveStr,n), 'probPixel', 'mask','cleanData', 'templateStruct', 'params', 'ruleStruct','probMapStruct', '-v7.3');
         
     end
 

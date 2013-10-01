@@ -9,7 +9,9 @@
     for (n=1:nTypes)
         logProbs = combineLogMsgs(cat(3, ...
                                       [msgs.uFb1ToSb_0{n}(:), 1-msgs.uFb1ToSb_0{n}(:)], ...
-                                      [msgs.uSbToFb1_0{n}(:), 1-msgs.uFb1ToSb_0{n}(:)]));
+                                      [msgs.uSbToFb1_0{n}(:), 1-msgs.uSbToFb1_0{n}(:)]));
+                                  
+                                  
         probOn{n} = exp(logProbs(:,2));
         if(clampToOff)
             probOn{n} = 1-clamp_msg_0(1-probOn{n},sOn,n);
@@ -40,7 +42,7 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
     uFb3ToGbk_1 = cell(nTypes,maxSlots);
     uGbkToFb1_0 = cell(nTypes,maxSlots); % only stores gbk->fb1= no point. All mass of 0.
     for (n=1:nTypes)
-        uFb1ToSb_0{n} = 0.99994 + 0.000001*rand(nCoordsInds(n,:));
+        uFb1ToSb_0{n} = 0.994 + 0.001*rand(nCoordsInds(n,:));
            
         uFb2ToRb{n} = 0.01 + 0.001*rand(nBricksType(n),sum(ruleStruct.parents== n));
         uFb2ToRb{n} = bsxfun(@rdivide, uFb2ToRb{n}, sum(uFb2ToRb{n},2));
@@ -48,10 +50,10 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
         for (k=1:maxSlots)
              %who messages are intended for given by gBkLookUp.
              % 1+ is for null (no point)
-            uFb3ToGbk_1{n,k} = 0.001 + 0.0001*rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
-            uFb3ToGbk_1{n,k}(:,1) = 10000;
+            uFb3ToGbk_1{n,k} = 0.01 + 0.001*rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
+            uFb3ToGbk_1{n,k}(:,1) = 1;
             uFb3ToGbk_1{n,k} = bsxfun(@rdivide, uFb3ToGbk_1{n,k}, sum(uFb3ToGbk_1{n,k},2));
-            uGbkToFb1_0{n,k} = 1-((0.004*params.probRoot(n)) + (0.004*params.probRoot(n))*0.1*rand(nBricksType(n),size(gBkLookUp{n,k},2))); %[#bricks, #potential children]
+            uGbkToFb1_0{n,k} = 1-((params.probRoot(n)) + rand(nBricksType(n),size(gBkLookUp{n,k},2))); %[#bricks, #potential children]
         end
     end
     prodGbk_0 = computeAllProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uGbkToFb1_0);
@@ -65,18 +67,18 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
     for (n=1:nTypes)
         for (k=1:maxSlots)
             % 1+ is for null (no point)
-            uGbkToFb3{n,k} = 0.001+0.0001*rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
-            uGbkToFb3{n,k}(:,1) = 10000; % likely point to nothing
+            uGbkToFb3{n,k} = 0.01+0.001*rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
+            uGbkToFb3{n,k}(:,1) = 1; % likely point to nothing
             uGbkToFb3{n,k} = bsxfun(@rdivide, uGbkToFb3{n,k}, sum(uGbkToFb3{n,k},2));
-            uFb1ToGbk_total_0{n,k} = 1- (0.0001 +0.00001*rand(nBricksType(n),size(gBkLookUp{n,k},2)));
+            uFb1ToGbk_total_0{n,k} = 1- (0.01 +0.001*rand(nBricksType(n),size(gBkLookUp{n,k},2)));
         end
         
-        uRbToFb2{n} = 0.01 + 0.0001*rand(nBricksType(n),sum(ruleStruct.parents== n));
+        uRbToFb2{n} = 0.01 + 0.001*rand(nBricksType(n),sum(ruleStruct.parents== n));
         uRbToFb2{n} = bsxfun(@rdivide, uRbToFb2{n}, sum(uRbToFb2{n},2));
         
-        uSbToFb1_0{n} = 0.5 + 0.001*rand(nCoordsInds(n,:));
+        uSbToFb1_0{n} = 0.5 + 0.01*rand(nCoordsInds(n,:));
     end
-    uSbToFb1_0 = correctFromSb_0(uSbToFb1_0,sOn);
+    %uSbToFb1_0 = correctFromSb_0(uSbToFb1_0,sOn);
     
     if(clampToOff==1)
         for (n=1:nTypes)
@@ -111,7 +113,7 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
             uSbToFb1_0{n} = reshape(bsxfun(@rdivide, uRbToFb2{n}(:,1), temp1 + uRbToFb2{n}(:,1)),nCoordsInds(n,:));
             assert(~any(isnan(uSbToFb1_0{n}(:))));
         end
-        uSbToFb1_0 = correctFromSb_0(uSbToFb1_0,sOn);
+        %uSbToFb1_0 = correctFromSb_0(uSbToFb1_0,sOn);
         
         % indexed by parent;
         reverse_uSbToFb1_0 = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uSbToFb1_0);
@@ -150,7 +152,7 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
         end
         
         uSbToFb2_0 = uFb1ToSb_0;
-        uSbToFb2_0 = correctFromSb_0(uSbToFb2_0,sOn);
+        %uSbToFb2_0 = correctFromSb_0(uSbToFb2_0,sOn);
         
         for (n=1:nTypes)
             ruleIds = ruleStruct.parents==n;
@@ -222,7 +224,7 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
             for (n=1:nTypes)
                 probs = combineMsgs(cat(3,...
                     [uFb1ToSb_0{n}(:), 1-uFb1ToSb_0{n}(:)], ...
-                    [uSbToFb1_0{n}(:), 1-uFb1ToSb_0{n}(:)]));
+                    [uSbToFb1_0{n}(:), 1-uSbToFb1_0{n}(:)]));
                 probOn{n} = probs(:,2);
             end
             viewHeatMap(sOn,probOn,cellParams,imSize);

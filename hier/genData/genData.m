@@ -1,4 +1,4 @@
-function [data,probPixel,mask] = genData(nExamples,imSize)
+function genData(nStart,nEnd,imSize)
     genFolder = 'genDataEx/';
     [~,~] = mkdir(genFolder);
 
@@ -24,8 +24,10 @@ function [data,probPixel,mask] = genData(nExamples,imSize)
     [rotTemplates,~] = getRotTemplates(params,templateStruct);
     
     templateStr = templateStruct.toString(templateStruct);
-    pxStr = ['pxInds_', 'sz-', int2str(imSize(1)), 'x', int2str(imSize(2)), '_', ...
-        cellParams.toString(cellParams), '_', templateStr];
+
+    pxStr = ['pxInds_', 'imSize-', int2str(imSize(1)), '-', int2str(imSize(2)), '_', ...
+             cellParams.toString(cellParams), '_', templateStr];
+    
     likePxIdxCell = getLikePxIdxAll(cellParams,posesStruct,pxStr);
     coordInds = cellParams.coordsSize;
     
@@ -41,7 +43,7 @@ function [data,probPixel,mask] = genData(nExamples,imSize)
     
     pGbkRbStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct);
     
-    for (n=1:nExamples)
+    for (n=nStart:nEnd)
         display(sprintf('Generating example: %d', n));
         
         %bricks: on/off, type, cellCentreIndex,[poseX,Y,theta], rule
@@ -130,7 +132,7 @@ function [data,probPixel,mask] = genData(nExamples,imSize)
         mask = (probPixel > 0.001);
         cleanData = rand(imSize) < probPixel;
 
-        save(sprintf(saveStr,n), 'probPixel', 'mask','cleanData', 'templateStruct', 'params', 'ruleStruct','probMapStruct', '-v7.3');
+        save(sprintf(saveStr,n), 'particle','probPixel', 'mask','cleanData', 'templateStruct', 'params', 'ruleStruct','probMapStruct', '-v7.3');
         
     end
 

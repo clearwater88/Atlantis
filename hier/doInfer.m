@@ -1,7 +1,7 @@
 function [allParticles,probOn,probOnFinal,msgs] = doInfer(testData,params,ruleStruct,templateStruct,probMapStruct,cellParams,imSize)
 
     % careful with new probMap distributions
-    mapStr= ['sweep0', ruleStruct.toString(ruleStruct), '_', probMapStruct.toString(probMapStruct), '_', ...
+    mapStr= ['sweep', ruleStruct.toString(ruleStruct), '_', probMapStruct.toString(probMapStruct), '_', ...
              'imSize-', int2str(imSize(1)), '-', int2str(imSize(2)), '_', ...
              cellParams.toString(cellParams)];
     if(exist([mapStr,'.mat'],'file'))
@@ -19,7 +19,7 @@ function [allParticles,probOn,probOnFinal,msgs] = doInfer(testData,params,ruleSt
 
     templateStr = templateStruct.toString(templateStruct);
     % precompute
-    pxStr = ['pxInds_', 'imSize-', int2str(imSize(1)), '-', int2str(imSize(2)), '_', ...
+    pxStr = ['pxInds_', 'imSize-', int2str(imSize(1)), 'x', int2str(imSize(2)), '_', ...
              cellParams.toString(cellParams), '_', templateStr];
     
     likePxIdxCells = getLikePxIdxAll(cellParams,posesStruct,pxStr);

@@ -39,7 +39,7 @@ function [allParticles,probOn,probOnFinal,msgs] = sampleParticlesBP(data,posesSt
         if(params.useContext)
             %clampToOff = qq==params.thingsToSee;
             clampToOff = 0;
-            [probOn{qq},~] = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn,imSize,clampToOff);           
+            [probOn{qq},msgs] = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn,imSize,clampToOff);           
             
         else
             msgs = [];

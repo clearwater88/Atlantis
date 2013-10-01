@@ -29,12 +29,12 @@ function mainBP(ds,noiseParam,useContext,alpha,resFolder,nStart,nTrials)
         ruleStruct = initRules();
         probMapStruct = initProbMaps(ruleStruct,templateStruct.sizes);
 
-        [templateStruct,probMapStruct,ruleStruct] = doLearning(trainInds,params,ruleStruct,templateStruct,probMapStruct);
-        save('learning2', 'templateStruct','probMapStruct','ruleStruct', '-v7.3');
+%         [templateStruct,probMapStruct,ruleStruct] = doLearning(trainInds,params,ruleStruct,templateStruct,probMapStruct);
+%         save('learning2', 'templateStruct','probMapStruct','ruleStruct', '-v7.3');
         % inference
         for (i=1:numel(testInds))
-            [cleanTestData,testData] = readData(params,templateStruct.app{end},testInds(i));
-            imSize = size(testData);
+            [cleanData,data] = readData(params,templateStruct.app{end},testInds(i));
+            imSize = size(data);
             cellParams = initPoseCellCentres(imSize,templateStruct.sizes);
     
             selfRootStr = 'selfRoot';
@@ -42,7 +42,7 @@ function mainBP(ds,noiseParam,useContext,alpha,resFolder,nStart,nTrials)
                 selfRootStr = [selfRootStr, '-', int2str(1000000*params.probRoot(j))];
             end
             
-            saveStr = [resFolder,'testSweep0', int2str(testInds(i)), '_', ...
+            saveStr = [resFolder,'testSweep', int2str(testInds(i)), '_', ...
                        'imSize', int2str(imSize(1)),'-',int2str(imSize(2)), '_', ...
                        ruleStruct.toString(ruleStruct), '_', ...
                        probMapStruct.toString(probMapStruct), '_', ...
@@ -58,9 +58,9 @@ function mainBP(ds,noiseParam,useContext,alpha,resFolder,nStart,nTrials)
             if(exist([saveStr,'.mat'],'file'))
                 display(['File exists: ', saveStr]);
             else
-                [allParticles,probOn,probOnFinal,msgs] = doInfer(testData,params,ruleStruct,templateStruct,probMapStruct,cellParams,imSize);
+                [allParticles,probOn,probOnFinal,msgs] = doInfer(data,params,ruleStruct,templateStruct,probMapStruct,cellParams,imSize);
                 finalParticles = allParticles{end};
-                save(saveStr,'cleanTestData', 'testData', 'allParticles', 'probOn', ...
+                save(saveStr,'cleanData', 'data', 'allParticles', 'probOn', ...
                     'templateStruct', 'probMapStruct', 'ruleStruct', 'cellParams', ...
                     'params','msgs', 'finalParticles','ruleStruct','probOnFinal','-v7.3');
             end

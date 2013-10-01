@@ -8,6 +8,7 @@ function likePxIdxCells = getLikePxIdxAll(cellParams,posesStruct,pxStr)
         load(pxStr,'likePxIdxCells');
     else
         tic
+        display(['File does not exist: ', pxStr]);
         display('Starting likePxIdxCells computation');
         likePxIdxCells = cell(cellParams.nTypes,1);
         for (n=1:cellParams.nTypes)
@@ -39,7 +40,7 @@ function res = doGetLikePxIdxAll(cellCentre,cellDims,poseCentres)
 
     ct = 1;
     for (n=1:NBATCH)
-        %display(['On batch ', int2str(n) '/', int2str(NBATCH)]);
+        display(['On batch ', int2str(n) '/', int2str(NBATCH)]);
         %tic
         nStart = (n-1)*batchSize+1;
         nEnd = min(n*batchSize,sz);

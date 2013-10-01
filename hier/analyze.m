@@ -5,7 +5,7 @@ function allAuc = analyze()
     
     imSizeTry = [50,75,100];
     contextTry = [0,1];
-    noiseTry = [1:2:19,20,25];
+    noiseTry = [1:2:31];
     
     testInds =[6:10];
     
@@ -26,17 +26,18 @@ function allAuc = analyze()
                         imSize = size(cleanTestData);
 
                         y = cleanTestData(:);
-                        tp = zeros(numel(cleanTestData),numel(allParticles));
-                        fp = zeros(numel(cleanTestData),numel(allParticles));
-                        auc = zeros(numel(allParticles),1);
+ 
                         [rotTemplates,~] = getRotTemplates(params,templateStruct);
 
-                        for (i=1:numel(allParticles))
-                            probPixel = viewAllParticles(allParticles{i},rotTemplates,params,imSize);
-                            [tp(:,i),fp(:,i),auc(i)] = getROC(probPixel(:),y);
-                        end
+                        probPixel = viewAllParticles(allParticles{end},rotTemplates,params,imSize);
+                        [~,~,auc] = getROC(probPixel(:),y);
+                        
+%                         for (i=1:numel(allParticles))
+%                             probPixel = viewAllParticles(allParticles{i},rotTemplates,params,imSize);
+%                             [tp(:,i),fp(:,i),auc(i)] = getROC(probPixel(:),y);
+%                         end
 
-                        allAuc(nt,at,ti,imt,t-trialStart+1) = auc(end);
+                        allAuc(nt,at,ti,imt,t-trialStart+1) = auc;
                     end
                 end
             end

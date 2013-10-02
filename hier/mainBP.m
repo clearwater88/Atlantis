@@ -29,7 +29,7 @@ function mainBP(ds,noiseParam,useContext,alpha,resFolder,nStart,nTrials)
         ruleStruct = initRules();
         probMapStruct = initProbMaps(ruleStruct,templateStruct.sizes);
 
-%         [templateStruct,probMapStruct,ruleStruct] = doLearning(trainInds,params,ruleStruct,templateStruct,probMapStruct);
+        [templateStruct,probMapStruct,ruleStruct] = doLearning(trainInds,params,ruleStruct,templateStruct,probMapStruct);
 %         save('learning2', 'templateStruct','probMapStruct','ruleStruct', '-v7.3');
         % inference
         for (i=1:numel(testInds))

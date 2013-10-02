@@ -21,4 +21,4 @@
 #matlab -r "foo; exit"
 funct="mainGen"
 
-matlab -nosplash -r "$funct([75,75],$SLURM_ARRAYID,1,[],0,2); exit"	
+matlab -nosplash -r "$funct([75,75],$SLURM_ARRAYID,1,[],1,2); exit"	

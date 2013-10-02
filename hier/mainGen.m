@@ -1,18 +1,14 @@
-function mainGen(imSize, noiseParam, useContext,alpha,resFolder,nStart,nTrials)
-% mainGen([50,50], 0.1, 1,1,'resTemp/',0,1);
+function mainGen(imSize, noiseParam, useContext,resFolder,nStart,nTrials)
+% mainGen([50,50], 0.1,1,'resTemp/',0,1);
     startup;
     
     genFolder = 'genDataEx/';
     genStr= [genFolder,'ex%d_imSize', int2str(imSize(1)), '-', int2str(imSize(2)), ...
-               '_', 'noiseParam-', int2str(100*noiseParam)] ;
+               '_', 'noiseParam-', int2str(noiseParam)] ;
            
     if(isempty(resFolder))
         resFolder = 'resDataEx/';
     end
-    if(isempty(alpha))
-        alpha = 100;
-    end
-    alpha = alpha/100; % stupid cluster thing
     [~,~]=mkdir(resFolder);
 
     %[trainInds,testInds] = splitData(10,0.5,0.5);
@@ -49,7 +45,7 @@ function mainGen(imSize, noiseParam, useContext,alpha,resFolder,nStart,nTrials)
                        params.toString(params), '_', ...
                        cellParams.toString(cellParams), '_', ...
                        'context', int2str(params.useContext), '_', ...
-                       'alpha', int2str(100*alpha), '_', ...
+                       'alpha', int2str(100*params.alpha), '_', ...
                        templateStruct.toString(templateStruct), '-', ...
                        selfRootStr, ...
                        '_noise', int2str(100*templateStruct.bg), ...

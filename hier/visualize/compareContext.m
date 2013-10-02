@@ -1,9 +1,11 @@
 function compareContext(nStart,nEnd,nTrials,noise,imSize)
     
     resFolder = 'resDataEx/';
-
+    exFolder = 'genDataEx/';
     
-    str = [resFolder,'testSweep0%d_imSize%d-%d__probMap-cov4x1_4x1_4x1_4x1__ds1_cell-dims7_7_5-strides8_8_4_context%d_alpha10_templates-17x3_9x3_5x3-selfRoot-10-100-1000_noise%d_trial%d'];
+    str = [resFolder,'testSweep%d_imSize%d-%d__probMap-cov4x1_4x1_4x1_4x1__ds1_cell-dims7_7_5-strides4_4_2_context%d_alpha1_templates-17x3_9x3_5x3-selfRoot-10-100-1000_noise%d_trial%d'];
+                     
+    gtStr = [exFolder,'ex%d_imSize%d-%d_noiseParam-%d'];
     
     for (n=nStart:nEnd)
         
@@ -16,15 +18,14 @@ function compareContext(nStart,nEnd,nTrials,noise,imSize)
         for (t=0:nTrials-1)
             
             file = sprintf(str,n,imSize(1),imSize(2),1,noise,t);
-            load(file,'cleanTestData','testData');
+            load(file,'cleanData','data');
             probPixelContext{t+1} = viewAllParticlesFromFile(file);
-            [~,~,auc] =  getROC(probPixelContext{t+1}(:),cleanTestData(:));
+            [~,~,auc] =  getROC(probPixelContext{t+1}(:),cleanData(:));
             aucContext(t+1) = auc;
-            
             
             file = sprintf(str,n,imSize(1),imSize(2),0,noise,t);
             probPixelNoContext{t+1} = viewAllParticlesFromFile(file);
-            [~,~,auc] =  getROC(probPixelNoContext{t+1}(:),cleanTestData(:));
+            [~,~,auc] =  getROC(probPixelNoContext{t+1}(:),cleanData(:));
             aucNoContext(t+1) = auc;
         end
         
@@ -53,10 +54,16 @@ function compareContext(nStart,nEnd,nTrials,noise,imSize)
 %         
 %         load(file,'cleanTestData','testData');
 %         figure(101);
+
+        load(sprintf(gtStr,n,imSize(1),imSize(2),noise),'particle','params','templateStruct');
+        [rotTemplates,~] = getRotTemplates(params,templateStruct);
+        allParticles{1} = particle;
+        probPixel = viewAllParticles(allParticles,rotTemplates,params,imSize);
         
         figure(3);
-        subplot(1,2,1); imshow(cleanTestData);
-        subplot(1,2,2); imshow(testData);
+        subplot(1,3,1); imshow(cleanData); title('Ground truth data');
+        subplot(1,3,2); imshow(data); title('Noised data');
+        subplot(1,3,3); imshow(probPixel); title('Perfect inference');
         pause;
     end
 

@@ -78,7 +78,7 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
         
         uSbToFb1_0{n} = 0.5 + 0.01*rand(nCoordsInds(n,:));
     end
-    %uSbToFb1_0 = correctFromSb_0(uSbToFb1_0,sOn);
+    uSbToFb1_0 = correctFromSb_0(uSbToFb1_0,sOn);
     
     if(clampToOff==1)
         for (n=1:nTypes)
@@ -113,7 +113,7 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
             uSbToFb1_0{n} = reshape(bsxfun(@rdivide, uRbToFb2{n}(:,1), temp1 + uRbToFb2{n}(:,1)),nCoordsInds(n,:));
             assert(~any(isnan(uSbToFb1_0{n}(:))));
         end
-        %uSbToFb1_0 = correctFromSb_0(uSbToFb1_0,sOn);
+        uSbToFb1_0 = correctFromSb_0(uSbToFb1_0,sOn);
         
         % indexed by parent;
         reverse_uSbToFb1_0 = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uSbToFb1_0);
@@ -132,7 +132,10 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
                 temp0 = temp0*size(gBkLookUp{n,k},2);
                 temp1 = (1-reverse_uSbToFb1_0{n,k});
                 uFb1ToGbk_total_0{n,k} = temp0 ./ (temp0+temp1); %for each parent, what signal the child sends
-                assert(~any(isnan(uFb1ToGbk_total_0{n,k}(:))));
+                if(~any(isnan(uFb1ToGbk_total_0{n,k}(:))));
+                    temp = isnan(uFb1ToGbk_total_0{n,k}(:));
+                    uFb1ToGbk_total_0{n,k}(temp) = 0.99999;
+                end
                 assert(~any(uFb1ToGbk_total_0{n,k}(:)< -0.0001));
             end
         end
@@ -152,7 +155,7 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
         end
         
         uSbToFb2_0 = uFb1ToSb_0;
-        %uSbToFb2_0 = correctFromSb_0(uSbToFb2_0,sOn);
+        uSbToFb2_0 = correctFromSb_0(uSbToFb2_0,sOn);
         
         for (n=1:nTypes)
             ruleIds = ruleStruct.parents==n;
@@ -211,6 +214,12 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
                 logProbs_1 = logProbs_1 + log(uFb3ToGbk_1{n,k});
                 normProbs_1 = exp(bsxfun(@minus,logProbs_1,logsum(logProbs_1,2)));
                 uGbkToFb1_0{n,k} = 1 - normProbs_1(:,2:end);
+                
+                temp =  uGbkToFb1_0{n,k};
+                temp(temp<0.000001)=0.000001;
+                temp(isnan(temp)) = 0.000001;
+                uGbkToFb1_0{n,k} = temp;
+                
                 assert(~any(isnan(uGbkToFb1_0{n,k}(:))));
             end
         end

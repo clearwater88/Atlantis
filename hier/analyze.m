@@ -1,7 +1,7 @@
 function allAuc = analyze()
 
     resFolder = 'resDataEx/';
-    resFile = 'testSweep0%d_imSize%d-%d__probMap-cov4x1_4x1_4x1_4x1__ds1_cell-dims7_7_5-strides8_8_4_context%d_alpha10_templates-17x3_9x3_5x3-selfRoot-10-100-1000_noise%d_trial%d';
+    resFile = 'testSweep%d_imSize%d-%d__probMap-cov4x1_4x1_4x1_4x1__ds1_cell-dims7_7_5-strides4_4_2_context%d_alpha1_templates-17x3_9x3_5x3-selfRoot-10-100-1000_noise%d_trial%d';
     
     imSizeTry = [50,75,100];
     contextTry = [0,1];
@@ -19,13 +19,20 @@ function allAuc = analyze()
                 for(nt=1:numel(noiseTry))
                     for (t=trialStart:trialStart+nTrials-1)
                         file = [resFolder,sprintf(resFile,testInds(ti),imSizeTry(imt),imSizeTry(imt),contextTry(at),noiseTry(nt),t)];
+                        
+                        if(~exist([file,'.mat'],'file'))
+                            display(['Warning, file does not exist: ', file]);
+                            continue;
+                        end
+                        
+                        
                         display(['Analyzing: ', file]);
 
-                        load(file,'cleanTestData','allParticles','params','templateStruct');
+                        load(file,'cleanData','allParticles','params','templateStruct');
 
-                        imSize = size(cleanTestData);
+                        imSize = size(cleanData);
 
-                        y = cleanTestData(:);
+                        y = cleanData(:);
  
                         [rotTemplates,~] = getRotTemplates(params,templateStruct);
 

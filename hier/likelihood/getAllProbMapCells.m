@@ -65,7 +65,9 @@ function [cellMapStruct] = getAllProbMapCells(cellParams,probMapStruct,ruleStruc
                                     probMapStruct, ...
                                     imSize,params.angles, ...
                                     cellParams);
-                                 
+                             
+                 assert(~any(isnan(probMapTemp)));
+                                
                  probMap{ruleId,slot,a} = probMapTemp;
                  locs{ruleId,slot,a} = locsTemp;
 

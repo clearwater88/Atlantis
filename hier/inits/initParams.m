@@ -2,7 +2,7 @@ function [params] = initParams()
     
     params.doLearning = 0;
 
-    params.probRoot = [0.00001,0.0001,0.001]; %epsilon
+    params.probRoot = [0.000001,0.000000000001,0.000000000001]; %epsilon
     params.bpIter = 20;
     params.nParticles = 10;
     params.thingsToSee=75;

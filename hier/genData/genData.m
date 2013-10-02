@@ -1,4 +1,7 @@
 function genData(nStart,nEnd,imSize)
+
+    close all;
+
     genFolder = 'genDataEx/';
     [~,~] = mkdir(genFolder);
 
@@ -132,7 +135,13 @@ function genData(nStart,nEnd,imSize)
         mask = (probPixel > 0.001);
         cleanData = rand(imSize) < probPixel;
 
-        save(sprintf(saveStr,n), 'particle','probPixel', 'mask','cleanData', 'templateStruct', 'params', 'ruleStruct','probMapStruct', '-v7.3');
+        figure(1);
+        subplot(1,3,1); imshow(cleanData);
+        subplot(1,3,2); imshow(mask);
+        subplot(1,3,3); imshow(probPixel);
+        pause;
+        
+        %save(sprintf(saveStr,n), 'particle','probPixel', 'mask','cleanData', 'templateStruct', 'params', 'ruleStruct','probMapStruct', '-v7.3');
         
     end
 

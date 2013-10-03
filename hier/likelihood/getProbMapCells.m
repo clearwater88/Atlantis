@@ -6,13 +6,13 @@ function [res,dirtyCoords] = getProbMapCells(ruleId,slot,chType,refPoint,probMap
     centres = cellParams.centres{chType};
     centreBoundaries = cellParams.centreBoundaries{chType};
     coords = cellParams.coords{chType};
-    
-    resPixels = getProbMapPixels(ruleId,slot,refPoint,probMapStruct,imSize,angles);
 
     offset = probMapStruct.offset{ruleId}(slot,:);
     covar = probMapStruct.cov{ruleId}(:,:,slot);
     centreUse = refPoint+offset;
 
+    resPixels = getProbMapPixels(ruleId,slot,refPoint,probMapStruct,imSize,angles);
+    
     [~,D] = eig(covar(1:2,1:2));
     maxStd = sqrt(max(D(:))); % find std of spatial direction of max variance
     
@@ -45,12 +45,6 @@ function [res,dirtyCoords] = getProbMapCells(ruleId,slot,chType,refPoint,probMap
             temp=temp+sumXY(indUseLow)+sumXY(indUseHigh);
 
         end
-        
-%         temp = 0;
-%         for (j=1:nAngleBins)
-%            indUse = mod(indStart-j,numel(sumXY))+1;
-%            temp=temp+sumXY(indUse);
-%         end
         res(i) = temp;
     end
     res = res/sum(res);

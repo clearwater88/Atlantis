@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Request an hour of runtime:
-#SBATCH --time=12:00:00
+#SBATCH --time=24:00:00
 
 # Default resources are 1 core with 2.8GB of memory.
 

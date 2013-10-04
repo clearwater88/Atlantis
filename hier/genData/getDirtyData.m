@@ -7,7 +7,7 @@ function getDirtyData(nStart,nEnd,imSize,noiseParam)
         load(sprintf(loadStr,n), 'particle', 'probPixel', 'mask','cleanData', 'templateStruct', 'params', 'ruleStruct','probMapStruct');
         
         templateStruct.bg = noiseParam;
-        templateStruct.app{4} = noiseParam;
+        templateStruct.app{end} = noiseParam;
         
         bg = rand(imSize) < templateStruct.bg;
         data = cleanData.*mask + bg.*(1-mask);

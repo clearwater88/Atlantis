@@ -1,4 +1,4 @@
-function [res,dirtyCoords] = getProbMapCells(ruleId,slot,chType,refPoint,probMapStruct,imSize,angles,cellParams)
+function [res,dirtyCoords,resPixels] = getProbMapCells(ruleId,slot,chType,refPoint,probMapStruct,imSize,angles,cellParams)
     % prob map in cells, [imSize x num angles]. Num angles steps in
     % angleDisc.
     % returns prob maps according to order in poseCellLocs
@@ -9,15 +9,22 @@ function [res,dirtyCoords] = getProbMapCells(ruleId,slot,chType,refPoint,probMap
 
     offset = probMapStruct.offset{ruleId}(slot,:);
     covar = probMapStruct.cov{ruleId}(:,:,slot);
-    centreUse = refPoint+offset;
-
-    resPixels = getProbMapPixels(ruleId,slot,refPoint,probMapStruct,imSize,angles);
+    vonM = probMapStruct.vonM(ruleId);
+    
+    % need to rotate offset
+    centreUse(3) = refPoint(3)+offset(3);
+    rotMat = [cos(centreUse(3)), sin(centreUse(3)); -sin(centreUse(3)), cos(centreUse(3))];
+    centreUse(1:2) = (rotMat*offset(1:2)')' + refPoint(1:2);
+    
+    resPixels = getProbMapPixels(offset,covar,vonM,refPoint,probMapStruct,imSize,angles);
     
     [~,D] = eig(covar(1:2,1:2));
     maxStd = sqrt(max(D(:))); % find std of spatial direction of max variance
     
     dirtyBounds(1:2,1) = centreUse(1:2)-3*maxStd;
     dirtyBounds(1:2,2) = centreUse(1:2)+3*maxStd;
+    dirtyBounds(:,1) = floor(dirtyBounds(:,1));
+    dirtyBounds(:,2) = ceil(dirtyBounds(:,2));
     
     dirtyInds = find(doesIntersect(dirtyBounds,centreBoundaries(1:2,:,:))==1);    
     dirtyCoords = coords(dirtyInds,:);
@@ -32,8 +39,7 @@ function [res,dirtyCoords] = getProbMapCells(ruleId,slot,chType,refPoint,probMap
         mapXY = resPixels(bd(1,1):bd(1,2), ...
                           bd(2,1):bd(2,2), ...
                           :);
-        sumXY = sum(sum(mapXY,1),2);
-        sumXY = sumXY(:);
+        sumXY = squeeze(sum(sum(mapXY,1),2));
         
         indStart = find(abs(angles - centre(3)) < 0.001,1,'first');
         nAngleBins = floor(abs(bd(3,2)-bd(3,1))/abs(angles(2)-angles(1)))/2;
@@ -48,5 +54,6 @@ function [res,dirtyCoords] = getProbMapCells(ruleId,slot,chType,refPoint,probMap
         res(i) = temp;
     end
     res = res/sum(res);
+    assert(~any(isnan(res(:))));
 end
 

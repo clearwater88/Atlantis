@@ -28,7 +28,7 @@ function genData(nStart,nEnd,imSize)
     
     templateStr = templateStruct.toString(templateStruct);
 
-    pxStr = ['pxInds_', 'imSize-', int2str(imSize(1)), '-', int2str(imSize(2)), '_', ...
+    pxStr = ['pxInds_', 'imSize-', int2str(imSize(1)), 'x', int2str(imSize(2)), '_', ...
              cellParams.toString(cellParams), '_', templateStr];
     
     likePxIdxCell = getLikePxIdxAll(cellParams,posesStruct,pxStr);
@@ -40,11 +40,8 @@ function genData(nStart,nEnd,imSize)
        nBricksType(n) = size(cellParams.coords{n},1);
     end
     maxSlots = size(ruleStruct.children,2);
-    
-    [gBkLookUp,refPoints] = getGbkLookUp(nTypes,maxSlots,ruleStruct,cellMapStruct);
+      
     conversions = getConversions(nTypes, cellParams);
-    
-    pGbkRbStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct);
     
     for (n=nStart:nEnd)
         display(sprintf('Generating example: %d', n));
@@ -57,9 +54,9 @@ function genData(nStart,nEnd,imSize)
             
             % choose self rooting.
             % *need to make sure don't self root already-existing child.*
-            coords = cellParams.coords{t};
-            selfRoot = rand(size(coords,1),1) < params.probRoot(t);
+            selfRoot = rand(size(cellParams.coords{t},1),1) < params.probRoot(t);
             if(t==1 && sum(selfRoot) == 0) % nothing here? create it
+               %idx=8808; %straight up, angle=0
                idx = randi(numel(selfRoot));
                selfRoot(idx) = 1;
             end
@@ -79,12 +76,7 @@ function genData(nStart,nEnd,imSize)
             
             for(k=1:numel(idx))
                 
-                % choose rule
-                ruleUse = ruleIdx(find(mnrnd(1,ruleProbs)==1));
-                
-                particle(7,idx(k)) = ruleUse;
-                
-                % now choose pose
+                % choose pose
                 centreIdx =  particle(3,idx(k));
                 centre = cellParams.centres{t}(centreIdx,:);
                 coord = cellParams.coords{t}(centreIdx,:);
@@ -96,6 +88,10 @@ function genData(nStart,nEnd,imSize)
                 
                 % use pose of cell for angle, not pose itself.
                 [~,agInd] = min(abs(posesStruct.angles-centre(3)));
+
+                % choose rule
+                ruleUse = ruleIdx(find(mnrnd(1,ruleProbs)==1));
+                particle(7,idx(k)) = ruleUse;
                 
                 % now choose children
                 childrenTypes = ruleStruct.children(ruleUse,:);
@@ -108,21 +104,40 @@ function genData(nStart,nEnd,imSize)
                     toAdd(2) = cType;
                     
                     % need to choose child cell
-                    probMapAll = pGbkRbStruct{ruleUse,slot}(:,agInd);
+%                     probMapAll = pGbkRbStruct{ruleUse,slot}(:,agInd);
+%                     
+%                     shiftedIndsAll = shiftGbkInds(gBkLookUp{t,slot}, ...
+%                                                   squeeze(conversions(:,t,:)), ...
+%                                                   refPoints(:,t), ...
+%                                                   coord(1:2));
+                              
+
+
+                                              
+                                              
+%                     badInds = shiftedIndsAll(2,:) < 1 | shiftedIndsAll(2,:) > coordInds(cType,1) |...
+%                               shiftedIndsAll(3,:) < 1 | shiftedIndsAll(3,:) > coordInds(cType,2);
+%                     shiftedInds = shiftedIndsAll(:,~badInds);
+%                     probMap = probMapAll(~badInds);
+%                     probMap = probMap/sum(probMap); % renormalize
                     
-                    shiftedIndsAll = shiftGbkInds(gBkLookUp{t,slot}, ...
-                                                  squeeze(conversions(:,t,:)), ...
-                                                  refPoints(:,t), ...
-                                                  coord(1:2));
-                    badInds = shiftedIndsAll(2,:) < 1 | shiftedIndsAll(2,:) > coordInds(cType,1) |...
-                              shiftedIndsAll(3,:) < 1 | shiftedIndsAll(3,:) > coordInds(cType,2);
-                    shiftedInds = shiftedIndsAll(:,~badInds);
-                    probMap = probMapAll(~badInds);
-                    probMap = probMap/sum(probMap); % renormalize
-                    
+                    probMap = cellMapStruct.probMap{ruleUse,slot,agInd};
+                    locs = cellMapStruct.locs{ruleUse,slot,agInd};
+
                     childIdx = find(mnrnd(1,probMap)==1);
-                    indUse = shiftedInds(2:end,childIdx);
-                    toAdd(3) = sub2ind(coordInds(cType,:),indUse(1),indUse(2),indUse(3));
+                    %indUse = shiftedInds(2:end,childIdx);
+                    
+                    % need to convert to right reference frame now
+                    convs=squeeze(conversions(:,t,:));
+                    
+                    temp = cat(1,cType*ones(1,size(locs,1)),locs');
+                    shiftedIndsAll = shiftGbkInds(temp, ...
+                                                  convs, ...
+                                                  cellMapStruct.refPoints(:,ruleUse), ...
+                                                  coord(1:2));
+                    loc = shiftedIndsAll(2:end,childIdx);
+                    
+                    toAdd(3) = sub2indNoCheck(coordInds(cType,:),loc(1),loc(2),loc(3));
                     particle = cat(2,particle,toAdd);
                 end
             end
@@ -139,9 +154,16 @@ function genData(nStart,nEnd,imSize)
         subplot(1,3,1); imshow(cleanData);
         subplot(1,3,2); imshow(mask);
         subplot(1,3,3); imshow(probPixel);
-        pause;
+        %pause;
         
-        %save(sprintf(saveStr,n), 'particle','probPixel', 'mask','cleanData', 'templateStruct', 'params', 'ruleStruct','probMapStruct', '-v7.3');
+        save(sprintf(saveStr,n), 'particle','probPixel', 'mask','cleanData', 'templateStruct', 'params', 'ruleStruct','probMapStruct', '-v7.3');
+       
+        figure(2);
+        sz(1) = ceil(sqrt(size(particle,2)));
+        sz(2) = ceil(size(particle,2)/sz(1));
+        for(i=1:size(particle,2))
+           subplot(sz(1),sz(2),i);  imshow(viewAllParticles(toCell(particle(:,1:i)),rotTemplates,params,imSize));
+        end
         
     end
 

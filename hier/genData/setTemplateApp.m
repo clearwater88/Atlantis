@@ -6,6 +6,7 @@ function [app] = setTemplateApp(sizes)
     stds(:,:,1) = diag([7,1]);
     stds(:,:,2) = diag([3,0.5]);
     stds(:,:,3) = diag([1,0.2]);
+    stds(:,:,4) = diag([0.5,0.1]);
     
     for (i=1:size(sizes,1))
         st = floor(sizes(i,1)/2);

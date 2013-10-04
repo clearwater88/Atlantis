@@ -33,8 +33,9 @@ function [allParticles,probOn,probOnFinal,msgs] = sampleParticlesBP(data,posesSt
             st2 = viewOverlayTest(data,particles,rotTemplates,params,imSize);
             subplot(1,3,3); imshow(st2);
         end
+        [logProbCellRatioOldParticle,ratiosImOldParticle,defaultLogLikeIm] = ...
+            evalDataRatio(data,nPosesCell,particleProbs,likePxIdxCells,likesIm,countsIm,templateStruct,cellParams,posesStruct,dirtyRegion,ratiosIm,logLikeCell,params);
         
-        %particles{1} = [1,1,69]';
         sOn = getProbOn(particles);
         if(params.useContext)
             %clampToOff = qq==params.thingsToSee;
@@ -51,7 +52,6 @@ function [allParticles,probOn,probOnFinal,msgs] = sampleParticlesBP(data,posesSt
             probOn{qq} = temp;
         end
         
-        [logProbCellRatioOldParticle,ratiosImOldParticle,defaultLogLikeIm] = evalDataRatio(data,nPosesCell,particleProbs,likePxIdxCells,likesIm,countsIm,templateStruct,cellParams,posesStruct,dirtyRegion,ratiosIm,logLikeCell,params);
         
         [cellType,cellLocIdx,probBrickOn] = getMostSalient(particles,probOn{qq},logProbCellRatioOldParticle,defaultLogLikeIm);
         dirtyRegion = findCellBounds(cellType,cellLocIdx,cellParams);

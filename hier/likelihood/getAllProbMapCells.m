@@ -1,8 +1,6 @@
 function [cellMapStruct] = getAllProbMapCells(cellParams,probMapStruct,ruleStruct,params,imSize)
 % probMap = cell(nRules,maxSlots,maxAngles);
 
-    cellCentres = cellParams.centres;
-
     nRules = numel(ruleStruct.parents);
     maxSlots = max(sum(ruleStruct.children~=0,2));    
 
@@ -13,14 +11,14 @@ function [cellMapStruct] = getAllProbMapCells(cellParams,probMapStruct,ruleStruc
     
     probMap = cell(nRules,maxSlots,maxAngles);
     probMapSpatial = cell(nRules,maxSlots,maxAngles);
+    resPixels = cell(nRules,maxSlots,maxAngles);
     locs = cell(nRules,maxSlots,maxAngles);
     
-    refPointsTemp = zeros(cellParams.nTypes,2);
-    
     % find reference point
-    imCentre = (imSize+1)/2;
+    refPointsTemp = zeros(cellParams.nTypes,2);
+    imCentre = floor((imSize+1)/2);
     for (n=1:cellParams.nTypes)
-        locsUse = cellCentres{n};          
+        locsUse = cellParams.centres{n};          
         diff = sum(bsxfun(@minus,locsUse(:,1:2),imCentre).^2,2);
         [~,temp] = min(diff);
         refPointsTemp(n,:) = locsUse(temp,1:2);
@@ -32,7 +30,7 @@ function [cellMapStruct] = getAllProbMapCells(cellParams,probMapStruct,ruleStruc
     end
     
     childType = zeros(nRules,maxSlots);
-    parentType = zeros(nRules);
+    parentType = zeros(nRules,1);
     % easier to work with if we just replicate the refpoints
     refPoints = zeros(2,nRules,maxSlots);
 
@@ -46,12 +44,10 @@ function [cellMapStruct] = getAllProbMapCells(cellParams,probMapStruct,ruleStruc
                 
         nAngles = numel(angles{type});
         
-        tic
         for (slot=1:nSlots)
             chType = ch(slot);
             childType(ruleId,slot) = chType;
             
-            refPointPixel = refPointsTemp(type,:);
             refPoints(:,ruleId,slot) = ...
                 centre2CellFrame(refPointsTemp(type,:), ...
                 cellParams.strides(type,1:2), ...
@@ -59,30 +55,24 @@ function [cellMapStruct] = getAllProbMapCells(cellParams,probMapStruct,ruleStruc
             assert(~any(abs(mod(refPoints(:,ruleId,slot),1)) > 0.0001));
             
             for (a=1:nAngles)
-                [probMapTemp,locsTemp]= ...
+                [probMapTemp,locsTemp,resPixelsTemp]= ...
                     getProbMapCells(ruleId,slot, chType, ...
-                                    [refPointPixel';angles{type}(a)]', ...
-                                    probMapStruct, ...
-                                    imSize,params.angles, ...
-                                    cellParams);
-                             
-                 assert(~any(isnan(probMapTemp)));
-                                
-                 probMap{ruleId,slot,a} = probMapTemp;
-                 locs{ruleId,slot,a} = locsTemp;
-
-                 rg = max(locsTemp)-min(locsTemp)+1;
+                    [refPointsTemp(type,:)';angles{type}(a)]', ...
+                    probMapStruct, ...
+                    imSize,params.angles, ...
+                    cellParams);
+                
+                probMap{ruleId,slot,a} = probMapTemp;
+                locs{ruleId,slot,a} = locsTemp;
+                resPixels{ruleId,slot,a}=resPixelsTemp;
+                 
                  % may not be symmetric; depends on how gridding of parent 
                  % and child centres align
-                 probMapSpatial{ruleId,slot,a} = reshape(probMapTemp,rg);
-                 [val] = max(probMapSpatial{ruleId,slot,a},[],3);
-                 temp = probMapSpatial{ruleId,slot,a}(:,:,a);
-                 assert(~any(val(:)-temp(:) > 0.001));
+                 probMapSpatial{ruleId,slot,a} = ...
+                     reshape(probMapTemp,max(locsTemp)-min(locsTemp)+1);
             end
         end
-        toc
     end
-    
     cellMapStruct.probMap = probMap;
     cellMapStruct.probMapSpatial = probMapSpatial;
     cellMapStruct.locs = locs; % in coords of child

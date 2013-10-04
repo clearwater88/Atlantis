@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Request an hour of runtime:
-#SBATCH --time=12:00:00
+#SBATCH --time=24:00:00
 
 # Default resources are 1 core with 2.8GB of memory.
 
@@ -15,7 +15,7 @@
 #SBATCH -o MyMatlabJob-%j.out
 #SBATCH -e MyMatlabJob-%j.out
 
-#SARRAY --range=1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31
+#SARRAY --range=5,10,15,20,25,30,35,40,45,50
 
 # Run a matlab script called 'foo.m' in the same directory as this batch script.
 #matlab -r "foo; exit"

@@ -11,7 +11,8 @@ function likePxIdxCells = getLikePxIdxAll(cellParams,posesStruct,pxStr)
         display(['File does not exist: ', pxStr]);
         display('Starting likePxIdxCells computation');
         likePxIdxCells = cell(cellParams.nTypes,1);
-        for (n=1:cellParams.nTypes)
+        for (n=cellParams.nTypes:-1:1)
+            display(['Computing idx for type: ', int2str(n)]);
             likePxIdxCells{n}= doGetLikePxIdxAll(cellParams.centres{n}, ...
                                                  cellParams.dims(n,:), ...
                                                  posesStruct.poses{n});
@@ -26,8 +27,8 @@ function res = doGetLikePxIdxAll(cellCentre,cellDims,poseCentres)
 
     NBATCH = 20;
 
-    lowCell = bsxfun(@minus,cellCentre(:,1:2),(cellDims(1:2)-1)/2)';
-    highCell = bsxfun(@plus,cellCentre(:,1:2),(cellDims(1:2)-1)/2)'; 
+    lowCell = bsxfun(@minus,cellCentre(:,1:2),(cellDims(1:2)+1)/2)';
+    highCell = bsxfun(@plus,cellCentre(:,1:2),(cellDims(1:2)+1)/2)'; 
     
     poseCentres = reshape(poseCentres',[3,1,numel(poseCentres)/3]);
     % size: #cellCentres x # pixels (size(poseCentres,3))

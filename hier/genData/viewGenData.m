@@ -4,7 +4,7 @@ function viewGenData(nStart,nEnd,imSize)
     str = [genDataFolder,'ex%d_imSize%d-%d_noiseParam-%d'];
     %str = [genDataFolder,'exClean%d_imSize%d-%d'];
 
-    noiseTry = [1:2:31];
+    noiseTry = [5:5:50];
     
     for(n=nStart:nEnd)
 
@@ -23,7 +23,7 @@ function viewGenData(nStart,nEnd,imSize)
 % 
 %         figure(1);
 %         imshow(makeCollage(ims,[sz1,sz2]));
-%         pause
+        pause
     end
     
 end

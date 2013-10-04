@@ -2,8 +2,8 @@ function res = getLocsUse(strides,cellDims, sz, imSize)
     % locations in column-major
 
     maxSz = max(sz);
-    temp = (maxSz+1)/2+1:strides(1):(imSize(1)+1)-(maxSz-1)/2-1;
-    temp2 = (maxSz+1)/2+1:strides(2):(imSize(2)+1)-(maxSz-1)/2-1;
+    temp = (maxSz+1)/2:strides(1):imSize(1)-(maxSz+1)/2;
+    temp2 = (maxSz+1)/2:strides(2):imSize(2)-(maxSz+1)/2;
     
     % cellBoundary angles start are [-pi:pi)
     temp3 = -pi:strides(3):pi-0.00001;

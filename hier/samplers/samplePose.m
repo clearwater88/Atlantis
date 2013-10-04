@@ -1,10 +1,10 @@
-function [pose,likeNew,countNew] = samplePose(data,likeIm,countsIm,ratiosIm,likePxIdxCell,posesStruct,cellType,centreIdx)
+function [pose,likeNew,countNew] = samplePose(data,likeIm,countsIm,ratiosImCell,likePxIdxCell,posesStruct,cellType,centreIdx)
 
     % need to provide particle
     % also updates likelihood maps
 
     poses = posesStruct.poses{cellType};
-    ratiosIm = ratiosIm{cellType};
+    ratiosIm = ratiosImCell{cellType};
     
     ids = likePxIdxCell{cellType}{centreIdx};
     

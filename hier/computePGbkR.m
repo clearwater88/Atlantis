@@ -21,8 +21,8 @@ function pGbkRStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct)
             
             for (ag=1:numel(cellMapStruct.angles{parType}))
                 probMapUse = cellMapStruct.probMap{r,k,ag};
-                locsUse = cellMapStruct.locs{r,k,ag}';
-                locsUse = [ruleStruct.children(r,k)*ones(1,size(locsUse,2)); locsUse];
+                locsUse = [ruleStruct.children(r,k)*ones(1,size(cellMapStruct.locs{r,k,ag},1)); ...
+                           cellMapStruct.locs{r,k,ag}'];
                 
                 temp = zeros(size(gbkInds,2),1);
                 idGuess = 1;

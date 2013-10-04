@@ -1,5 +1,7 @@
 function [gBkLookUp,refPoints,typeInds] = getGbkLookUp(nTypes,maxSlots,ruleStruct,cellMapStruct)
-    %gBkLookUp = [nTypes,maxSlots]
+
+    % possible children of each brick. Incorporates all rules
+
     nRules = size(ruleStruct.rules,1);
 
     gBkLookUp = cell(nTypes,maxSlots);

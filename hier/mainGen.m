@@ -12,10 +12,9 @@ function mainGen(imSize, noiseParam, useContext,resFolder,nStart,nTrials)
     [~,~]=mkdir(resFolder);
 
     %[trainInds,testInds] = splitData(10,0.5,0.5);
-    trainInds = [1:5];
-    testInds=[6:10];
+    %trainInds = [1:5];
+    testInds=[1:5];
     
-%     params = initParams;
 %     params.downSampleFactor = ds;
 %     params.useContext = useContext;
 %     params.alpha = alpha;
@@ -26,7 +25,15 @@ function mainGen(imSize, noiseParam, useContext,resFolder,nStart,nTrials)
         for (i=1:numel(testInds))
             
             load(sprintf(genStr,testInds(i)),'probPixel', 'mask', 'data', 'cleanData','ruleStruct','probMapStruct','templateStruct','ruleStruct','params');
-            params.useContext=useContext;
+            
+            params2 = initParams;
+            % set defaults
+            params2.useContext=useContext;
+            params2.alpha = 1;
+            %copy over
+            params2.downSampleFactor = params.downSampleFactor;
+            params2.probRoot = params.probRoot;
+            params=params2; clear params2;
 
             testData = data;
             

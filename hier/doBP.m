@@ -21,7 +21,7 @@
 
 function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,imSize,clampToOff)
     % things stored in raster order:x,y,angleInd
-    verbose = 0;
+    verbose = 1;
     
     nTypes = numel(unique(ruleStruct.parents));
     nBricksType = zeros(nTypes,1);
@@ -53,10 +53,12 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
             uFb3ToGbk_1{n,k} = 0.01 + 0.001*rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
             uFb3ToGbk_1{n,k}(:,1) = 1;
             uFb3ToGbk_1{n,k} = bsxfun(@rdivide, uFb3ToGbk_1{n,k}, sum(uFb3ToGbk_1{n,k},2));
-            uGbkToFb1_0{n,k} = 1-((params.probRoot(n)) + rand(nBricksType(n),size(gBkLookUp{n,k},2))); %[#bricks, #potential children]
+            uGbkToFb1_0{n,k} = 1-((params.probRoot(n)) + 0.01*rand(nBricksType(n),size(gBkLookUp{n,k},2))); %[#bricks, #potential children]
         end
     end
     prodGbk_0 = computeAllProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uGbkToFb1_0);
+    logProdGbk_0 = computeAllLogProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uGbkToFb1_0);
+    
     % uRbToFb3 = uFb2ToRb
 
     % allocate space for bottom-up messages
@@ -90,13 +92,24 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
 
     for(iter=1:params.bpIter)
         %% up pass
+        if(verbose)
+           display(['Computing: uGbkToFb3']);
+           tic
+        end
         uGbkToFb3 = compute_uGbkFb3(nTypes,maxSlots,uFb1ToGbk_total_0);
         for (n=1:size(uGbkToFb3,1))
             for(k=1:size(uGbkToFb3,2))
                 assert(~any(isnan(uGbkToFb3{n,k}(:))));
             end
         end
+        if(verbose)
+            toc;
+        end
         
+        if(verbose)
+           display(['Computing: logPgbkRbMuFb3 and uRbToFb2']);
+           tic
+        end
         % logPgbkRbMuFb3: [nbricks, #rules, maxSlots]
         logPgbkRbMuFb3 = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,cellParams,pGbkRbStruct,uGbkToFb3);
         for (n=1:nTypes)
@@ -105,7 +118,14 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
             uRbToFb2{n} = exp(bsxfun(@minus,temp,logsum(temp,2)));
             assert(~any(isnan(uRbToFb2{n}(:))));
         end
+        if(verbose)
+            toc;
+        end
         
+        if(verbose)
+           display(['Computing: uSbToFb1_0']);
+           tic
+        end
         for (n=1:nTypes)
             ruleIds = ruleStruct.parents==n;
             probs = ruleStruct.probs(ruleIds)';
@@ -114,10 +134,25 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
             assert(~any(isnan(uSbToFb1_0{n}(:))));
         end
         uSbToFb1_0 = correctFromSb_0(uSbToFb1_0,sOn);
+        if(verbose)
+            toc;
+        end
         
         % indexed by parent;
+        if(verbose)
+           display(['Computing: reverse_uSbToFb1_0 and reverseProdGbk']);
+           tic
+        end
         reverse_uSbToFb1_0 = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uSbToFb1_0);
-        reverseProdGbk = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,prodGbk_0);
+        logReverseProdGbk = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,logProdGbk_0);
+        if(verbose)
+            toc;
+        end
+        
+        if(verbose)
+           display(['Computing: uFb1ToGbk_total_0']);
+           tic
+        end
         for (n=1:nTypes)
             for (k=1:maxSlots)
                 
@@ -126,7 +161,8 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
                     uFb1ToGbk_total_0{n,k} = uGbkToFb1_0{n,k};
                     continue;
                 end;
-                tempRatio = (1-params.probRoot(n))*reverseProdGbk{n,k}./uGbkToFb1_0{n,k};
+                %tempRatio = (1-params.probRoot(n))*reverseProdGbk{n,k}./uGbkToFb1_0{n,k};
+                tempRatio = (1-params.probRoot(n))*exp(logReverseProdGbk{n,k}-log(uGbkToFb1_0{n,k}));
                 
                 temp0 = reverse_uSbToFb1_0{n,k}.*tempRatio + (1-reverse_uSbToFb1_0{n,k}).*(1-tempRatio); % this is for a single value of g
                 temp0 = temp0*size(gBkLookUp{n,k},2);
@@ -136,27 +172,50 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
                     temp = isnan(uFb1ToGbk_total_0{n,k}(:));
                     uFb1ToGbk_total_0{n,k}(temp) = 0.99999;
                 end
+                %assert(isreal(uFb1ToGbk_total_0{n,k}));
+                if(~isreal(uFb1ToGbk_total_0{n,k})) 
+                    display(['Something in uFb1ToGbk_total_0{n,k} is imaginary']);
+                    
+                    a=uFb1ToGbk_total_0{n,k};
+                    save('imaginary','a');
+                    clear a;
+                   
+                    uFb1ToGbk_total_0{n,k} = real(uFb1ToGbk_total_0{n,k});
+                end
                 assert(~any(uFb1ToGbk_total_0{n,k}(:)< -0.0001));
             end
+        end
+        if(verbose)
+            toc;
         end
         %% up pass
         
         %% down pass
-        
+        if(verbose)
+           display(['Computing: uFb1ToSb_0']);
+           tic
+        end
         for (n=1:nTypes)
-            uFb1ToSb_0{n} = (1-params.probRoot(n))*prodGbk_0{n};
+            %uFb1ToSb_0{n} = (1-params.probRoot(n))*prodGbk_0{n};
+            uFb1ToSb_0{n} = exp(log(1-params.probRoot(n))+logProdGbk_0{n});
             assert(~any(isnan(uFb1ToSb_0{n}(:))));
         end
-        
         if(clampToOff==1)
             for (n=1:nTypes)
                 uFb1ToSb_0{n} = clamp_msg_0(uFb1ToSb_0{n},sOn,n);
             end
         end
+        if(verbose)
+            toc;
+        end
         
         uSbToFb2_0 = uFb1ToSb_0;
         uSbToFb2_0 = correctFromSb_0(uSbToFb2_0,sOn);
         
+        if(verbose)
+           display(['Computing: uFb2ToRb']);
+           tic
+        end
         for (n=1:nTypes)
             ruleIds = ruleStruct.parents==n;
             probs = ruleStruct.probs(ruleIds)';
@@ -167,9 +226,24 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
             uFb2ToRb{n} = bsxfun(@rdivide,temp,sum(temp,2));
             assert(~any(isnan(uFb2ToRb{n}(:))));
         end
+        if(verbose)
+            toc;
+        end
         
+        if(verbose)
+           display(['Computing: logPgbkRbMuFb3']);
+           tic
+        end
         % logPgbkRbMuFb3: [nbricks, #rules, maxSlots]
         logPgbkRbMuFb3 = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,cellParams,pGbkRbStruct,uGbkToFb3);
+        if(verbose)
+            toc;
+        end
+        
+        if(verbose)
+           display(['Computing: uFb3ToGbk_1']);
+           tic
+        end
         for (n=1:nTypes)
             ags = cellParams.coords{n}(:,3);
             nAngles = numel(unique(ags));
@@ -191,18 +265,48 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
                     end;
                     for (ag=1:nAngles)
                         agId = ags==ag;
-                        pGbkRbTemp = [0,pGbkRb(:,ag)'];
-                        logMessageTemp(agId,:,r) = bsxfun(@plus,tempLogMess(agId,r,k),log(pGbkRbTemp));
+                        logPGbkRbTemp = log([10^-10,pGbkRb(:,ag)']);
+                        logMessageTemp(agId,:,r) = bsxfun(@plus,tempLogMess(agId,r,k),logPGbkRbTemp);
+                        
+                        temp = logMessageTemp(agId,:,r);
+                        temp(isinf(temp)) = -10^10;
+                        logMessageTemp(agId,:,r) = temp;
+                        
+                        temp = logMessageTemp(agId,:,r);
+                        if(any(isnan(temp(:))) || any(isinf(temp(:))))
+                        end
+                        
+                        temp = logsum(logMessageTemp,3);
+                
+                        temp = exp(bsxfun(@minus,temp,logsum(temp,2)));
+                        assert(~any(isnan(temp(:))))
+                        
                     end
                     
                 end
                 finalLogMess = logsum(logMessageTemp,3);
-                finalLogMess(isnan(finalLogMess)) = -Inf;
+                %finalLogMess(isnan(finalLogMess)) = -Inf;
                 uFb3ToGbk_1{n,k} = exp(bsxfun(@minus,finalLogMess,logsum(finalLogMess,2)));
-                assert(~any(isnan(uFb3ToGbk_1{n,k}(:))));
+                a=uFb3ToGbk_1{n,k};
+                if(any(isnan(a(:))))
+                    display('stuff is nan, you');
+                    a(isnan(a)) = 0.0000001;
+                    a = bsxfun(@rdivide,a,sum(a,2));
+                    uFb3ToGbk_1{n,k}=a;
+                end
+                
+                
+%                 assert(~any(isnan(uFb3ToGbk_1{n,k}(:))));
             end
         end
+        if(verbose)
+            toc;
+        end
         
+        if(verbose)
+           display(['Computing: uGbkToFb1_0']);
+           tic
+        end
         for (n=1:nTypes) % loop over parents
             for(k=1:maxSlots)
                 %singleLogMess_0 = log(uFb1ToGbk_total_0{n,k}/(size(uFb1ToGbk_total_0{n,k},2)-1)); % WRONG WAY TO NORMALIZE
@@ -223,22 +327,36 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
                 assert(~any(isnan(uGbkToFb1_0{n,k}(:))));
             end
         end
-        prodGbk_0 = computeAllProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uGbkToFb1_0);
+        if(verbose)
+            toc;
+        end
+        
+        if(verbose)
+           display(['Computing: logProdGbk_0']);
+           tic
+        end
+        logProdGbk_0 = computeAllLogProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uGbkToFb1_0);
+        if(verbose)
+            toc;
+        end
         
         %% down pass
         
         if(verbose)
             probOn = cell(nTypes,1);
-            figure(1000);
+            
             for (n=1:nTypes)
-                probs = combineMsgs(cat(3,...
+                logProbs = combineLogMsgs(cat(3,...
                     [uFb1ToSb_0{n}(:), 1-uFb1ToSb_0{n}(:)], ...
                     [uSbToFb1_0{n}(:), 1-uSbToFb1_0{n}(:)]));
-                probOn{n} = probs(:,2);
+                probOn{n} = exp(logProbs(:,2));
+                assert(~any(isnan(probOn{n})));
             end
-            viewHeatMap(sOn,probOn,cellParams,imSize);
+            %figure(1000);
+            %viewHeatMap(sOn,probOn,cellParams,imSize);
         end
     end
+    
     msgs.uFb1ToSb_0 = uFb1ToSb_0;
     msgs.uFb2ToRb = uFb2ToRb;
     msgs.uFb3ToGbk_1 = uFb3ToGbk_1;
@@ -310,6 +428,26 @@ function prodGbk_0 = computeAllProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,con
     end
 end
 
+function logProdGbk_0 = computeAllLogProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uGbkToFb1_0)
+    % logProdGbk_0{n}(coord): log sum of Gbk's of this brick's parents
+
+    logProdGbk_0 = cell(nTypes,1);
+    for (n=1:nTypes)
+        logProdGbk_0{n} = zeros(nCoordsInds(n,:));
+    end
+
+    for (n=1:nTypes) % loop over parents
+        for(k=1:maxSlots)
+            gbkType = gBkLookUp{n,k};
+            if(isempty(gbkType)) continue; end; % no children
+            conversionsType = squeeze(conversions(:,n,:));
+            refPointType = refPoints(:,n);
+            
+            logProdGbk_0 = computeLogProdGbk(gbkType, conversionsType,  refPointType, nCoordsInds(n,:)', log(uGbkToFb1_0{n,k}), logProdGbk_0);
+        end
+    end
+end
+
 function res = compute_uGbkFb3(nTypes,maxSlots,uFb1ToGbk_total_0)
     %uFb1Gbk_0: cell(#types,maxSlots)
     %uFb1Gbk_0{n,k}: [#types,#potential children]);
@@ -351,7 +489,8 @@ function res = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,
                 nAngles = numel(unique(ags));
                 for (ag=1:nAngles)
                     agId = ags==ag;
-                    temp = log(sum(bsxfun(@times,[0,pGbkRb(:,ag)'],mUse(agId,:)),2));
+                    %temp = log(sum(bsxfun(@times,[0,pGbkRb(:,ag)'],mUse(agId,:)),2));
+                    temp=(logsum(bsxfun(@plus,log([10^-10,pGbkRb(:,ag)']),log(mUse(agId,:))),2));
                     tempFill(agId,k) = temp;
                 end
             end

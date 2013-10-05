@@ -32,8 +32,10 @@ function mainGen(imSize, noiseParam, useContext,resFolder,nStart,nTrials)
             params2.alpha = 1;
             %copy over
             params2.downSampleFactor = params.downSampleFactor;
-            params2.probRoot = params.probRoot;
+            %params2.probRoot = params.probRoot;
             params=params2; clear params2;
+
+            ruleStruct = initRules(); % DEBUGGING
 
             testData = data;
             

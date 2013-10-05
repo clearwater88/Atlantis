@@ -2,7 +2,7 @@ function [params] = initParams()
     
     params.doLearning = 0;
 
-    params.probRoot = [1*10^-6,1*10^-7,1*10^-8,1*10^-9]; %epsilon
+    params.probRoot = [1*10^-2,1*10^-3,1*10^-4,1*10^-5]; %epsilon
     params.bpIter = 6;
     params.nParticles = 10;
     params.thingsToSee=75;

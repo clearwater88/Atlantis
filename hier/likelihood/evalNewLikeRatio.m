@@ -55,10 +55,7 @@ function res = evalLikeRatioPartition(partition,agInd,type,initLikes,initCounts,
     countsTot = bsxfun(@plus,counts,countsUse);
 
     temp = log(evalLike(likesTot,countsTot,alpha) ./ evalLike(likeUse,countsUse,alpha));
-    temp = sum(sum(temp,1),2);
-    
-    res = reshape(temp,[numel(temp),1]);
-    
+    res = squeeze(sum(sum(temp,1),2));    
 end
 
 function [dirtyPartitions,ags] = splitDirty(type,dirty,evalLikeDims,posesStruct)

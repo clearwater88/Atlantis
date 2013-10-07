@@ -1,6 +1,7 @@
 function pGbkRStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct)
     % in raster order!
     % pGbkRStruct = cell(nRules,maxSlots);
+    % pGbkRStruct: %nBricks x nAngles
     
     nTypes = numel(unique(ruleStruct.parents));
     maxSlots = size(ruleStruct.children,2);
@@ -11,6 +12,7 @@ function pGbkRStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct)
     end
     
     pGbkRStruct = cell(nRules,maxSlots);
+    idxUsed = [];
     
     for (r=1:size(ruleStruct.rules,1))
         parType = ruleStruct.parents(r);
@@ -19,6 +21,7 @@ function pGbkRStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct)
             gbkInds = gBkLookUp{parType,k};
             tempAll = [];
             
+            idxUsed = [];
             for (ag=1:numel(cellMapStruct.angles{parType}))
                 probMapUse = cellMapStruct.probMap{r,k,ag};
                 locsUse = [ruleStruct.children(r,k)*ones(1,size(cellMapStruct.locs{r,k,ag},1)); ...
@@ -29,13 +32,18 @@ function pGbkRStruct = computePGbkR(gBkLookUp,ruleStruct,cellMapStruct)
                 
                 for (i=1:numel(temp))
                     d = gbkInds(:,i) - locsUse(:,idGuess);
-                    if (any(d > 0.001))
+                    if (any(abs(d) > 0.001))
                         a=sum(abs(bsxfun(@minus,gbkInds(:,i),locsUse)),1);
                         id = find(a < 0.001);
                     else
                         id = idGuess;
                     end
                     if(~isempty(id))
+                        if(contains(idxUsed,id))
+                            
+                        end
+                        idxUsed = [idxUsed,id];
+                        
                         temp(i) = probMapUse(id);
                         idGuess = min(id+1,size(locsUse,2));
                     else

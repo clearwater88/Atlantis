@@ -121,10 +121,9 @@ function genData(nStart,nEnd,imSize)
 %                     probMap = probMapAll(~badInds);
 %                     probMap = probMap/sum(probMap); % renormalize
                     
-                    probMap = cellMapStruct.probMap{ruleUse,slot,agInd};
+                    
                     locs = cellMapStruct.locs{ruleUse,slot,agInd};
 
-                    childIdx = find(mnrnd(1,probMap)==1);
                     %indUse = shiftedInds(2:end,childIdx);
                     
                     % need to convert to right reference frame now
@@ -135,7 +134,21 @@ function genData(nStart,nEnd,imSize)
                                                   convs, ...
                                                   cellMapStruct.refPoints(:,ruleUse), ...
                                                   coord(1:2));
-                    loc = shiftedIndsAll(2:end,childIdx);
+
+                     badInds = shiftedIndsAll(2,:) < 1 | shiftedIndsAll(2,:) > coordInds(cType,1) |...
+                               shiftedIndsAll(3,:) < 1 | shiftedIndsAll(3,:) > coordInds(cType,2);
+                     shiftedInds = shiftedIndsAll(:,~badInds);
+                     
+                     probMapAll = cellMapStruct.probMap{ruleUse,slot,agInd};
+                     probMap = probMapAll(~badInds);
+                     probMap = probMap/sum(probMap); % renormalize
+                     childIdx = find(mnrnd(1,probMap)==1);
+ 
+                     loc = shiftedInds(2:end,childIdx);
+                    
+                    
+                    
+                   
                     
                     toAdd(3) = sub2indNoCheck(coordInds(cType,:),loc(1),loc(2),loc(3));
                     particle = cat(2,particle,toAdd);
@@ -156,7 +169,7 @@ function genData(nStart,nEnd,imSize)
         subplot(1,3,3); imshow(probPixel);
         %pause;
         
-        save(sprintf(saveStr,n), 'particle','probPixel', 'mask','cleanData', 'templateStruct', 'params', 'ruleStruct','probMapStruct', '-v7.3');
+        save(sprintf(saveStr,n), 'particle','probPixel', 'mask','cleanData', 'templateStruct', 'params', 'ruleStruct','probMapStruct', 'cellParams','-v7.3');
        
         figure(2);
         sz(1) = ceil(sqrt(size(particle,2)));

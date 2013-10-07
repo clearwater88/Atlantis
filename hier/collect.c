@@ -24,11 +24,12 @@ void mexFunction( int nlhs, mxArray *plhs[],
     /*for (i=0; i < 1; i++) {*/
         sliceInd = i*nBoundsSlice;
         
-        /* change to 0-indexed*/
+        /* change to 0-indexed. Skip over angles during indexing.*/
         start1 = (int) bounds[sliceInd]-1;
         end1 = (int) bounds[sliceInd+3]-1;
         start2 = (int) bounds[sliceInd+1]-1;
         end2 = (int) bounds[sliceInd+4]-1;
+        /*end2 = (int) bounds[sliceInd+3]-1;*/
         
         dataSliceInd = i*nDataSlice;
         ind = 0;

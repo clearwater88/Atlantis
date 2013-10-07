@@ -1,16 +1,16 @@
 function allAuc = analyze()
 
     resFolder = 'resDataEx/';
-    resFile = 'testSweep%d_imSize%d-%d__probMap-cov4x1_4x1_4x1_4x1__ds1_cell-dims7_7_5-strides4_4_2_context%d_alpha1_templates-17x3_9x3_5x3-selfRoot-10-100-1000_noise%d_trial%d';
+    resFile = 'testSweep%d_imSize%d-%d__probMap-cov4x4_4x4_4x4_4x4_4x4_4x4_4x4_4x4_4x4__ds1_cell-dims5_5_5_5-strides3_3_3_3_context%d_alpha100_templates-33x5_17x5_9x5_5x5-selfRoot-0-0-0-1_noise%d_trial%d';
     
-    imSizeTry = [50,75,100];
-    contextTry = [0,1];
-    noiseTry = [1:2:31];
+    imSizeTry = [75];
+    contextTry = [1];
+    noiseTry = [5:5:50];
     
-    testInds =[6:10];
+    testInds =[1:5];
     
     trialStart = 0;
-    nTrials = 2;
+    nTrials = 1;
     
     allAuc= zeros(numel(noiseTry),numel(contextTry),numel(testInds),numel(imSizeTry),nTrials);
     for (imt=1:numel(imSizeTry))

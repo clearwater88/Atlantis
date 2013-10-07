@@ -32,10 +32,10 @@ function mainGen(imSize, noiseParam, useContext,resFolder,nStart,nTrials)
             params2.alpha = 1;
             %copy over
             params2.downSampleFactor = params.downSampleFactor;
-            %params2.probRoot = params.probRoot;
+            params2.probRoot = params.probRoot;
             params=params2; clear params2;
 
-            ruleStruct = initRules(); % DEBUGGING
+            %ruleStruct = initRules(); % DEBUGGING
 
             testData = data;
             
@@ -63,11 +63,11 @@ function mainGen(imSize, noiseParam, useContext,resFolder,nStart,nTrials)
             if(exist([saveStr,'.mat'],'file'))
                 display(['File exists: ', saveStr]);
             else
-                [allParticles,probOn,probOnFinal,msgs] = doInfer(testData,params,ruleStruct,templateStruct,probMapStruct,cellParams,imSize);
+                [allParticles,probOn,probOnFinal,msgs,ratiosIm,avgLogLikeIm] = doInfer(testData,params,ruleStruct,templateStruct,probMapStruct,cellParams,imSize);
                 finalParticles = allParticles{end};
                 save(saveStr,'cleanData', 'data', 'allParticles', 'probOn', ...
                     'templateStruct', 'probMapStruct', 'ruleStruct', 'cellParams', ...
-                    'params','msgs', 'finalParticles','ruleStruct','probOnFinal','-v7.3');
+                    'params','msgs', 'finalParticles','ratiosIm','ruleStruct','probOnFinal','avgLogLikeIm','-v7.3');
             end
 
         end

@@ -1,4 +1,4 @@
-function [allParticles,probOn,probOnFinal,msgs] = sampleParticlesBP(data,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct,imSize)
+function [allParticles,probOn,probOnFinal,msgs,ratiosImAll,avgLogLikeIm] = sampleParticlesBP(data,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct,imSize)
 
     verbose = 0;
 
@@ -16,31 +16,30 @@ function [allParticles,probOn,probOnFinal,msgs] = sampleParticlesBP(data,posesSt
     % initialize
     brickIdx = 1;
     dirtyRegion = [];
+    ratiosImAll = cell(params.thingsToSee,1);
     ratiosIm = cell(params.nParticles,1);
     logLikeCell = cell(params.nParticles,1);
     nPosesCell = getNumPoses(likePxIdxCells);
     probOn = cell(params.thingsToSee,1);
+    avgLogLikeIm = zeros(params.thingsToSee,1);
     
     [rotTemplates,~] = getRotTemplates(params,templateStruct);
+    
     for (qq=1:params.thingsToSee);
         
         display(['bp iter: ', int2str(qq)]);
         
-        if(verbose)
-            figure(200); subplot(1,3,1); imshow(data);
-            st = viewAllParticles(particles,rotTemplates,params,imSize);
-            subplot(1,3,2); imshow(st);
-            st2 = viewOverlayTest(data,particles,rotTemplates,params,imSize);
-            subplot(1,3,3); imshow(st2);
-        end
         [logProbCellRatioOldParticle,ratiosImOldParticle,defaultLogLikeIm] = ...
-            evalDataRatio(data,nPosesCell,particleProbs,likePxIdxCells,likesIm,countsIm,templateStruct,cellParams,posesStruct,dirtyRegion,ratiosIm,logLikeCell,params);
+            evalDataRatio(data,nPosesCell,particleProbs,likePxIdxCells,likesIm,countsIm,templateStruct,cellParams,posesStruct,dirtyRegion,ratiosIm,logLikeCell,params,templateStruct.sizes);
+        ratiosImAll{qq} = ratiosImOldParticle;
         
         sOn = getProbOn(particles);
         if(params.useContext)
             %clampToOff = qq==params.thingsToSee;
             clampToOff = 0;
-            [probOn{qq},msgs] = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn,imSize,clampToOff);           
+                
+            [probOn{qq},msgs] = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn,imSize,clampToOff);
+        
             
         else
             msgs = [];
@@ -54,14 +53,22 @@ function [allParticles,probOn,probOnFinal,msgs] = sampleParticlesBP(data,posesSt
         
         
         [cellType,cellLocIdx,probBrickOn] = getMostSalient(particles,probOn{qq},logProbCellRatioOldParticle,defaultLogLikeIm);
-        dirtyRegion = findCellBounds(cellType,cellLocIdx,cellParams);
         
         newParticles = cell(params.nParticles,1);
         newLikes = cell(params.nParticles,1);
         newCounts = cell(params.nParticles,1);
         
+        temp = zeros(numel(logProbCellRatioOldParticle),1);
+        for (pp=1:numel(logProbCellRatioOldParticle))
+            temp(pp) = logProbCellRatioOldParticle{pp}{cellType}(cellLocIdx);
+        end
+        avgLogLikeIm(qq) = logsum(temp,1);
+        
         display(['type: ', int2str(cellType)]);
+        display(['on in prior: ', num2str(probOn{qq}{cellType}(cellLocIdx))]);
+        display(['Log likelihood ratio: ', num2str(avgLogLikeIm(qq))]);
         display(['probBrickOn: ', num2str(probBrickOn)]);
+
 %         if(probBrickOn < 0.1)
 %             
 %         end
@@ -71,6 +78,9 @@ function [allParticles,probOn,probOnFinal,msgs] = sampleParticlesBP(data,posesSt
             likesParticle = likesIm{particleId};
             countsParticle = countsIm{particleId};
             
+            ratiosIm{n} = ratiosImOldParticle{particleId};
+            logLikeCell{n} = logProbCellRatioOldParticle{particleId};
+            
             particle = particles{particleId};
             % setup for sampling
             particle = cat(2,particle,zeros(6,1));
@@ -79,19 +89,46 @@ function [allParticles,probOn,probOnFinal,msgs] = sampleParticlesBP(data,posesSt
             particle(3,end) = cellLocIdx; 
             
             % bricks: on/off, type, cellCentreIndex,[poseX,Y,theta]            
-            [pose,newLike,newCount] = samplePose(data,likesParticle,countsParticle,ratiosImOldParticle{particleId},likePxIdxCells,posesStruct,cellType,cellLocIdx);
+            [pose,newLike,newCount] = samplePose(data,likesParticle,countsParticle,ratiosImOldParticle{particleId},likePxIdxCells,posesStruct,cellType,cellLocIdx,templateStruct.mix);
+            temp = newLike./newCount;
+            assert(~any(temp(:) > 1.0001));
             particle(4:6,end) = pose;
 
             newParticles{n} = particle;
             newCounts{n} = newCount;
             newLikes{n} = newLike;
-            
-            ratiosIm{n} = ratiosImOldParticle{particleId};
-            logLikeCell{n} = logProbCellRatioOldParticle{particleId};
+        end
+        
+        dirtyRegion = findCellBounds(cellType,cellLocIdx,cellParams);
+        
+        maxSz= (max(templateStruct.sizes(cellType,:))+1)/2;
+        
+        dirtyRegion(1:2,1) = dirtyRegion(1:2,1)-maxSz;
+        dirtyRegion(1:2,2) = dirtyRegion(1:2,2)+maxSz;
+        
+        if(qq==params.thingsToSee)
             
         end
         
-        particles = newParticles;
+         pt=particle(:,end);
+         ptType=pt(2);
+         ptCentre=pt(4:5);
+         agInd=find(abs(posesStruct.angles-pt(6)) < 0.0001);
+         rt=rotTemplates{ptType,agInd};
+         mask=posesStruct.mask{ptType}{agInd}==1;
+         
+         sz=(size(rt)-1)/2;
+         dataUse=data(ptCentre(1)-sz(1):ptCentre(1)+sz(1),ptCentre(2)-sz(2):ptCentre(2)+sz(2));
+         
+         r1= evalLikePixels(rt,dataUse,mask,1);
+         r1=sum(log(r1(mask)));
+         
+         r2=evalLikePixels(templateStruct.app{end},dataUse,mask,1);
+         r2=sum(log(r2(mask)));
+         
+         assert(r1>r2);
+         
+         particles = newParticles;
         particleProbs = ones(numel(particles),1)/numel(particles); %uniform
         likesIm = newLikes;
         countsIm = newCounts;
@@ -102,14 +139,37 @@ function [allParticles,probOn,probOnFinal,msgs] = sampleParticlesBP(data,posesSt
         if(probBrickOn < 0.01)
             break;
         end
+         
+        if(verbose)
+            figure(200); subplot(1,3,1); imshow(data);
+            st = viewAllParticles(particles,rotTemplates,params,imSize);
+            subplot(1,3,2); imshow(st);
+            st2 = viewOverlayTest(data,particles,rotTemplates,params,imSize);
+            subplot(1,3,3); imshow(st2);
+            title(['r1,r2: ', num2str(r1),',',num2str(r2)]);
+        end 
     end
     
     % clamp here; just need final msgs of the active set
-    clampToOff = 1;
-    [probOnFinal,msgs] = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn,imSize,clampToOff);
+    if(params.useContext)
+        %clampToOff = qq==params.thingsToSee;
+        clampToOff = 1;
+        
+        [probOnFinal,msgs] = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn,imSize,clampToOff);
+        
+        
+    else
+        msgs = [];
+        temp = cell(nTypes,1);
+        for (n=1:nTypes)
+            nBricks = prod(cellParams.coordsSize(n,:),2);
+            temp{n} = params.probRoot(n)*ones(nBricks,1);
+        end
+        probOnFinal = temp;
+    end
 end
 
-function [logProbCellRatio,ratiosIm,defaultLogLikeIm] = evalDataRatio(data,nPosesCell,particleProbs,likePxIdxCells,likesIm,countsIm,templateStruct,cellParams,posesStruct,dirtyRegion,ratiosImOld,logLikeCellOld,params)
+function [logProbCellRatio,ratiosIm,defaultLogLikeIm] = evalDataRatio(data,nPosesCell,particleProbs,likePxIdxCells,likesIm,countsIm,templateStruct,cellParams,posesStruct,dirtyRegion,ratiosImOld,logLikeCellOld,params,templateSizes)
     
     logProbCellRatio = cell(numel(particleProbs),1);
     ratiosIm = cell(numel(particleProbs),1);
@@ -123,7 +183,7 @@ function [logProbCellRatio,ratiosIm,defaultLogLikeIm] = evalDataRatio(data,nPose
         temp = evalNewLikeRatio(data,templateStruct,likesIm{i},countsIm{i},posesStruct,dirtyRegion,ratiosImOld{i},params);
         ratiosIm{i} = temp;
         
-        logProbCellRatio{i} = getLogLikeCellRatio(ratiosIm{i},cellParams,likePxIdxCells,dirtyRegion,nPosesCell,logLikeCellOld{i});
+        logProbCellRatio{i} = getLogLikeCellRatio(ratiosIm{i},cellParams,likePxIdxCells,dirtyRegion,nPosesCell,logLikeCellOld{i},templateSizes);
     end
 end
 

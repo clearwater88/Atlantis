@@ -3,8 +3,10 @@ function compareContext(nStart,nEnd,nTrials,noise,imSize)
     resFolder = 'resDataEx/';
     exFolder = 'genDataEx/';
     
-    str = [resFolder,'testSweep%d_imSize%d-%d__probMap-cov4x1_4x1_4x1_4x1__ds1_cell-dims7_7_5-strides4_4_2_context%d_alpha1_templates-17x3_9x3_5x3-selfRoot-10-100-1000_noise%d_trial%d'];
-                     
+    resFile = 'testSweep%d_imSize%d-%d__probMap-cov4x4_4x4_4x4_4x4_4x4_4x4_4x4_4x4_4x4__ds1_cell-dims5_5_5_5-strides3_3_3_3_context%d_alpha100_templates-33x5_17x5_9x5_5x5-selfRoot-0-0-0-1_noise%d_trial%d';   
+    str = [resFolder, resFile];
+                   
+    
     gtStr = [exFolder,'ex%d_imSize%d-%d_noiseParam-%d'];
     
     for (n=nStart:nEnd)
@@ -23,10 +25,10 @@ function compareContext(nStart,nEnd,nTrials,noise,imSize)
             [~,~,auc] =  getROC(probPixelContext{t+1}(:),cleanData(:));
             aucContext(t+1) = auc;
             
-            file = sprintf(str,n,imSize(1),imSize(2),0,noise,t);
-            probPixelNoContext{t+1} = viewAllParticlesFromFile(file);
-            [~,~,auc] =  getROC(probPixelNoContext{t+1}(:),cleanData(:));
-            aucNoContext(t+1) = auc;
+%             file = sprintf(str,n,imSize(1),imSize(2),0,noise,t);
+%             probPixelNoContext{t+1} = viewAllParticlesFromFile(file);
+%             [~,~,auc] =  getROC(probPixelNoContext{t+1}(:),cleanData(:));
+%             aucNoContext(t+1) = auc;
         end
         
         
@@ -36,10 +38,10 @@ function compareContext(nStart,nEnd,nTrials,noise,imSize)
            title(['Context: ', num2str(aucContext(i))]);
         end
         
-        for (i=1:numel(probPixelNoContext))
-           subplot(numel(probPixelNoContext),2,i+numel(probPixelContext)); imshow(probPixelNoContext{i});
-           title(['No context: ', num2str(aucNoContext(i))]);
-        end
+%         for (i=1:numel(probPixelNoContext))
+%            subplot(numel(probPixelNoContext),2,i+numel(probPixelContext)); imshow(probPixelNoContext{i});
+%            title(['No context: ', num2str(aucNoContext(i))]);
+%         end
         
 %         figure(1);
 %         imshow(makeCollage(probPixelContext,[1,nTrials]));

@@ -42,24 +42,19 @@ void mexFunction( int nlhs, mxArray *plhs[],
 { 
     int ind,i,x,y,agInd,childType,childX,childY,childAgInd;
     double point[2], convToChild[2], message;
-    double *pointsBoundary, *allMessages, *prodGbk, *shiftedInds;
-    size_t m_log_uGbkToFb1_0, n_log_uGbkToFb1_0, m_gbkInds, n_gbkInds;
+    double *pointsBoundary, *shiftedInds;
+    size_t m_gbkInds, n_gbkInds;
     
     const mwSize* dims;
     
-    const mxArray *gBkIndsMx, *conversionMx, *refPointMx, *pointsBoundaryMx, *log_uGbkToFb1_0, *prodGbkMx;
-    mxArray * shiftedIndsMx, *prodGbk_TypeMx;
+    const mxArray *gBkIndsMx, *conversionMx, *refPointMx, *pointsBoundaryMx, *res;
+    mxArray * shiftedIndsMx;
     
-    gBkIndsMx = prhs[0]; conversionMx = prhs[1]; refPointMx = prhs[2]; pointsBoundaryMx = prhs[3]; log_uGbkToFb1_0 = prhs[4], prodGbkMx = prhs[5];
+    gBkIndsMx = prhs[0]; conversionMx = prhs[1]; refPointMx = prhs[2]; pointsBoundaryMx = prhs[3]; res = prhs[4];
     pointsBoundary = mxGetPr(pointsBoundaryMx);
-    allMessages = mxGetPr(log_uGbkToFb1_0);
+
+    plhs[0] = mxDuplicateArray(res);
     
-    /*plhs[0] = mxDuplicateArray(uFb1ToSb_0_holderMx);*/
-    plhs[0] = mxDuplicateArray(prodGbkMx);
-    /*plhs[0] = mxDuplicateArray(prodGbkMx);*/
-    
-    m_log_uGbkToFb1_0 = mxGetM(log_uGbkToFb1_0);
-    n_log_uGbkToFb1_0 = mxGetN(log_uGbkToFb1_0);
     m_gbkInds = mxGetM(gBkIndsMx);
     n_gbkInds=mxGetN(gBkIndsMx);
     
@@ -74,8 +69,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
                     ind = (x-1) + (y-1)*pointsBoundary[0] + (agInd-1)*pointsBoundary[0]*pointsBoundary[1];
                     
                     for (i=0; i < n_log_uGbkToFb1_0; i++) { /* iterate over children */
-                        message = allMessages[ind + m_log_uGbkToFb1_0*i];
-                        
+
                         /* these are 1-indexed */
                         childType = shiftedInds[m_gbkInds*i];
                         childX = shiftedInds[m_gbkInds*i+1];
@@ -91,7 +85,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
                         if (childY < 0.99) continue;
                         if (childY > dims[1]+0.01) continue;
 
-                        prodGbk[childX-1 + dims[0]*(childY-1) + dims[0]*dims[1]*(childAgInd-1)] += message;
+                        res[x-1 + dims[0]*(y-1) + dims[0]*dims[1]*(agInd-1)]++;
                     }
                     
                 }

@@ -1,4 +1,4 @@
-function [logProbCell] = getLogLikeCellRatio(ratios,cellParams,likePxIdxCells,dirtyRegion,nPosesCell,logLikeCellOld)
+function [logProbCell] = getLogLikeCellRatio(ratios,cellParams,likePxIdxCells,dirtyRegion,nPosesCell,logLikeCellOld,templateSizes)
 % Get sum of log likelihoods in a specific cell:
 % (\int_{pose in cell} P(pose | cell) * P(I|pose_0, pose))/P(I|pose_0)
 
@@ -10,9 +10,14 @@ function [logProbCell] = getLogLikeCellRatio(ratios,cellParams,likePxIdxCells,di
         
         ratiosType = ratios{n};
         nElem = size(likePxIdxCellsUse,1);
+        maxSz= (max(templateSizes(n,:))+1)/2;
         
         if(~isempty(dirtyRegion))
-            regionIntersect = doesIntersect(dirtyRegion,cellParams.centreBoundaries{n});
+            cb=cellParams.centreBoundaries{n};
+            cb(1:2,1,:) = cb(1:2,1,:) - maxSz;
+            cb(1:2,2,:) = cb(1:2,2,:) + maxSz;
+            
+            regionIntersect = doesIntersect(dirtyRegion,cb);
             oldLogCellProbUse = logLikeCellOld{n};
         else
             regionIntersect = ones(size(cellParams.centreBoundaries{n},3),1);
@@ -35,6 +40,20 @@ function [logProbCell] = getLogLikeCellRatio(ratios,cellParams,likePxIdxCells,di
             end
         end
         logProbCell{n} = logProbCellTemp;        
+        
+%         for (i=1:numel(regionIntersect))
+%             id = likePxIdxCellsUse{i};
+%             if(~isempty(ratiosType(id)))
+%                 logProbCellTemp2(i) = logsum(ratiosType(id),1) - log(nPosesCell{n}(i));  % add in prior over poses
+%             else
+%                 logProbCellTemp2(i) = -Inf;
+%             end
+%         end
+%         
+%         diff = abs(logProbCellTemp-logProbCellTemp2);
+%         assert(max(diff(:)) <0.0001);
+        
+        
     end
 end
 

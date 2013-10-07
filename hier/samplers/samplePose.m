@@ -1,4 +1,4 @@
-function [pose,likeNew,countNew] = samplePose(data,likeIm,countsIm,ratiosImCell,likePxIdxCell,posesStruct,cellType,centreIdx)
+function [pose,likeNew,countNew] = samplePose(data,likeIm,countsIm,ratiosImCell,likePxIdxCells,posesStruct,cellType,centreIdx,mix)
 
     % need to provide particle
     % also updates likelihood maps
@@ -6,7 +6,7 @@ function [pose,likeNew,countNew] = samplePose(data,likeIm,countsIm,ratiosImCell,
     poses = posesStruct.poses{cellType};
     ratiosIm = ratiosImCell{cellType};
     
-    ids = likePxIdxCell{cellType}{centreIdx};
+    ids = likePxIdxCells{cellType}{centreIdx};
     
 %     likes = likePxStruct.likes{cellType};
 %     counts = likePxStruct.counts{cellType};
@@ -28,9 +28,11 @@ function [pose,likeNew,countNew] = samplePose(data,likeIm,countsIm,ratiosImCell,
     boundUse = posesStruct.bounds{cellType}(:,:,poseId);
     countsUse = posesStruct.counts{cellType}{agInd};
     
+    mask=posesStruct.mask{cellType}{agInd};
+    
     % for projecting into image
     dataUse = data(boundUse(1,1):boundUse(1,2),boundUse(2,1):boundUse(2,2));
-    likeUse = evalLikePixels(template,dataUse,[],1);
+    likeUse = evalLikePixels(template,dataUse,mask,mix(cellType));
     
     [likeNew,countNew] = projectIntoIm(likeIm,countsIm,likeUse,countsUse,boundUse);
 end

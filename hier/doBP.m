@@ -21,7 +21,7 @@
 
 function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,imSize,clampToOff)
     % things stored in raster order:x,y,angleInd
-    verbose = 1;
+    verbose = 0;
     
     nTypes = numel(unique(ruleStruct.parents));
     nBricksType = zeros(nTypes,1);
@@ -42,18 +42,21 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
     uFb3ToGbk_1 = cell(nTypes,maxSlots);
     log_uGbkToFb1_0 = cell(nTypes,maxSlots); % only stores gbk->fb1= no point. All mass of 0.
     for (n=1:nTypes)
-        uFb1ToSb_0{n} = 0.5+2*params.probRoot(n)*rand(nCoordsInds(n,:));
+        uFb1ToSb_0{n} = 0.999+0.0001*rand(nCoordsInds(n,:));
            
-        uFb2ToRb{n} = 0.1 + 0.1*rand(nBricksType(n),sum(ruleStruct.parents== n));
+        probs = ruleStruct.probs(ruleStruct.parents==n)';
+        uFb2ToRb{n} = bsxfun(@plus,probs,0.01*rand(nBricksType(n),sum(ruleStruct.parents== n)));
+        
+        %uFb2ToRb{n} = 0.01 + 0.1*rand(nBricksType(n),sum(ruleStruct.parents== n));
         uFb2ToRb{n} = bsxfun(@rdivide, uFb2ToRb{n}, sum(uFb2ToRb{n},2));
         
         for (k=1:maxSlots)
              %who messages are intended for given by gBkLookUp.
              % 1+ is for null (no point)
-            uFb3ToGbk_1{n,k} = 0.1 + 0.01*rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
-            uFb3ToGbk_1{n,k}(:,1) = 1;
+            uFb3ToGbk_1{n,k} = 1 + 0.1*rand(nBricksType(n),1+size(gBkLookUp{n,k},2));
+            uFb3ToGbk_1{n,k}(:,1) = 0.01;
             uFb3ToGbk_1{n,k} = bsxfun(@rdivide, uFb3ToGbk_1{n,k}, sum(uFb3ToGbk_1{n,k},2));
-            log_uGbkToFb1_0{n,k} = log(0.5-(0.1*rand(nBricksType(n),size(gBkLookUp{n,k},2)))); %[#bricks, #potential children]
+            log_uGbkToFb1_0{n,k} = log(1- (0.00001 + 0.0*rand(nBricksType(n),size(gBkLookUp{n,k},2)))); %[#bricks, #potential children]
         end
     end
     logProdGbk_0 = computeAllLogProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,log_uGbkToFb1_0);
@@ -62,20 +65,21 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
 
     % allocate space for bottom-up messages
     log_uFb1ToGbk_total_0 = cell(nTypes,maxSlots); % for a TOTAL no point. What child says to parent
-    log_uGbkToFb3 = cell(nTypes,maxSlots);
     uRbToFb2 = cell(nTypes,1); % stores all values
     uSbToFb1_0 = cell(nTypes,1); % only stores uFb1ToSb=0
     for (n=1:nTypes)
         for (k=1:maxSlots)
-            log_uFb1ToGbk_total_0{n,k} = log(0.01+0.1*rand(nBricksType(n),size(gBkLookUp{n,k},2)));
+            log_uFb1ToGbk_total_0{n,k} = log((0.1 + 0.1*rand(nBricksType(n),size(gBkLookUp{n,k},2))));
         end
         
-        uRbToFb2{n} = 0.01+ 0.1*rand(nBricksType(n),sum(ruleStruct.parents== n));
+        probs = ruleStruct.probs(ruleStruct.parents==n)';
+        uRbToFb2{n} = bsxfun(@plus,probs,0.01*rand(nBricksType(n),sum(ruleStruct.parents== n)));
         uRbToFb2{n} = bsxfun(@rdivide, uRbToFb2{n}, sum(uRbToFb2{n},2));
         
-        uSbToFb1_0{n} = 0.5 + 0.01*rand(nCoordsInds(n,:));
+        uSbToFb1_0{n} = 0.994 + 0.001*rand(nCoordsInds(n,:));
     end
-    %uSbToFb1_0 = correctFromSb_0(uSbToFb1_0,sOn);
+    uSbToFb1_0 = correctFromSb_0(uSbToFb1_0,sOn);
+    log_uGbkToFb3 = compute_log_uGbkFb3(nTypes,maxSlots,log_uFb1ToGbk_total_0);
     
     if(clampToOff==1)
         for (n=1:nTypes)
@@ -85,6 +89,8 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
     %uFb3ToRb = uRbToFb2;
     %uFb2ToSb = uSbToFb1_0;
 
+    %nChildren = countChildren(gBkLookUp,nCoordsInds,conversions,refPoints);
+    
     for(iter=1:params.bpIter)
         %% up pass
         if(verbose)
@@ -131,8 +137,9 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
            display(['Computing: reverse_uSbToFb1_0 and reverseProdGbk']);
            tic
         end
-        reverse_uSbToFb1_0 = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uSbToFb1_0);
-        logReverseProdGbk = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,logProdGbk_0);
+        
+        reverse_uSbToFb1_0 = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,uSbToFb1_0,1);
+        logReverseProdGbk = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,logProdGbk_0,0);
         if(verbose)
             toc;
         end
@@ -153,7 +160,7 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
                 tempRatio = (1-params.probRoot(n))*exp(logReverseProdGbk{n,k}-log_uGbkToFb1_0{n,k});
                 
                 temp0 = reverse_uSbToFb1_0{n,k}.*tempRatio + (1-reverse_uSbToFb1_0{n,k}).*(1-tempRatio); % this is for a single value of g
-                temp0 = temp0*size(gBkLookUp{n,k},2);
+                %temp0 = temp0*(size(gBkLookUp{n,k},2)-1); % approximate number of other chidlren the parent has
                 temp1 = (1-reverse_uSbToFb1_0{n,k});
                 log_uFb1ToGbk_total_0{n,k} = log(temp0) - log(temp0+temp1); %for each parent, what signal the child sends
             end
@@ -170,7 +177,7 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
         end
         for (n=1:nTypes)
             %uFb1ToSb_0{n} = (1-params.probRoot(n))*prodGbk_0{n};
-            uFb1ToSb_0{n} = exp(log(1-params.probRoot(n))+logProdGbk_0{n});
+            uFb1ToSb_0{n} = (1-params.probRoot(n))*exp(logProdGbk_0{n});
             assert(~any(isnan(uFb1ToSb_0{n}(:))));
         end
         if(clampToOff==1)
@@ -197,7 +204,6 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
             temp(:,1) = uSbToFb2_0{n}(:); % stores P(rb|sb=0)m_{sb->fb2}(sb)
             temp = bsxfun(@times, (1-uFb1ToSb_0{n}(:)), probs) + temp;
             uFb2ToRb{n} = bsxfun(@rdivide,temp,sum(temp,2));
-            assert(~any(isnan(uFb2ToRb{n}(:))));
         end
         if(verbose)
             toc;
@@ -239,7 +245,6 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
                 end
                 finalLogMess = logsum(logMessageTemp,3);
                 uFb3ToGbk_1{n,k} = exp(bsxfun(@minus,finalLogMess,logsum(finalLogMess,2)));
-                
             end
         end
         if(verbose)
@@ -252,7 +257,7 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
         end
         for (n=1:nTypes) % loop over parents
             for(k=1:maxSlots)
-                %singleLogMess_0 = log(uFb1ToGbk_total_0{n,k}/(size(uFb1ToGbk_total_0{n,k},2)-1)); % WRONG WAY TO NORMALIZE
+                %singleLogMess_0 = uFb1ToGbk_total_0{n,k}/(size(uFb1ToGbk_total_0{n,k},2)-1)); % WRONG WAY TO NORMALIZE
                 singleLogMess_0 = log_uFb1ToGbk_total_0{n,k}-log((size(log_uFb1ToGbk_total_0{n,k},2)-1));
                 
                 allOtherProd0 = bsxfun(@minus,sum(singleLogMess_0,2),singleLogMess_0); %log(prod_{b,k} != this brick and slot)
@@ -305,6 +310,25 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
     
 end
 
+function nChildren = countChildren(gBkLookUp,nCoordsInds,conversions,refPoints)
+    nTypes = size(gBkLookUp,1);
+    nSlots= size(gBkLookUp,2);
+    nChildren = cell(nTypes,nSlots);
+    
+    for (n=1:nTypes)
+        for(k=1:nSlots)
+            if(isempty(gBkLookUp{n,k}))
+                nChildren{n,k} = 0;
+            else
+                
+            end
+            
+        end
+    end
+   
+
+end
+
 function res = clamp_msg_0(msg_0,sOn,type)
 
     sz = size(msg_0);
@@ -330,7 +354,7 @@ function fromSb = correctFromSb_0(fromSb,sOn)
     end
 end
 
-function res = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,mp)
+function res = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,conversions,refPoints,mp,defaultVal)
 
 	res = cell(nTypes,maxSlots);
     for (n=1:nTypes) % loop over parents
@@ -340,7 +364,7 @@ function res = constructReverseMap(nTypes,maxSlots,gBkLookUp,nCoordsInds,convers
             conversionsType = squeeze(conversions(:,n,:));
             refPointType = refPoints(:,n);
             
-            res{n,k} = reverseMap(gbkType, conversionsType,  refPointType, nCoordsInds(n,:)', mp, ones(prod(nCoordsInds(n,:)), size(gbkType,2)));
+            res{n,k} = reverseMap(gbkType, conversionsType,  refPointType, nCoordsInds(n,:)', mp, defaultVal*ones(prod(nCoordsInds(n,:)), size(gbkType,2)));
         end
     end
 end
@@ -353,6 +377,11 @@ function logProdGbk_0 = computeAllLogProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsIn
         logProdGbk_0{n} = zeros(nCoordsInds(n,:));
     end
 
+    logProdGbk2_0 = cell(nTypes,1);
+    for (n=1:nTypes)
+        logProdGbk2_0{n} = zeros(nCoordsInds(n,:));
+    end
+    
     for (n=1:nTypes) % loop over parents
         for(k=1:maxSlots)
             gbkType = gBkLookUp{n,k};
@@ -363,6 +392,7 @@ function logProdGbk_0 = computeAllLogProdGbk(nTypes,maxSlots,gBkLookUp,nCoordsIn
             logProdGbk_0 = computeLogProdGbk(gbkType, conversionsType,  refPointType, nCoordsInds(n,:)', log_uGbkToFb1_0{n,k}, logProdGbk_0);
         end
     end
+    
 end
 
 function res = compute_log_uGbkFb3(nTypes,maxSlots,log_uFb1ToGbk_total_0)
@@ -401,6 +431,7 @@ function res = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,
             % that means all mass from pGbkRb on off
             if(isempty(pGbkRb))
                 tempFill(:,k) = mUse(:,1); %mUse(:,1) is 'point to nothing', and there's only 1 of them
+                %tempFill(:,k) = 0;
             else
                 ags = cellParams.coords{parType}(:,3);
                 nAngles = numel(unique(ags));
@@ -408,6 +439,7 @@ function res = computeLogMessPgbkRbMuFb3(nBricksType,nTypes,maxSlots,ruleStruct,
                     agId = ags==ag;
                     %temp = log(sum(bsxfun(@times,[0,pGbkRb(:,ag)'],mUse(agId,:)),2));
                     temp=(logsum(bsxfun(@plus,log([10^-10,pGbkRb(:,ag)']),mUse(agId,:)),2));
+                    %temp=(logsum(bsxfun(@plus,log([10^-10,pGbkRb(:,ag)']),0),2));
                     tempFill(agId,k) = temp;
                 end
             end

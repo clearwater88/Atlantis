@@ -10,7 +10,7 @@ function [cellMapStruct] = getAllProbMapCells(cellParams,probMapStruct,ruleStruc
     end
     
     probMap = cell(nRules,maxSlots,maxAngles);
-    probMapSpatial = cell(nRules,maxSlots,maxAngles);
+%     probMapSpatial = cell(nRules,maxSlots,maxAngles);
     resPixels = cell(nRules,maxSlots,maxAngles);
     locs = cell(nRules,maxSlots,maxAngles);
     
@@ -68,13 +68,13 @@ function [cellMapStruct] = getAllProbMapCells(cellParams,probMapStruct,ruleStruc
                  
                  % may not be symmetric; depends on how gridding of parent 
                  % and child centres align
-                 probMapSpatial{ruleId,slot,a} = ...
-                     reshape(probMapTemp,max(locsTemp)-min(locsTemp)+1);
+%                  probMapSpatial{ruleId,slot,a} = ...
+%                      reshape(probMapTemp,max(locsTemp)-min(locsTemp)+1);
             end
         end
     end
     cellMapStruct.probMap = probMap;
-    cellMapStruct.probMapSpatial = probMapSpatial;
+    %cellMapStruct.probMapSpatial = probMapSpatial;
     cellMapStruct.locs = locs; % in coords of child
     cellMapStruct.refPoints = refPoints; % in coords of parent
     cellMapStruct.parentType=parentType;

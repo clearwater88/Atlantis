@@ -54,6 +54,13 @@ function [res,dirtyCoords,resPixels] = getProbMapCells(ruleId,slot,chType,refPoi
         res(i) = temp;
     end
     res = res/sum(res);
+    
+    % prune off further
+    tooLow = find(res<0.001);
+    res(tooLow) = [];
+    dirtyCoords(tooLow,:)=[];
+    res=res/sum(res);
+    
     assert(~any(isnan(res(:))));
     assert(numel(dirtyCoords) > 0);
 end

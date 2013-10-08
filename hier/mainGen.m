@@ -1,10 +1,10 @@
-function mainGen(imSize, noiseParam, useContext,resFolder,nStart,nTrials)
-% mainGen([50,50], 0.1,1,'resTemp/',0,1);
+function mainGen(imSize, noiseParam, useContext,resFolder,nStart,nTrials,templateStrat)
+% mainGen([50,50], 19,1,'resTemp/',0,1);
     startup;
     
     genFolder = 'genDataEx/';
     genStr= [genFolder,'ex%d_imSize', int2str(imSize(1)), '-', int2str(imSize(2)), ...
-               '_', 'noiseParam-', int2str(noiseParam)] ;
+               '_', 'noiseParam-', int2str(noiseParam), 'templateStrat-', int2str(templateStrat)] ;
            
     if(isempty(resFolder))
         resFolder = 'resDataEx/';
@@ -24,7 +24,7 @@ function mainGen(imSize, noiseParam, useContext,resFolder,nStart,nTrials)
         % inference
         for (i=1:numel(testInds))
             
-            load(sprintf(genStr,testInds(i)),'probPixel', 'mask', 'data', 'cleanData','ruleStruct','probMapStruct','templateStruct','ruleStruct','params');
+            load(sprintf(genStr,testInds(i)),'probPixel', 'data', 'cleanData','ruleStruct','probMapStruct','templateStruct','ruleStruct','params');
             
             params2 = initParams;
             % set defaults
@@ -57,17 +57,18 @@ function mainGen(imSize, noiseParam, useContext,resFolder,nStart,nTrials)
                        'alpha', int2str(100*params.alpha), '_', ...
                        templateStruct.toString(templateStruct), '-', ...
                        selfRootStr, ...
-                       '_noise', int2str(100*templateStruct.bg), ...
+                       '_templateStrat-', int2str(templateStrat), ...
+                       '_noise', int2str(noiseParam), ...
                        '_trial', int2str(t)];
                    
             if(exist([saveStr,'.mat'],'file'))
                 display(['File exists: ', saveStr]);
             else
-                [allParticles,probOn,probOnFinal,msgs,ratiosIm,avgLogLikeIm] = doInfer(testData,params,ruleStruct,templateStruct,probMapStruct,cellParams,imSize);
+                [allParticles,probOn,probOnFinal,msgs] = doInfer(testData,params,ruleStruct,templateStruct,probMapStruct,cellParams,imSize);
                 finalParticles = allParticles{end};
                 save(saveStr,'cleanData', 'data', 'allParticles', 'probOn', ...
                     'templateStruct', 'probMapStruct', 'ruleStruct', 'cellParams', ...
-                    'params','msgs', 'finalParticles','ratiosIm','ruleStruct','probOnFinal','avgLogLikeIm','-v7.3');
+                    'params','msgs', 'finalParticles','ruleStruct','probOnFinal');
             end
 
         end

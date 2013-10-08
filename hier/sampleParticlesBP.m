@@ -1,4 +1,4 @@
-function [allParticles,probOn,probOnFinal,msgs,ratiosImAll,avgLogLikeIm] = sampleParticlesBP(data,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct,imSize)
+function [allParticles,probOn,probOnFinal,msgs] = sampleParticlesBP(data,posesStruct,likePxIdxCells,cellMapStruct,cellParams,params,ruleStruct,templateStruct,imSize)
 
     verbose = 0;
 
@@ -16,14 +16,13 @@ function [allParticles,probOn,probOnFinal,msgs,ratiosImAll,avgLogLikeIm] = sampl
     % initialize
     brickIdx = 1;
     dirtyRegion = [];
-    ratiosImAll = cell(params.thingsToSee,1);
+   
     ratiosIm = cell(params.nParticles,1);
     logLikeCell = cell(params.nParticles,1);
     nPosesCell = getNumPoses(likePxIdxCells);
     probOn = cell(params.thingsToSee,1);
-    avgLogLikeIm = zeros(params.thingsToSee,1);
     
-    [rotTemplates,~] = getRotTemplates(params,templateStruct);
+    [rotTemplates,~] = getRotTemplates(params,templateStruct.app);
     
     for (qq=1:params.thingsToSee);
         
@@ -31,16 +30,12 @@ function [allParticles,probOn,probOnFinal,msgs,ratiosImAll,avgLogLikeIm] = sampl
         
         [logProbCellRatioOldParticle,ratiosImOldParticle,defaultLogLikeIm] = ...
             evalDataRatio(data,nPosesCell,particleProbs,likePxIdxCells,likesIm,countsIm,templateStruct,cellParams,posesStruct,dirtyRegion,ratiosIm,logLikeCell,params,templateStruct.sizes);
-        ratiosImAll{qq} = ratiosImOldParticle;
         
         sOn = getProbOn(particles);
         if(params.useContext)
             %clampToOff = qq==params.thingsToSee;
             clampToOff = 0;
-                
             [probOn{qq},msgs] = doBP(cellMapStruct,cellParams,params,ruleStruct,sOn,imSize,clampToOff);
-        
-            
         else
             msgs = [];
             temp = cell(nTypes,1);
@@ -50,7 +45,6 @@ function [allParticles,probOn,probOnFinal,msgs,ratiosImAll,avgLogLikeIm] = sampl
             end
             probOn{qq} = temp;
         end
-        
         
         [cellType,cellLocIdx,probBrickOn] = getMostSalient(particles,probOn{qq},logProbCellRatioOldParticle,defaultLogLikeIm);
         
@@ -62,16 +56,10 @@ function [allParticles,probOn,probOnFinal,msgs,ratiosImAll,avgLogLikeIm] = sampl
         for (pp=1:numel(logProbCellRatioOldParticle))
             temp(pp) = logProbCellRatioOldParticle{pp}{cellType}(cellLocIdx);
         end
-        avgLogLikeIm(qq) = logsum(temp,1);
-        
+       
         display(['type: ', int2str(cellType)]);
         display(['on in prior: ', num2str(probOn{qq}{cellType}(cellLocIdx))]);
-        display(['Log likelihood ratio: ', num2str(avgLogLikeIm(qq))]);
         display(['probBrickOn: ', num2str(probBrickOn)]);
-
-%         if(probBrickOn < 0.1)
-%             
-%         end
         
         for(n=1:params.nParticles)
             particleId = find(mnrnd(1,particleProbs),1,'first');
@@ -129,9 +117,9 @@ function [allParticles,probOn,probOnFinal,msgs,ratiosImAll,avgLogLikeIm] = sampl
          assert(r1>r2);
          
          particles = newParticles;
-        particleProbs = ones(numel(particles),1)/numel(particles); %uniform
-        likesIm = newLikes;
-        countsIm = newCounts;
+         particleProbs = ones(numel(particles),1)/numel(particles); %uniform
+         likesIm = newLikes;
+         countsIm = newCounts;
         
         allParticles{end+1} = particles;
 

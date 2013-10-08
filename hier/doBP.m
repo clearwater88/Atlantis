@@ -92,6 +92,9 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
     %nChildren = countChildren(gBkLookUp,nCoordsInds,conversions,refPoints);
     
     for(iter=1:params.bpIter)
+        
+        timeStart=tic;
+        
         %% up pass
         if(verbose)
            display(['Computing: log_uGbkToFb3']);
@@ -297,6 +300,7 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
             %figure(1000);
             %viewHeatMap(sOn,probOn,cellParams,imSize);
         end
+        display(['***Time for iter: ', num2str(toc(timeStart)), '***']);
     end
     
     msgs.uFb1ToSb_0 = uFb1ToSb_0;
@@ -308,25 +312,6 @@ function msgs = getFinalMessages(cellMapStruct,cellParams,params,ruleStruct,sOn,
     msgs.uSbToFb1_0 = uSbToFb1_0;
     msgs.uSbToFb2_0 = uSbToFb2_0;
     
-end
-
-function nChildren = countChildren(gBkLookUp,nCoordsInds,conversions,refPoints)
-    nTypes = size(gBkLookUp,1);
-    nSlots= size(gBkLookUp,2);
-    nChildren = cell(nTypes,nSlots);
-    
-    for (n=1:nTypes)
-        for(k=1:nSlots)
-            if(isempty(gBkLookUp{n,k}))
-                nChildren{n,k} = 0;
-            else
-                
-            end
-            
-        end
-    end
-   
-
 end
 
 function res = clamp_msg_0(msg_0,sOn,type)

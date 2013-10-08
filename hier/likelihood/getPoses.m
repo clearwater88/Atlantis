@@ -1,12 +1,12 @@
 function [posesStruct] = getPoses(params,templateStruct,imSize)
 
-    nTemplates = numel(templateStruct.app)-1;
+    nTemplates = size(templateStruct.sizes,1);
     posesStruct.angles = params.angles;
 
+    %%% these really dont belong here
     posesStruct.rotTemplate = cell(nTemplates,1);
     posesStruct.mask = cell(nTemplates,1);
     posesStruct.counts = cell(nTemplates,1);
-    
     for (type=1:nTemplates)
         template = templateStruct.app{type};
         
@@ -28,6 +28,7 @@ function [posesStruct] = getPoses(params,templateStruct,imSize)
         posesStruct.mask{type} = mask;
         posesStruct.counts{type} = counts;
     end
+    %%% these really dont belong here
     
     % poses can at most be centred at all pixels, all orientations
     maxElem = prod(imSize)*numel(params.angles);
